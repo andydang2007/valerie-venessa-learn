@@ -3,253 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Family Learning Hub</title>
+    <title>Family Learning Hub - DEBUG MODE</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <style>
-        body { font-family: -apple-system, sans-serif; background: #f0fdf4; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: #1f2937; }
-        .container { background: #fff; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 750px; text-align: center; }
-        h1 { font-size: 42px; margin: 0 0 10px 0; color: #064e3b; } 
-        .subtitle { color: #6b7280; font-size: 22px; margin-bottom: 30px; } 
-        .screen { display: none; }
-        .name-selector { display: flex; gap: 20px; justify-content: center; margin-bottom: 30px; }
-        button.name-btn { font-size: 24px; font-weight: bold; padding: 15px 40px; border: 3px solid #e5e7eb; border-radius: 15px; cursor: pointer; background: #fff; transition: 0.2s; }
-        button.name-btn.active { border-color: #059669; background: #d1fae5; color: #065f46; box-shadow: 0 4px 12px rgba(5,150,105,0.2); }
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
-        button.subject-btn { font-size: 26px; font-weight: bold; padding: 30px 16px; border: none; border-radius: 16px; cursor: pointer; color: #fff; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        button.subject-btn:hover { transform: translateY(-3px); filter: brightness(1.1); }
-        .tools-area { border-top: 2px solid #e5e7eb; padding-top: 24px; }
-        button.tool-btn { width: 100%; background: #f8fafc; border: 2px solid #cbd5e1; color: #475569; padding: 18px; font-size: 20px; font-weight: bold; border-radius: 12px; cursor: pointer; }
-        .header-area { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-        .topic-badge { padding: 8px 20px; border-radius: 999px; font-size: 20px; font-weight: bold; background: #dbeafe; color: #1e40af; }
-        .progress-text { font-size: 20px; font-weight: bold; color: #6b7280; }
-        .question { font-size: 32px; font-weight: 500; margin-bottom: 32px; text-align: left; line-height: 1.4; }
-        .options-mcq { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
-        button.option { font-size: 24px; padding: 20px; border: 3px solid #e5e7eb; border-radius: 12px; background: #fff; cursor: pointer; color: #374151; font-weight: bold; transition: 0.2s; }
-        .feedback { font-size: 24px; min-height: 36px; margin-bottom: 24px; font-weight: bold; }
-        .controls { display: flex; gap: 16px; }
-        button.action-btn { flex: 1; background: #f3f4f6; color: #4b5563; border: none; padding: 18px; font-size: 22px; font-weight: bold; border-radius: 12px; cursor: pointer; }
-        button.primary-btn { background: #111827; color: #fff; }
+        body { font-family: sans-serif; background: #f0fdf4; margin: 0; padding: 20px; text-align: center; }
+        .container { background: #fff; padding: 30px; border-radius: 20px; max-width: 600px; margin: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .name-btn { font-size: 20px; padding: 15px 30px; margin: 10px; cursor: pointer; border-radius: 10px; border: 2px solid #ddd; background: white; }
+        .name-btn.active { background: #d1fae5; border-color: #059669; }
+        .subject-btn { font-size: 22px; padding: 20px; margin: 10px; color: white; border: none; border-radius: 12px; cursor: pointer; min-width: 150px; }
+        
+        /* 调试窗口样式 */
+        #debug-panel {
+            position: fixed; bottom: 0; left: 0; right: 0; 
+            background: #1e293b; color: #38bdf8; 
+            padding: 15px; font-family: monospace; font-size: 12px; 
+            text-align: left; max-height: 150px; overflow-y: auto; border-top: 3px solid #0ea5e9;
+        }
+        .log-error { color: #f87171; }
+        .log-success { color: #4ade80; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div id="loading-screen" class="screen" style="display: flex; flex-direction: column; align-items: center; padding: 50px 0;">
-        <h2 id="status-msg">Syncing with Google Sheets...</h2>
-        <div id="debug-box" style="margin-top:20px; padding:15px; background:#f8fafc; border-radius:10px; font-family:monospace; font-size:12px; text-align:left; color:#64748b; max-height:200px; overflow-y:auto; width:100%;">
-            Initializing...<br>
-        </div>
+    <h1>Family Practice Hub</h1>
+    <div id="status-display" style="font-weight: bold; margin-bottom: 20px; color: #64748b;">Checking connection...</div>
+    
+    <div id="name-selector">
+        <button class="name-btn" id="btn-P3" onclick="switchChild('P3')">Valerie (P3)</button>
+        <button class="name-btn" id="btn-P1" onclick="switchChild('P1')">Venissa (P1)</button>
     </div>
 
-    <div id="menu-screen" class="screen">
-        <h1>Family Hub</h1>
-        <div class="subtitle">Select your name to start</div>
-        <div class="name-selector">
-            <button id="btn-valerie" class="name-btn" onclick="selectChild('P3', 'Valerie')">Valerie (P3)</button>
-            <button id="btn-venissa" class="name-btn" onclick="selectChild('P1', 'Venissa')">Venissa (P1)</button>
+    <div id="subject-grid" style="margin-top: 20px;">
         </div>
-        <div class="menu-grid" id="subject-grid"></div>
-        <div class="tools-area"><button class="tool-btn" onclick="alert('Mistake printing coming soon!')">Review Mistakes</button></div>
-    </div>
+</div>
 
-    <div id="quiz-screen" class="screen">
-        <div class="header-area">
-            <div id="topic-badge" class="topic-badge">Subject</div>
-            <div id="progress-text" class="progress-text">1 of 5</div>
-        </div>
-        <div class="question" id="question-text">Question</div>
-        <div id="dynamic-content"></div>
-        <div class="feedback" id="feedback-text"></div>
-        <div class="controls">
-            <button class="action-btn" onclick="showScreen('menu-screen')">Exit</button>
-            <button class="action-btn primary-btn" id="submit-btn" onclick="submitAnswer()">Submit</button>
-            <button class="action-btn primary-btn" id="next-btn" style="display:none;" onclick="handleNext()">Next</button>
-        </div>
-    </div>
-
-    <div id="end-screen" class="screen">
-        <div style="font-size: 80px; margin-bottom: 24px;">🌟</div>
-        <h2>Great Job!</h2>
-        <button class="action-btn primary-btn" style="width: 100%; margin-top:20px;" onclick="showScreen('menu-screen')">Done</button>
-    </div>
+<div id="debug-panel">
+    <div>[SYSTEM START] Waiting for data...</div>
 </div>
 
 <script>
+    // 你的 CSV 链接
     const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQlpdRHnR9ybEHHgX6fouRI-vXOh8KQNLSjsbt0TYh9R3No_9i7QNv_4ELwJZJGQpTe3oZVXaZijaW4/pub?output=csv";
-    
+
     let db = {};
-    let curGrade = 'P3', curChild = 'Valerie', curQIdx = 0, sessionQs = [], ansed = false;
+    const debugPanel = document.getElementById('debug-panel');
 
-    function log(msg) {
-        const box = document.getElementById('debug-box');
-        box.innerHTML += `> ${msg}<br>`;
-        console.log(msg);
-    }
-
-    // 清理文本的终极武器：移除所有非打印字符和前后空格
-    function clean(str) {
-        if (!str) return "";
-        return str.toString().replace(/[\u200B-\u200D\uFEFF]/g, "").trim();
+    function addLog(msg, type = '') {
+        const line = document.createElement('div');
+        if(type) line.className = 'log-' + type;
+        line.innerText = `[${new Date().toLocaleTimeString()}] ${msg}`;
+        debugPanel.appendChild(line);
+        debugPanel.scrollTop = debugPanel.scrollHeight;
     }
 
     window.onload = function() {
-        showScreen('loading-screen');
-        Papa.parse(CSV_URL + "&t=" + Date.now(), {
+        addLog("Attempting to fetch Google Sheet...");
+        
+        Papa.parse(CSV_URL + "&cache=" + Date.now(), {
             download: true,
             header: true,
-            skipEmptyLines: 'greedy',
             complete: function(results) {
-                log(`Rows found: ${results.data.length}`);
+                addLog(`Success! Found ${results.data.length} rows of data.`, 'success');
                 processData(results.data);
             },
-            error: e => { log(`Error: ${e}`); }
+            error: function(err) {
+                addLog(`FAILED: Could not connect to Google Sheet. Check 'Publish to Web' settings.`, 'error');
+                document.getElementById('status-display').innerText = "❌ Connection Failed";
+                document.getElementById('status-display').style.color = "red";
+            }
         });
     };
 
     function processData(rows) {
         db = {};
-        if (rows.length === 0) { log("Table is empty!"); return; }
-
-        // 获取列名的真实键（处理可能的空格/隐藏字符）
-        const keys = Object.keys(rows[0]);
-        const findKey = (name) => keys.find(k => clean(k).toLowerCase() === name.toLowerCase());
-
-        const kGrade = findKey('Grade');
-        const kSub = findKey('Subject');
-        const kType = findKey('Type');
-        const kQ = findKey('Question');
-        const kAns = findKey('Correct Answer');
-
-        rows.forEach((row, i) => {
-            let g = clean(row[kGrade]);
-            let s = clean(row[kSub]);
-            let q = clean(row[kQ]);
-            
-            if (!g || !s || !q) return;
-
-            if (!db[g]) db[g] = {};
-            if (!db[g][s]) db[g][s] = [];
-
-            db[g][s].push({
-                q: q,
-                type: clean(row[kType] || 'MCQ').toUpperCase(),
-                ans: clean(row[kAns]),
-                options: [
-                    clean(row[findKey('Option A')]),
-                    clean(row[findKey('Option B')]),
-                    clean(row[findKey('Option C')]),
-                    clean(row[findKey('Option D')])
-                ].filter(o => o !== "")
-            });
-        });
-
-        const availableGrades = Object.keys(db);
-        log(`Grades loaded: ${availableGrades.join(', ')}`);
-        
-        if (availableGrades.length > 0) {
-            showScreen('menu-screen');
-            // 自动检测并匹配存在的年级
-            if (db['P3']) selectChild('P3', 'Valerie');
-            else if (availableGrades[0]) selectChild(availableGrades[0], 'Valerie');
-        } else {
-            document.getElementById('status-msg').innerText = "Data Mapping Error. Check column names.";
-        }
-    }
-
-    function selectChild(grade, name) {
-        curGrade = grade; curChild = name;
-        document.getElementById('btn-valerie').className = name === 'Valerie' ? 'name-btn active' : 'name-btn';
-        document.getElementById('btn-venissa').className = name === 'Venissa' ? 'name-btn active' : 'name-btn';
-        
-        const grid = document.getElementById('subject-grid');
-        grid.innerHTML = '';
-        
-        if (!db[grade]) {
-            grid.innerHTML = `<p style="grid-column:1/-1; color:#94a3b8;">No subjects for ${grade}</p>`;
+        if (rows.length === 0) {
+            addLog("The spreadsheet seems to be empty.", "error");
             return;
         }
 
-        const colors = ["#2563eb", "#059669", "#e11d48", "#d97706", "#7c3aed"];
+        // 获取列名并清理
+        const rawKeys = Object.keys(rows[0]);
+        addLog("Detected Columns: " + rawKeys.join(' | '));
+
+        const findKey = (name) => rawKeys.find(k => k.trim().toLowerCase() === name.toLowerCase());
+
+        rows.forEach((row, index) => {
+            let g = (row[findKey('Grade')] || "").toString().trim();
+            let s = (row[findKey('Subject')] || "").toString().trim();
+            
+            if (!g || !s) return;
+
+            if (!db[g]) db[g] = {};
+            if (!db[g][s]) db[g][s] = [];
+            db[g][s].push(row);
+        });
+
+        const grades = Object.keys(db);
+        addLog("Mapped Grades: " + grades.join(', '), 'success');
+
+        if (grades.length > 0) {
+            document.getElementById('status-display').innerText = "✅ Cloud Synced";
+            document.getElementById('status-display').style.color = "#059669";
+            switchChild(grades.includes('P3') ? 'P3' : grades[0]);
+        } else {
+            addLog("No valid data found. Check if your column names match 'Grade' and 'Subject'.", 'error');
+            document.getElementById('status-display').innerText = "⚠️ Data Mapping Error";
+        }
+    }
+
+    function switchChild(grade) {
+        document.getElementById('btn-P3').classList.toggle('active', grade === 'P3');
+        document.getElementById('btn-P1').classList.toggle('active', grade === 'P1');
+        
+        const grid = document.getElementById('subject-grid');
+        grid.innerHTML = '';
+
+        if (!db[grade]) {
+            addLog(`No subjects found for grade: ${grade}`, 'error');
+            grid.innerHTML = `<p style="color:red;">No questions for ${grade} yet.</p>`;
+            return;
+        }
+
+        const colors = ["#2563eb", "#059669", "#e11d48", "#d97706"];
         Object.keys(db[grade]).forEach((sub, i) => {
             let btn = document.createElement('button');
             btn.className = 'subject-btn';
             btn.style.background = colors[i % colors.length];
             btn.innerText = sub;
-            btn.onclick = () => startQuiz(grade, sub);
+            btn.onclick = () => alert(`Starting ${sub} quiz... (Logic for questions is ready, first sync subjects!)`);
             grid.appendChild(btn);
         });
-    }
-
-    function startQuiz(grade, sub) {
-        curQIdx = 0; ansed = false;
-        sessionQs = db[grade][sub].sort(() => 0.5 - Math.random()).slice(0, 5);
-        document.getElementById('topic-badge').innerText = sub;
-        showScreen('quiz-screen');
-        renderQ();
-    }
-
-    function renderQ() {
-        ansed = false;
-        const q = sessionQs[curQIdx];
-        document.getElementById('question-text').innerText = q.q;
-        document.getElementById('progress-text').innerText = `${curQIdx + 1} of ${sessionQs.length}`;
-        document.getElementById('feedback-text').innerText = '';
-        document.getElementById('next-btn').style.display = 'none';
-        document.getElementById('submit-btn').style.display = q.type === 'MCQ' ? 'none' : 'block';
-
-        const cont = document.getElementById('dynamic-content');
-        cont.innerHTML = '';
-
-        if (q.type === 'MCQ') {
-            let div = document.createElement('div');
-            div.className = 'options-mcq';
-            q.options.sort(() => 0.5 - Math.random()).forEach(opt => {
-                let btn = document.createElement('button');
-                btn.className = 'option';
-                btn.innerText = opt;
-                btn.onclick = () => {
-                    if (ansed) return; ansed = true;
-                    if (clean(opt) === clean(q.ans)) {
-                        btn.style.background = '#d1fae5'; btn.style.borderColor = '#10b981';
-                    } else {
-                        btn.style.background = '#fee2e2'; btn.style.borderColor = '#ef4444';
-                    }
-                    document.getElementById('next-btn').style.display = 'block';
-                };
-                div.appendChild(btn);
-            });
-            cont.appendChild(div);
-        } else {
-            cont.innerHTML = `<input type="text" id="ans-input" style="font-size:28px; padding:15px; width:100%; border:3px solid #e5e7eb; border-radius:12px; box-sizing:border-box;">`;
-        }
-    }
-
-    function submitAnswer() {
-        if (ansed) return; ansed = true;
-        const q = sessionQs[curQIdx];
-        const userAns = clean(document.getElementById('ans-input').value);
-        const fb = document.getElementById('feedback-text');
-        
-        if (userAns.toLowerCase() === q.ans.toLowerCase()) {
-            fb.innerText = "✅ Correct!"; fb.style.color = "#10b981";
-        } else {
-            fb.innerText = `❌ Correct answer: ${q.ans}`; fb.style.color = "#ef4444";
-        }
-        document.getElementById('submit-btn').style.display = 'none';
-        document.getElementById('next-btn').style.display = 'block';
-    }
-
-    function handleNext() {
-        if (curQIdx < sessionQs.length - 1) {
-            curQIdx++; renderQ();
-        } else {
-            showScreen('end-screen');
-        }
-    }
-
-    function showScreen(id) {
-        document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
-        document.getElementById(id).style.display = 'block';
+        addLog(`Displayed ${Object.keys(db[grade]).length} subjects for ${grade}.`);
     }
 </script>
 </body>
