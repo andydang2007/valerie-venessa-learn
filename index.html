@@ -10,19 +10,16 @@
         body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #1e293b; }
         .container { max-width: 600px; margin: auto; background: #fff; padding: 25px; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; }
         .screen { display: none; }
-        
-        /* 智能日历样式 */
         .date-badge { display: inline-block; background: #f1f5f9; color: #475569; padding: 6px 14px; border-radius: 20px; font-size: 14px; font-weight: 600; margin-bottom: 20px; border: 1px solid #e2e8f0; }
-
         .name-selector { display: flex; gap: 10px; justify-content: center; margin: 20px 0; }
         button.name-btn { padding: 10px 20px; border-radius: 12px; border: 2px solid #e2e8f0; background: white; cursor: pointer; font-weight: 600; transition: 0.2s; }
         button.name-btn.active { border-color: var(--primary); background: #d1fae5; color: #065f46; transform: scale(1.05); }
         .subject-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 30px; }
         button.sub-btn { padding: 20px; border-radius: 16px; border: none; color: white; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         button.sub-btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
-        
         .q-text { font-size: 24px; text-align: left; margin: 25px 0; line-height: 1.5; font-weight: 500; }
-        input.ans-input { font-size: 20px; padding: 15px; width: 100%; border: 2px solid #e2e8f0; border-radius: 12px; box-sizing: border-box; outline: none; }
+        input.ans-input, textarea.ans-input { font-size: 20px; padding: 15px; width: 100%; border: 2px solid #e2e8f0; border-radius: 12px; box-sizing: border-box; outline: none; font-family: inherit; }
+        textarea.ans-input { resize: vertical; line-height: 1.4; }
         input.ans-input.error-shake { border-color: #ef4444; animation: shake 0.3s; background-color: #fef2f2; }
         .feedback { font-size: 18px; margin: 15px 0; min-height: 50px; font-weight: bold; }
         .controls { display: flex; gap: 10px; margin-top: 20px; }
@@ -55,7 +52,7 @@
     <div id="quiz-screen" class="screen">
         <div style="text-align:right; font-size:14px; color:#94a3b8;" id="progress-text"></div>
         <div id="q-text" class="q-text"></div>
-        <input type="text" id="ans-in" class="ans-input" placeholder="Type answer here..." autocomplete="off">
+        <div id="input-container"></div>
         <div id="fb-text" class="feedback"></div>
         <div class="controls">
             <button class="btn-action" style="background:#f1f5f9;" onclick="location.reload()">Exit</button>
@@ -77,14 +74,11 @@
 
     let db = {}, curUser = 'P3', curSub = '', sessionQs = [], curIdx = 0;
 
-    // --- 新加坡 MOE 校历推算系统 ---
     function updateSchoolTerm() {
         const now = new Date();
-        // 关键时间节点 (月份从 0 开始算，所以 2=March, 5=June, 8=September)
-        const t2Start = new Date(2026, 2, 23); // 假设 Term 2 从 3月23日开始
-        const t3Start = new Date(2026, 5, 28); // Term 3: June 28
-        const t4Start = new Date(2026, 8, 13); // Term 4: Sept 13
-        
+        const t2Start = new Date(2026, 2, 23);
+        const t3Start = new Date(2026, 5, 28);
+        const t4Start = new Date(2026, 8, 13);
         const daysDiff = (d1, d2) => Math.floor((d1 - d2) / (1000 * 60 * 60 * 24));
         let termStr = "";
 
@@ -97,18 +91,14 @@
         } else if (now >= t2Start) {
             const w = Math.floor(daysDiff(now, t2Start) / 7) + 1;
             termStr = w <= 10 ? `Term 2 Week ${w}` : "June Holiday";
-        } else {
-            termStr = "Term 1"; // 简化显示
-        }
+        } else { termStr = "Term 1"; }
 
-        const dateOptions = { weekday: 'short', month: 'short', day: 'numeric' };
-        const dateString = now.toLocaleDateString('en-SG', dateOptions);
-        document.getElementById('school-term-display').innerText = `📅 ${dateString} | ${termStr}`;
+        const options = { weekday: 'short', month: 'short', day: 'numeric' };
+        document.getElementById('school-term-display').innerText = `📅 ${now.toLocaleDateString('en-SG', options)} | ${termStr}`;
     }
 
     async function init() {
-        updateSchoolTerm(); // 初始化校历
-
+        updateSchoolTerm();
         const loads = Object.entries(GIDS).map(([name, gid]) => {
             return new Promise(res => {
                 const url = `https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=${gid}&single=true&output=csv&t=${Date.now()}`;
@@ -186,13 +176,24 @@
         const q = sessionQs[curIdx];
         document.getElementById('q-text').innerText = q.Question;
         document.getElementById('progress-text').innerText = `${curIdx + 1} / ${sessionQs.length}`;
+        
+        const container = document.getElementById('input-container');
+        const qType = (q.Type || "").toString().trim().toUpperCase();
+        
+        if (qType === 'OPEN') {
+            // 这里加上了 rows="5"，默认撑开 5 行
+            container.innerHTML = `<textarea id="ans-in" class="ans-input" rows="5" placeholder="Type your full answer here..."></textarea>`;
+        } else {
+            container.innerHTML = `<input type="text" id="ans-in" class="ans-input" placeholder="Type answer here..." autocomplete="off">`;
+            document.getElementById('ans-in').onkeypress = (e) => { if(e.key === 'Enter') checkAns(); };
+        }
+
         const input = document.getElementById('ans-in');
-        input.value = ''; input.disabled = false; input.className = 'ans-input';
+        setTimeout(() => input.focus(), 100);
+        
         document.getElementById('fb-text').innerText = '';
         document.getElementById('sub-btn').style.display = 'block';
         document.getElementById('next-btn').style.display = 'none';
-        setTimeout(() => input.focus(), 100);
-        input.onkeypress = (e) => { if(e.key === 'Enter') checkAns(); };
     }
 
     function checkAns() {
@@ -202,23 +203,33 @@
         const correct = correctRaw.toLowerCase();
         const fb = document.getElementById('fb-text');
         
+        const qType = (sessionQs[curIdx]['Type'] || "").toString().trim().toUpperCase();
+        
         if(user === "") return;
+
+        if (qType === 'OPEN') {
+            fb.innerHTML = `<span style="color:#0f172a;"><b>Suggested Answer:</b></span><br>
+                            <span style="font-size:18px; color:#10b981;">${correctRaw}</span><br>
+                            <span style="font-size:14px; color:#64748b;">(Check if your meaning is similar)</span>`;
+            input.disabled = true;
+            document.getElementById('sub-btn').style.display = 'none';
+            document.getElementById('next-btn').style.display = 'block';
+            return;
+        }
 
         if(user === correct) {
             fb.innerHTML = `<span style="color:#10b981;">✅ Correct! Well done.</span>`;
             input.disabled = true;
             document.getElementById('sub-btn').style.display = 'none';
             document.getElementById('next-btn').style.display = 'block';
-            input.className = 'ans-input'; // 取消可能的红框
+            input.className = 'ans-input'; 
         } else {
-            // 答错逻辑：红框闪烁、显示答案、但不清空输入框
             fb.innerHTML = `<span style="color:#ef4444;">❌ Not quite. Check your spelling!</span><br>
                             <span style="font-size:15px; color:#64748b; font-weight:normal;">Hint: The answer is <b>${correctRaw}</b></span>`;
             input.className = 'ans-input error-shake';
             setTimeout(() => { 
-                input.className = 'ans-input'; // 停止抖动，保留红底色提醒
+                input.className = 'ans-input'; 
                 input.style.backgroundColor = '#fef2f2';
-                // 不清空 value，而是全选文字，方便她一键修改
                 input.select(); 
             }, 300);
         }
