@@ -8,7 +8,7 @@
     <style>
         :root { --primary: #10b981; --bg: #f8fafc; }
         
-        /* 基础布局（兼容移动端） */
+        /* 基础布局 */
         body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #1e293b; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; }
         .container { width: 100%; max-width: 600px; background: #fff; padding: 25px; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; }
         .screen { display: none; width: 100%; }
@@ -21,26 +21,36 @@
         button.sub-btn { padding: 20px; border-radius: 16px; border: none; color: white; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         button.sub-btn:hover { transform: translateY(-2px); filter: brightness(1.05); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         
+        /* 卡通闯关进度条 */
+        .milestone-track { display: flex; justify-content: space-between; position: relative; margin: 15px 0 35px 0; padding: 0 10px; }
+        .milestone-track::before { content: ''; position: absolute; top: 50%; left: 20px; right: 20px; height: 6px; background: #e2e8f0; z-index: 1; transform: translateY(-50%); border-radius: 3px; }
+        .milestone-fill { position: absolute; top: 50%; left: 20px; height: 6px; background: #10b981; z-index: 1; transform: translateY(-50%); border-radius: 3px; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .milestone { width: 40px; height: 40px; background: #f8fafc; border: 3px solid #cbd5e1; border-radius: 50%; z-index: 2; display: flex; align-items: center; justify-content: center; font-size: 18px; transition: 0.4s; box-sizing: border-box; }
+        .milestone.done { border-color: #10b981; background: #d1fae5; }
+        .milestone.active { border-color: #3b82f6; background: #eff6ff; font-size: 24px; transform: scale(1.2); box-shadow: 0 0 15px rgba(59,130,246,0.3); animation: bounce 1s infinite alternate; }
+        @keyframes bounce { from { transform: scale(1.1) translateY(0); } to { transform: scale(1.1) translateY(-6px); } }
+
         .q-text { font-size: 24px; text-align: left; margin: 25px 0; line-height: 1.5; font-weight: 500; }
         input.ans-input, textarea.ans-input { font-size: 20px; padding: 15px; width: 100%; border: 2px solid #e2e8f0; border-radius: 12px; box-sizing: border-box; outline: none; font-family: inherit; }
         textarea.ans-input { resize: vertical; line-height: 1.4; }
         input.ans-input.error-shake { border-color: #ef4444; animation: shake 0.3s; background-color: #fef2f2; }
         
         .mcq-list { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
-        button.mcq-btn { padding: 16px; border-radius: 12px; border: 2px solid #e2e8f0; background: white; font-size: 18px; cursor: pointer; text-align: left; transition: 0.2s; font-family: inherit; color: #1e293b; }
-        button.mcq-btn:hover { background: #f1f5f9; }
+        button.mcq-btn { padding: 16px; border-radius: 12px; border: 2px solid #e2e8f0; background: white; font-size: 18px; cursor: pointer; text-align: left; transition: 0.2s; font-family: inherit; color: #1e293b; outline: none; }
+        button.mcq-btn:hover, button.mcq-btn:focus { background: #f1f5f9; border-color: #cbd5e1; }
         button.mcq-btn.active { border-color: var(--primary); background: #d1fae5; font-weight: bold; color: #065f46; }
         button.mcq-btn.error { border-color: #ef4444; background: #fef2f2; color: #b91c1c; animation: shake 0.3s; }
 
         .feedback { font-size: 18px; margin: 15px 0; min-height: 50px; font-weight: bold; }
         .controls { display: flex; gap: 10px; margin-top: 20px; }
-        .btn-action { flex: 1; padding: 15px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
+        .btn-action { flex: 1; padding: 15px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; outline: none; transition: 0.2s; }
+        #next-btn:focus { box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.4); transform: scale(1.02); }
+        
         .res-section { border-top: 2px dashed #e2e8f0; margin-top: 20px; padding-top: 20px; text-align: left; }
         .res-card { background: #f1f5f9; padding: 15px; border-radius: 12px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         
-        /* --- 电脑端大屏专属优化 (屏幕宽度大于 768px 时生效) --- */
         @media (min-width: 768px) {
-            body { justify-content: center; padding: 40px; background: #e2e8f0; /* 大屏背景稍微深一点点，突出居中面板 */ }
+            body { justify-content: center; padding: 40px; background: #e2e8f0; }
             .container { max-width: 750px; padding: 40px; border-radius: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); }
             h2 { font-size: 32px; margin-bottom: 15px; }
             .date-badge { font-size: 16px; padding: 8px 18px; margin-bottom: 30px; }
@@ -77,12 +87,13 @@
     </div>
 
     <div id="quiz-screen" class="screen">
+        <div id="progress-bar" class="milestone-track"></div>
         <div style="text-align:right; font-size:14px; color:#94a3b8;" id="progress-text"></div>
         <div id="q-text" class="q-text"></div>
         <div id="input-container"></div>
         <div id="fb-text" class="feedback"></div>
         <div class="controls">
-            <button class="btn-action" style="background:#f1f5f9; color:#475569;" onclick="location.reload()">Exit</button>
+            <button id="exit-btn" class="btn-action" style="background:#f1f5f9; color:#475569;" onclick="location.reload()">Exit</button>
             <button id="sub-btn" class="btn-action" style="background:#1e293b; color:white;" onclick="checkAns()">Submit</button>
             <button id="next-btn" class="btn-action" style="background:#10b981; color:white; display:none;" onclick="nextQ()">Next →</button>
         </div>
@@ -100,6 +111,7 @@
     };
 
     let db = {}, curUser = 'P3', curSub = '', sessionQs = [], curIdx = 0;
+    let sessionErrors = 0; // 新增：错误追踪器
 
     function updateSchoolTerm() {
         const now = new Date();
@@ -166,21 +178,11 @@
         document.getElementById('btn-P1').className = g === 'P1' ? 'name-btn active' : 'name-btn';
         
         const grid = document.getElementById('subject-grid'); grid.innerHTML = '';
-        
-        // 1. 全新配色：English(Blue), Math(Pink), Science(Green), 华文(Purple)
-        const colors = {
-            "English": "#3b82f6", 
-            "Math": "#ec4899", 
-            "华文": "#a855f7", 
-            "Science": "#10b981"
-        };
-        
-        // 2. 强制锁定科目顺序，Science 放最后
+        const colors = {"English": "#3b82f6", "Math": "#ec4899", "华文": "#a855f7", "Science": "#10b981"};
         const orderedSubjects = ["English", "Math", "华文", "Science"];
         
         if(db[g]) {
             orderedSubjects.forEach(s => {
-                // 如果当前用户的这个科目里有题目数据，才渲染按钮
                 if(db[g][s] && db[g][s].length > 0) {
                     const btn = document.createElement('button');
                     btn.className = 'sub-btn'; 
@@ -207,19 +209,49 @@
         } else { list.innerHTML = `<p style="color:#94a3b8;">No resources yet.</p>`; }
     }
 
+    function updateProgress() {
+        const bar = document.getElementById('progress-bar');
+        const len = sessionQs.length;
+        const pct = len > 1 ? (curIdx / (len - 1)) * 100 : 100;
+        
+        let activeIcon = '🚀'; 
+        if (curSub === '华文') activeIcon = '🐼';
+        else if (curSub === 'Science') activeIcon = '🌱';
+        else if (curSub === 'Math') activeIcon = '🔢';
+        
+        let html = `<div class="milestone-fill" style="width: ${pct}%"></div>`;
+        for(let i=0; i<len; i++) {
+            let cls = 'milestone';
+            let content = '';
+            if (i < curIdx) { cls += ' done'; content = '⭐'; }
+            else if (i === curIdx) { cls += ' active'; content = activeIcon; }
+            else { content = '☁️'; }
+            html += `<div class="${cls}">${content}</div>`;
+        }
+        bar.innerHTML = html;
+    }
+
     function startQuiz(s) {
-        curSub = s; curIdx = 0;
+        curSub = s; curIdx = 0; sessionErrors = 0; // 重置错误追踪
+        
+        // 恢复退出按钮原始样式
+        const exitBtn = document.getElementById('exit-btn');
+        exitBtn.innerText = "Exit";
+        exitBtn.style.background = "#f1f5f9";
+        exitBtn.style.color = "#475569";
+
         sessionQs = db[curUser][s].sort(() => 0.5 - Math.random()).slice(0, 5);
         showScreen('quiz-screen'); renderQ();
     }
 
     function renderQ() {
+        document.getElementById('progress-bar').style.display = 'flex';
+        updateProgress(); 
+        
         const q = sessionQs[curIdx];
         const isCN = (curSub === '华文');
         
         document.getElementById('q-text').innerText = q.Question;
-        document.getElementById('progress-text').innerText = `${curIdx + 1} / ${sessionQs.length}`;
-        
         const container = document.getElementById('input-container');
         const qType = (q.Type || "").toString().trim().toUpperCase();
         
@@ -238,7 +270,12 @@
             container.innerHTML = html;
         } else {
             container.innerHTML = `<input type="text" id="ans-in" class="ans-input" placeholder="${isCN ? '在此输入答案...' : 'Type answer here...'}" autocomplete="off">`;
-            document.getElementById('ans-in').onkeypress = (e) => { if(e.key === 'Enter') checkAns(); };
+            document.getElementById('ans-in').onkeydown = (e) => { 
+                if(e.key === 'Enter' && document.getElementById('sub-btn').style.display !== 'none') {
+                    e.preventDefault();
+                    checkAns(); 
+                }
+            };
             setTimeout(() => document.getElementById('ans-in').focus(), 100);
         }
         
@@ -273,6 +310,14 @@
             return;
         }
 
+        const showNextState = () => {
+            input.disabled = true;
+            document.getElementById('sub-btn').style.display = 'none';
+            const nextBtn = document.getElementById('next-btn');
+            nextBtn.style.display = 'block';
+            setTimeout(() => nextBtn.focus(), 50); 
+        };
+
         if (qType === 'OPEN') {
             let title = isCN ? "参考答案：" : "Suggested Answer:";
             let hint = isCN ? "(只需意思相近即可)" : 
@@ -281,17 +326,13 @@
             fb.innerHTML = `<span style="color:#0f172a;"><b>${title}</b></span><br>
                             <span style="font-size:18px; color:#10b981;">${correctRaw}</span><br>
                             <span style="font-size:14px; color:#64748b;">${hint}</span>`;
-            input.disabled = true;
-            document.getElementById('sub-btn').style.display = 'none';
-            document.getElementById('next-btn').style.display = 'block';
+            showNextState();
             return;
         }
 
         if(user === correct) {
             fb.innerHTML = `<span style="color:#10b981;">${isCN ? "✅ 答对啦！非常棒。" : "✅ Correct! Well done."}</span>`;
-            input.disabled = true;
-            document.getElementById('sub-btn').style.display = 'none';
-            document.getElementById('next-btn').style.display = 'block';
+            showNextState();
             
             if (qType === 'MCQ') {
                 document.querySelectorAll('.mcq-btn').forEach(b => {
@@ -304,6 +345,8 @@
                 input.className = 'ans-input'; 
             }
         } else {
+            sessionErrors++; // 记录错误次数
+            
             if (qType === 'MCQ') {
                 fb.innerHTML = `<span style="color:#ef4444;">${isCN ? "❌ 不对哦，试试其他选项！" : "❌ Not quite. Try another option!"}</span>`;
                 const activeBtn = document.querySelector('.mcq-btn.active');
@@ -314,7 +357,7 @@
                 input.value = ''; 
             } else {
                 fb.innerHTML = `<span style="color:#ef4444;">${isCN ? "❌ 拼写不对哦，请检查一下！" : "❌ Not quite. Check your spelling!"}</span><br>
-                                <span style="font-size:15px; color:#64748b; font-weight:normal;">${isCN ? "提示：" : "Hint: The answer is "}<b>${correctRaw}</b></span>`;
+                                <span style="font-size:15px; color:#64748b; font-weight:normal;">${isCN ? "提示：" : "Hint: "}<b>${correctRaw}</b></span>`;
                 input.className = 'ans-input error-shake';
                 setTimeout(() => { 
                     input.className = 'ans-input'; 
@@ -326,10 +369,35 @@
     }
 
     function nextQ() {
-        if(curIdx < sessionQs.length - 1) { curIdx++; renderQ(); }
-        else { 
-            alert(curSub === '华文' ? "太棒了！你完成了所有练习！" : "Amazing job! You finished!"); 
-            location.reload(); 
+        if(curIdx < sessionQs.length - 1) { 
+            curIdx++; 
+            renderQ(); 
+        } else { 
+            // 练习完成，展示动态结算画面
+            const isCN = (curSub === '华文');
+            document.getElementById('progress-bar').style.display = 'none';
+            document.getElementById('progress-text').innerText = isCN ? "练习完成！" : "Completed!";
+            
+            let msg = "";
+            if (sessionErrors === 0) {
+                msg = isCN ? "🏆 完美通关！全对无错，你太棒了！" : "🏆 Perfect Score! You are amazing!";
+            } else if (sessionErrors <= 2) {
+                msg = isCN ? "🌟 闯关成功！做得很好，继续保持！" : "🌟 Great job! You finished strong!";
+            } else {
+                msg = isCN ? "💪 挑战完成！多练几次会越来越厉害！" : "💪 Good effort! Keep practicing and you will get even better!";
+            }
+
+            document.getElementById('q-text').innerHTML = `<div style="text-align:center; padding: 40px 0; font-size: 26px; color: #064e3b; font-weight:bold;">${msg}</div>`;
+            document.getElementById('input-container').innerHTML = '';
+            document.getElementById('fb-text').innerText = '';
+            document.getElementById('sub-btn').style.display = 'none';
+            document.getElementById('next-btn').style.display = 'none';
+            
+            // 将退出按钮变为返回主菜单
+            const exitBtn = document.getElementById('exit-btn');
+            exitBtn.innerText = isCN ? "返回主菜单" : "Back to Menu";
+            exitBtn.style.background = "#10b981";
+            exitBtn.style.color = "white";
         }
     }
 
