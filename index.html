@@ -23,7 +23,7 @@
         .name-selector { display: flex; gap: 15px; justify-content: center; margin: 25px 0; }
         button.name-btn { padding: 15px 30px; border-radius: 16px; border: 2px solid #e2e8f0; background: white; cursor: pointer; font-weight: 700; font-size: 18px; transition: 0.2s; color: #475569; }
         button.name-btn:hover { background: #f1f5f9; }
-        button.name-btn.active { border-color: var(--primary); background: #d1fae5; color: #065f46; }
+        button.name-btn.active { border-color: var(--primary); background: #d1fae5; color: #065f46; transform: scale(1.05); }
         
         .subject-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-bottom: 15px; }
         button.sub-btn { flex: 1 1 40%; max-width: 45%; padding: 20px; border-radius: 16px; border: none; color: white; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; box-sizing: border-box; }
@@ -35,7 +35,6 @@
         .checkbox-label input { display: none; }
         .checkbox-label.selected { border-color: #3b82f6; background: #eff6ff; color: #1d4ed8; font-weight: bold; box-shadow: 0 2px 5px rgba(59, 130, 246, 0.1); }
         
-        /* 🌟 核心：专门给 Spelling List 设计的紫色外观 */
         .checkbox-label.vocab-list { border-color: #d8b4fe; background: #faf5ff; color: #7e22ce; }
         .checkbox-label.vocab-list:hover { background: #f3e8ff; border-color: #a855f7; }
         .checkbox-label.vocab-list.selected { border-color: #9333ea; background: #e9d5ff; color: #6b21a8; box-shadow: 0 2px 5px rgba(147, 51, 234, 0.2); font-weight: bold; }
@@ -116,7 +115,7 @@
         <div id="school-term-display" class="date-badge">Loading Date...</div>
         <div class="name-selector">
             <button id="btn-P3" class="name-btn" onclick="switchUser('P3')">Valerie (P3)</button>
-            <button id="btn-P1" class="name-btn" onclick="switchUser('P1')">Venissa (P1)</button>
+            <button id="btn-P1" class="name-btn" onclick="switchUser('P1')">Venessa (P1)</button>
         </div>
         <div id="subject-grid" class="subject-grid">
             <button class="sub-btn" style="background:#3b82f6;" onclick="handleSubjectClick('English')">English</button>
@@ -204,6 +203,14 @@
     const SHEET_ID = "1vQlpdRHnR9ybEHHgX6fouRI-vXOh8KQNLSjsbt0TYh9R3No_9i7QNv_4ELwJZJGQpTe3oZVXaZijaW4";
     const GIDS = { "English": "1893311738", "Math": "59294467", "Science": "1581471994", "华文": "2020673087", "Resources": "469231602" };
 
+    // ==========================================
+    // 🎵 专属欢呼语音设置区 
+    // 在双引号里填入你在 Google Drive 上传的录音链接 (必须是"知道链接的任何人都可以访问")
+    // ==========================================
+    const SUCCESS_AUDIO_VALERIE = "https://drive.google.com/file/d/1StoRXMJqWPegTr5Cu6oxlyIvL0iVgFwH/view?usp=drive_link"; 
+    const SUCCESS_AUDIO_VENESSA = "https://drive.google.com/file/d/1dMcI2VhKCzCKzTnAn570yyTGF0R_MJPh/view?usp=drive_link"; 
+    // ==========================================
+
     let db = {}, curUser = '', curSub = '', sessionQs = [], curIdx = 0, sessionErrors = 0;
     let isSpellingMode = false;
     let currentWriter = null;
@@ -222,6 +229,16 @@
     }
     if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = loadVoices;
     loadVoices();
+
+    // 将 Drive 链接转换为直接播放的直链
+    function getDriveDirectLink(link) {
+        if (!link) return "";
+        let driveMatch = link.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        if (driveMatch && driveMatch[1]) {
+            return `https://drive.google.com/uc?export=download&id=${driveMatch[1]}`;
+        }
+        return link;
+    }
 
     function playWordAudio(text) {
         if (synth.speaking) synth.cancel();
@@ -332,7 +349,7 @@
 
     function handleSubjectClick(s) {
         if (!curUser) {
-            alert("请先在上面选择是 Valerie 还是 Venissa 哦！\nPlease select a name first!");
+            alert("请先在上面选择是 Valerie 还是 Venessa 哦！\nPlease select a name first!");
             return;
         }
 
@@ -381,8 +398,6 @@
         const isCN = (s === '华文');
         document.getElementById('topic-title').innerText = isSpellingMode ? (isCN ? '你要听写哪里的内容？' : 'Select Spelling Topics') : (isCN ? '你要复习哪里的内容？' : 'Select Practice Topics');
         document.getElementById('topic-desc').innerText = isCN ? `（至少选择一项）` : `Choose the topics you want to practice.`;
-        
-        // 🌟 修复：默认取消全选
         document.getElementById('check-all-text').innerText = isCN ? '🌟 全选 (Select All)' : '🌟 Select All';
         document.getElementById('check-all').checked = false;
         document.getElementById('check-all-label').className = 'checkbox-label';
@@ -399,15 +414,12 @@
 
         const boxGrid = document.getElementById('topic-checkboxes'); boxGrid.innerHTML = '';
         renderItems.forEach(item => {
-            // 🌟 修复：检测是否为学校 Spelling List，加上特殊紫色样式
             let isVocabList = /^Spelling \d+/.test(item.label) || item.label.includes("Spelling ");
             let baseClass = item.isBundle ? 'checkbox-label bundle-label' : 'checkbox-label';
             if (isVocabList) baseClass += ' vocab-list';
 
             const label = document.createElement('label'); label.className = baseClass;
             const cb = document.createElement('input'); cb.type = 'checkbox'; cb.value = JSON.stringify(item.values); cb.className = 'topic-cb';
-            
-            // 🌟 修复：默认全部不勾选
             cb.checked = false;
             
             cb.onchange = () => { label.className = cb.checked ? baseClass + ' selected' : baseClass.replace('selected', '').trim(); syncCheckAll(); };
@@ -515,7 +527,6 @@
         
         let slotsHtml = '<div style="display:flex; gap:8px; justify-content:center; margin-bottom:40px; flex-wrap:wrap; width:100%;">';
         for(let i=0; i<currentSpellWord.length; i++) {
-            // Add extra styling if the word is very long (like 'vice-principal') to prevent breaking
             slotsHtml += `<div id="eng-slot-${i}" style="width:40px; height:50px; border-bottom:4px solid #cbd5e1; font-size:32px; font-weight:bold; display:flex; justify-content:center; align-items:center; color:#1e293b; text-transform: lowercase;"></div>`;
         }
         slotsHtml += '</div>';
@@ -559,11 +570,18 @@
                 btn.classList.remove('error-shake');
                 btn.style.borderColor = '#e2e8f0'; btn.style.color = '#1e293b'; btn.style.background = 'white';
             }, 400);
+            sessionErrors++; // 英文拼错也计入错误，影响最终是否播放庆祝彩蛋
         }
     }
 
     function renderChineseSpelling(q) {
-        document.getElementById('spelling-pinyin').innerHTML = `<div style="font-size:28px; color:#64748b; font-weight:normal; margin-bottom:5px;">请听写出这个词语：</div>${q.Question.trim()}`;
+        document.getElementById('spelling-pinyin').innerHTML = `
+            <div style="font-size:28px; color:#64748b; font-weight:normal; margin-bottom:10px;">请听写出这个词语：</div>
+            <div style="display:flex; justify-content:center; align-items:center; gap:15px;">
+                <span>${q.Question.trim()}</span>
+            </div>
+        `;
+        
         currentSpellWord = (q['Correct Answer'] || "").toString().trim();
         currentSpellCharIdx = 0;
         
@@ -586,6 +604,7 @@
             }
             let box = document.createElement('div'); box.id = 'mini-char-' + i; box.className = 'mini-char-box'; progContainer.appendChild(box);
         }
+        
         startNextChar();
     }
 
@@ -621,6 +640,9 @@
         });
 
         currentWriter.quiz({
+            onMistake: function(strokeData) {
+                sessionErrors++; // 华文笔画写错计入错误，影响最终是否播放庆祝彩蛋
+            },
             onComplete: function() { 
                 document.getElementById('mini-char-' + currentSpellCharIdx).innerText = char;
                 currentSpellCharIdx++;
@@ -730,17 +752,28 @@
         else { finishQuiz(); }
     }
 
+    // 🌟 核心：触发 6~7 专属彩蛋语音
     function finishQuiz() {
         const isCN = (curSub === '华文');
         document.querySelectorAll('.milestone-track').forEach(el => el.style.display = 'none');
         document.getElementById('draw-panel').style.display = 'none';
         
-        let msg = ""; let magic67 = `<span class="magic-number">6~7</span>`; 
-        if(isSpellingMode) {
-            msg = `🎉 恭喜你完成了听写任务！表现太棒了！`;
+        let msg = ""; 
+        let magic67 = `<span class="magic-number">6~7</span>`; 
+        
+        // 只要错误 <= 1，就算达成 6~7 成就！
+        if (sessionErrors <= 1) {
+            msg = isCN ? `🎉 恭喜你，获得了 ${magic67} 的好成绩！太棒了！` : `🎉 Congratulations, you've got ${magic67} today!`;
+            
+            // 播放专属庆祝语音
+            let audioLink = curUser === 'P3' ? SUCCESS_AUDIO_VALERIE : SUCCESS_AUDIO_VENESSA;
+            if (audioLink && audioLink.trim() !== "") {
+                let playSrc = getDriveDirectLink(audioLink);
+                let successAudio = new Audio(playSrc);
+                successAudio.play().catch(e => console.warn("Success audio play failed", e));
+            }
         } else {
-            if (sessionErrors <= 1) msg = isCN ? `🎉 恭喜你，今天的${curSub}获得了 ${magic67} 的好成绩！太棒了！` : `🎉 Congratulations, you've got ${magic67} for your ${curSub} today!`;
-            else msg = isCN ? `💪 挑战完成！多练几次，争取下次拿到 ${magic67} 哦！` : `💪 Good effort! Keep practicing to get ${magic67} next time!`;
+            msg = isCN ? `💪 挑战完成！多练几次，争取下次拿到 ${magic67} 哦！` : `💪 Good effort! Keep practicing to get ${magic67} next time!`;
         }
 
         const targetScreen = isSpellingMode ? 'spelling-screen' : 'quiz-screen';
