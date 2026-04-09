@@ -20,8 +20,6 @@
         @keyframes popPulse { 0% { transform: scale(1); text-shadow: 0 0 5px rgba(253, 224, 71, 0.5); } 100% { transform: scale(1.2) translateY(-3px); text-shadow: 0 0 15px rgba(234, 179, 8, 0.8), 0 0 30px rgba(234, 179, 8, 0.4); } }
 
         .date-badge { display: inline-block; background: #f1f5f9; color: #475569; padding: 6px 14px; border-radius: 20px; font-size: 14px; font-weight: 600; margin-bottom: 20px; border: 1px solid #e2e8f0; }
-        
-        /* 修复：去掉了 transform: scale(1.05)，防止按键跳动 */
         .name-selector { display: flex; gap: 15px; justify-content: center; margin: 25px 0; }
         button.name-btn { padding: 15px 30px; border-radius: 16px; border: 2px solid #e2e8f0; background: white; cursor: pointer; font-weight: 700; font-size: 18px; transition: 0.2s; color: #475569; }
         button.name-btn:hover { background: #f1f5f9; }
@@ -36,6 +34,12 @@
         .checkbox-label:hover { background: #f8fafc; border-color: #cbd5e1; }
         .checkbox-label input { display: none; }
         .checkbox-label.selected { border-color: #3b82f6; background: #eff6ff; color: #1d4ed8; font-weight: bold; box-shadow: 0 2px 5px rgba(59, 130, 246, 0.1); }
+        
+        /* 🌟 核心：专门给 Spelling List 设计的紫色外观 */
+        .checkbox-label.vocab-list { border-color: #d8b4fe; background: #faf5ff; color: #7e22ce; }
+        .checkbox-label.vocab-list:hover { background: #f3e8ff; border-color: #a855f7; }
+        .checkbox-label.vocab-list.selected { border-color: #9333ea; background: #e9d5ff; color: #6b21a8; box-shadow: 0 2px 5px rgba(147, 51, 234, 0.2); font-weight: bold; }
+
         .bundle-label { width: 100%; justify-content: center; border-radius: 12px; border-width: 2px; border-style: dashed; padding: 10px; margin-top: 5px; }
         .bundle-label.selected { border-style: solid; }
         
@@ -110,19 +114,16 @@
     <div id="menu-screen" class="screen">
         <h2 style="margin:0 0 10px 0; color:#0f172a;">Did you <span class="magic-number" style="font-size:1em;">6~7</span> today?</h2>
         <div id="school-term-display" class="date-badge">Loading Date...</div>
-        
         <div class="name-selector">
             <button id="btn-P3" class="name-btn" onclick="switchUser('P3')">Valerie (P3)</button>
             <button id="btn-P1" class="name-btn" onclick="switchUser('P1')">Venissa (P1)</button>
         </div>
-        
         <div id="subject-grid" class="subject-grid">
             <button class="sub-btn" style="background:#3b82f6;" onclick="handleSubjectClick('English')">English</button>
             <button class="sub-btn" style="background:#ec4899;" onclick="handleSubjectClick('Math')">Math</button>
             <button class="sub-btn" style="background:#a855f7;" onclick="handleSubjectClick('华文')">华文</button>
             <button class="sub-btn" style="background:#10b981;" onclick="handleSubjectClick('Science')">Science</button>
         </div>
-
         <div class="res-section">
             <h3 style="margin-top:0;">Resources 📚</h3>
             <div id="res-list"></div>
@@ -143,7 +144,7 @@
         <p id="topic-desc" style="color:#64748b; margin-bottom: 20px; font-size:14px;"></p>
         <div style="text-align: center; margin-bottom: 15px;">
             <label class="checkbox-label" id="check-all-label" style="display:inline-flex; background:#eff6ff; border-color:#3b82f6;">
-                <input type="checkbox" id="check-all" onchange="toggleAllTopics(this)" checked>
+                <input type="checkbox" id="check-all" onchange="toggleAllTopics(this)">
                 <b id="check-all-text">🌟 全选所有 (Select All)</b>
             </label>
         </div>
@@ -251,7 +252,6 @@
         else { p.style.display = 'flex'; if(!canvas) initDrawPad(); canvas.width = document.getElementById('quiz-screen').clientWidth - 60; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = 4; }
     }
 
-    // 修复：自动推算新加坡学期日历（2026年）
     function updateSchoolTerm() {
         const now = new Date();
         const year = now.getFullYear();
@@ -311,7 +311,6 @@
         document.getElementById('btn-P3').className = g === 'P3' ? 'name-btn active' : 'name-btn';
         document.getElementById('btn-P1').className = g === 'P1' ? 'name-btn active' : 'name-btn';
         
-        // 修复：不再重绘科目按钮，只更新 Resource 列表
         const list = document.getElementById('res-list'); list.innerHTML = '';
         if(db[g] && db[g]['Resources']) {
             db[g]['Resources'].forEach(r => {
@@ -381,10 +380,12 @@
 
         const isCN = (s === '华文');
         document.getElementById('topic-title').innerText = isSpellingMode ? (isCN ? '你要听写哪里的内容？' : 'Select Spelling Topics') : (isCN ? '你要复习哪里的内容？' : 'Select Practice Topics');
-        document.getElementById('topic-desc').innerText = isCN ? `（可多选组合）` : `Choose the topics you want to practice.`;
+        document.getElementById('topic-desc').innerText = isCN ? `（至少选择一项）` : `Choose the topics you want to practice.`;
+        
+        // 🌟 修复：默认取消全选
         document.getElementById('check-all-text').innerText = isCN ? '🌟 全选 (Select All)' : '🌟 Select All';
-        document.getElementById('check-all').checked = true;
-        document.getElementById('check-all-label').className = 'checkbox-label selected';
+        document.getElementById('check-all').checked = false;
+        document.getElementById('check-all-label').className = 'checkbox-label';
         
         let topicsArr = Array.from(topics).sort((a, b) => getSortWeight(a) - getSortWeight(b));
         let maxWeight = 0; topicsArr.forEach(t => { let w = getSortWeight(t); if(w < 999 && w > maxWeight) maxWeight = w; });
@@ -398,11 +399,16 @@
 
         const boxGrid = document.getElementById('topic-checkboxes'); boxGrid.innerHTML = '';
         renderItems.forEach(item => {
+            // 🌟 修复：检测是否为学校 Spelling List，加上特殊紫色样式
+            let isVocabList = /^Spelling \d+/.test(item.label) || item.label.includes("Spelling ");
             let baseClass = item.isBundle ? 'checkbox-label bundle-label' : 'checkbox-label';
+            if (isVocabList) baseClass += ' vocab-list';
+
             const label = document.createElement('label'); label.className = baseClass;
             const cb = document.createElement('input'); cb.type = 'checkbox'; cb.value = JSON.stringify(item.values); cb.className = 'topic-cb';
-            cb.checked = true;
-            label.className = baseClass + ' selected';
+            
+            // 🌟 修复：默认全部不勾选
+            cb.checked = false;
             
             cb.onchange = () => { label.className = cb.checked ? baseClass + ' selected' : baseClass.replace('selected', '').trim(); syncCheckAll(); };
             label.appendChild(cb); label.appendChild(document.createTextNode(item.label));
@@ -413,7 +419,11 @@
     }
 
     function toggleAllTopics(master) {
-        document.querySelectorAll('.topic-cb').forEach(cb => { cb.checked = master.checked; let p = cb.parentElement.className; cb.parentElement.className = master.checked ? (p.includes('selected') ? p : p + ' selected') : p.replace('selected', '').trim(); });
+        document.querySelectorAll('.topic-cb').forEach(cb => { 
+            cb.checked = master.checked; 
+            let p = cb.parentElement.className; 
+            cb.parentElement.className = master.checked ? (p.includes('selected') ? p : p + ' selected') : p.replace('selected', '').trim(); 
+        });
     }
     
     function syncCheckAll() {
@@ -436,7 +446,7 @@
     function startQuiz() {
         let pool = db[curUser][curSub];
         const selectedJSONs = Array.from(document.querySelectorAll('.topic-cb:checked')).map(cb => cb.value);
-        if (selectedJSONs.length === 0) { alert(curSub === '华文' ? "请至少选择一个进度！" : "Please select at least one topic!"); return; }
+        if (selectedJSONs.length === 0) { alert(curSub === '华文' ? "请至少选择一项进行练习哦！" : "Please select at least one topic!"); return; }
         
         let selectedTopics = [];
         selectedJSONs.forEach(j => { selectedTopics = selectedTopics.concat(JSON.parse(j)); });
@@ -505,7 +515,8 @@
         
         let slotsHtml = '<div style="display:flex; gap:8px; justify-content:center; margin-bottom:40px; flex-wrap:wrap; width:100%;">';
         for(let i=0; i<currentSpellWord.length; i++) {
-            slotsHtml += `<div id="eng-slot-${i}" style="width:45px; height:55px; border-bottom:4px solid #cbd5e1; font-size:36px; font-weight:bold; display:flex; justify-content:center; align-items:center; color:#1e293b; text-transform: lowercase;"></div>`;
+            // Add extra styling if the word is very long (like 'vice-principal') to prevent breaking
+            slotsHtml += `<div id="eng-slot-${i}" style="width:40px; height:50px; border-bottom:4px solid #cbd5e1; font-size:32px; font-weight:bold; display:flex; justify-content:center; align-items:center; color:#1e293b; text-transform: lowercase;"></div>`;
         }
         slotsHtml += '</div>';
         
@@ -517,7 +528,7 @@
         
         let btnsHtml = '<div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; width:100%;">';
         letters.forEach((l, idx) => {
-            btnsHtml += `<button id="eng-btn-${idx}" class="word-card-btn" onclick="checkEngLetter('${l}', this)">${l}</button>`;
+            btnsHtml += `<button id="eng-btn-${idx}" class="word-card-btn" style="width:50px; height:60px; font-size:28px;" onclick="checkEngLetter('${l}', this)">${l}</button>`;
         });
         btnsHtml += '</div>';
         
