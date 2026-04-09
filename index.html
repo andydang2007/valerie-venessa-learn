@@ -12,6 +12,20 @@
         .container { width: 100%; max-width: 600px; background: #fff; padding: 25px; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; }
         .screen { display: none; width: 100%; }
         
+        /* 6~7 专属金色跃动特效 */
+        .magic-number {
+            display: inline-block;
+            font-size: 1.4em;
+            color: #f59e0b; /* 金琥珀色 */
+            font-weight: 900;
+            padding: 0 5px;
+            animation: popPulse 1s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @keyframes popPulse {
+            0% { transform: scale(1); text-shadow: 0 0 5px rgba(253, 224, 71, 0.5); }
+            100% { transform: scale(1.2) translateY(-3px); text-shadow: 0 0 15px rgba(234, 179, 8, 0.8), 0 0 30px rgba(234, 179, 8, 0.4); }
+        }
+
         .date-badge { display: inline-block; background: #f1f5f9; color: #475569; padding: 6px 14px; border-radius: 20px; font-size: 14px; font-weight: 600; margin-bottom: 20px; border: 1px solid #e2e8f0; }
         .name-selector { display: flex; gap: 10px; justify-content: center; margin: 20px 0; }
         button.name-btn { padding: 10px 20px; border-radius: 12px; border: 2px solid #e2e8f0; background: white; cursor: pointer; font-weight: 600; transition: 0.2s; }
@@ -20,14 +34,14 @@
         button.sub-btn { padding: 20px; border-radius: 16px; border: none; color: white; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         button.sub-btn:hover { transform: translateY(-2px); filter: brightness(1.05); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         
-        /* 卡通闯关进度条（针对 7 题微调了间距） */
+        /* 卡通闯关进度条 */
         .milestone-track { display: flex; justify-content: space-between; position: relative; margin: 15px 0 35px 0; padding: 0 5px; }
         .milestone-track::before { content: ''; position: absolute; top: 50%; left: 15px; right: 15px; height: 6px; background: #e2e8f0; z-index: 1; transform: translateY(-50%); border-radius: 3px; }
         .milestone-fill { position: absolute; top: 50%; left: 15px; height: 6px; background: #10b981; z-index: 1; transform: translateY(-50%); border-radius: 3px; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
         .milestone { width: 36px; height: 36px; background: #f8fafc; border: 3px solid #cbd5e1; border-radius: 50%; z-index: 2; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: 0.4s; box-sizing: border-box; }
         .milestone.done { border-color: #10b981; background: #d1fae5; }
-        .milestone.active { border-color: #3b82f6; background: #eff6ff; font-size: 20px; transform: scale(1.2); box-shadow: 0 0 15px rgba(59,130,246,0.3); animation: bounce 1s infinite alternate; }
-        @keyframes bounce { from { transform: scale(1.1) translateY(0); } to { transform: scale(1.1) translateY(-5px); } }
+        .milestone.active { border-color: #3b82f6; background: #eff6ff; font-size: 20px; transform: scale(1.2); box-shadow: 0 0 15px rgba(59,130,246,0.3); animation: bounceActive 1s infinite alternate; }
+        @keyframes bounceActive { from { transform: scale(1.1) translateY(0); } to { transform: scale(1.1) translateY(-5px); } }
 
         .q-text { font-size: 24px; text-align: left; margin: 25px 0; line-height: 1.5; font-weight: 500; }
         input.ans-input, textarea.ans-input { font-size: 20px; padding: 15px; width: 100%; border: 2px solid #e2e8f0; border-radius: 12px; box-sizing: border-box; outline: none; font-family: inherit; }
@@ -71,7 +85,7 @@
     <div id="loading" class="screen" style="display:block;">Syncing Lessons...</div>
 
     <div id="menu-screen" class="screen">
-        <h2 style="margin:0 0 10px 0; color:#0f172a;">Did you 6~7 today?</h2>
+        <h2 style="margin:0 0 10px 0; color:#0f172a;">Did you <span style="color:#f59e0b; font-weight:900;">6~7</span> today?</h2>
         <div id="school-term-display" class="date-badge">Loading Date...</div>
         
         <div class="name-selector">
@@ -238,7 +252,6 @@
         exitBtn.style.background = "#f1f5f9";
         exitBtn.style.color = "#475569";
 
-        // 将题目数量修改为抽取 7 题
         sessionQs = db[curUser][s].sort(() => 0.5 - Math.random()).slice(0, 7);
         showScreen('quiz-screen'); renderQ();
     }
@@ -377,22 +390,23 @@
             document.getElementById('progress-text').innerText = isCN ? "练习完成！" : "Completed!";
             
             let msg = "";
-            // 如果错误数是 0 或 1，也就是对了 7 题或 6 题
+            let magic67 = `<span class="magic-number">6~7</span>`; // 注入金色跃动特效
+            
             if (sessionErrors <= 1) {
                 if (isCN) {
-                    msg = `🎉 恭喜你，今天的${curSub}获得了 6~7 的好成绩！太棒了！`;
+                    msg = `🎉 恭喜你，今天的${curSub}获得了 ${magic67} 的好成绩！太棒了！`;
                 } else {
-                    msg = `🎉 Congratulations, you've got 6~7 for your ${curSub} today!`;
+                    msg = `🎉 Congratulations, you've got ${magic67} for your ${curSub} today!`;
                 }
             } else {
                 if (isCN) {
-                    msg = `💪 挑战完成！多练几次，争取下次拿到 6~7 哦！`;
+                    msg = `💪 挑战完成！多练几次，争取下次拿到 ${magic67} 哦！`;
                 } else {
-                    msg = `💪 Good effort! Keep practicing to get 6~7 next time!`;
+                    msg = `💪 Good effort! Keep practicing to get ${magic67} next time!`;
                 }
             }
 
-            document.getElementById('q-text').innerHTML = `<div style="text-align:center; padding: 40px 0; font-size: 26px; color: #064e3b; font-weight:bold; line-height: 1.5;">${msg}</div>`;
+            document.getElementById('q-text').innerHTML = `<div style="text-align:center; padding: 40px 0; font-size: 26px; color: #064e3b; font-weight:bold; line-height: 1.8;">${msg}</div>`;
             document.getElementById('input-container').innerHTML = '';
             document.getElementById('fb-text').innerText = '';
             document.getElementById('sub-btn').style.display = 'none';
