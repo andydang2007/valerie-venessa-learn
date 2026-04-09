@@ -24,22 +24,20 @@
         button.name-btn { padding: 10px 20px; border-radius: 12px; border: 2px solid #e2e8f0; background: white; cursor: pointer; font-weight: 600; transition: 0.2s; }
         button.name-btn.active { border-color: var(--primary); background: #d1fae5; color: #065f46; transform: scale(1.05); }
         
-        .subject-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-bottom: 15px; }
+        .subject-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-bottom: 30px; }
         button.sub-btn { flex: 1 1 40%; max-width: 45%; padding: 20px; border-radius: 16px; border: none; color: white; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; box-sizing: border-box; }
         button.sub-btn:hover { transform: translateY(-2px); filter: brightness(1.05); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         
-        /* 独立听写按钮 */
-        .spelling-btn { width: 95%; max-width: 400px; margin: 10px auto 30px auto; padding: 18px; border-radius: 16px; background: linear-gradient(135deg, #f59e0b, #ea580c); color: white; font-size: 20px; font-weight: bold; cursor: pointer; border: none; transition: 0.2s; display: block; box-shadow: 0 4px 15px rgba(234, 88, 12, 0.3); }
-        .spelling-btn:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(234, 88, 12, 0.4); }
-
-        .checkbox-grid { display: grid; grid-template-columns: 1fr; gap: 10px; text-align: left; margin-bottom: 20px; max-height: 300px; overflow-y: auto; padding-right: 10px; }
-        .checkbox-label { display: flex; align-items: center; padding: 12px 15px; border-radius: 12px; border: 2px solid #e2e8f0; background: #f8fafc; cursor: pointer; transition: 0.2s; font-size: 16px; font-weight: 500; }
-        .checkbox-label:hover { background: #f1f5f9; }
-        .checkbox-label input { margin-right: 12px; width: 20px; height: 20px; accent-color: #3b82f6; cursor: pointer; }
-        .checkbox-label.selected { border-color: #3b82f6; background: #eff6ff; }
-        .bundle-label { border-width: 3px; font-weight: bold; }
+        .checkbox-grid { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 20px; max-height: 250px; overflow-y: auto; padding: 5px; }
+        .checkbox-label { display: flex; align-items: center; padding: 8px 12px; border-radius: 20px; border: 2px solid #e2e8f0; background: white; cursor: pointer; transition: 0.2s; font-size: 15px; font-weight: 500; color: #475569; user-select: none; }
+        .checkbox-label:hover { background: #f8fafc; border-color: #cbd5e1; }
+        .checkbox-label input { display: none; }
+        .checkbox-label.selected { border-color: #3b82f6; background: #eff6ff; color: #1d4ed8; font-weight: bold; box-shadow: 0 2px 5px rgba(59, 130, 246, 0.1); }
+        .bundle-label { width: 100%; justify-content: center; border-radius: 12px; border-width: 2px; border-style: dashed; padding: 10px; margin-top: 5px; }
+        .bundle-label.selected { border-style: solid; }
         
-        .action-row { display: flex; gap: 10px; margin-top: 10px; }
+        .action-row { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
+        .action-buttons-group { display: flex; gap: 10px; }
 
         .milestone-track { display: flex; justify-content: space-between; position: relative; margin: 15px 0 35px 0; padding: 0 5px; }
         .milestone-track::before { content: ''; position: absolute; top: 50%; left: 15px; right: 15px; height: 6px; background: #e2e8f0; z-index: 1; transform: translateY(-50%); border-radius: 3px; }
@@ -55,27 +53,37 @@
         
         .mcq-list { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
         button.mcq-btn { padding: 16px; border-radius: 12px; border: 2px solid #e2e8f0; background: white; font-size: 18px; cursor: pointer; text-align: left; transition: 0.2s; font-family: inherit; color: #1e293b; outline: none; }
-        button.mcq-btn:hover, button.mcq-btn:focus { background: #f1f5f9; border-color: #cbd5e1; }
         button.mcq-btn.active { border-color: var(--primary); background: #d1fae5; font-weight: bold; color: #065f46; }
         button.mcq-btn.error { border-color: #ef4444; background: #fef2f2; color: #b91c1c; animation: shake 0.3s; }
 
         .feedback { font-size: 18px; margin: 15px 0; min-height: 50px; font-weight: bold; }
         .controls { display: flex; gap: 10px; margin-top: 20px; }
-        .btn-action { flex: 1; padding: 15px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; outline: none; transition: 0.2s; }
+        .btn-action { flex: 1; padding: 15px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; outline: none; transition: 0.2s; font-size: 16px; }
         
         /* 听写区域新样式 */
-        .pinyin-display { font-size: 28px; font-weight: bold; color: #0f172a; margin: 10px 0; letter-spacing: 1px; }
-        .word-cards-container { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 25px; align-items: center; }
+        .pinyin-display { font-size: 32px; font-weight: bold; color: #0f172a; margin: 10px 0 20px 0; letter-spacing: 2px; }
         
-        .word-card-btn { width: 60px; height: 60px; font-size: 32px; font-weight: bold; border: 2px solid #e2e8f0; border-radius: 12px; background: white; color: #1e293b; cursor: pointer; transition: 0.2s; display: flex; justify-content: center; align-items: center; padding: 0; outline: none; }
-        .word-card-btn:hover { border-color: #f59e0b; transform: translateY(-3px); box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2); }
-        .word-card-btn.active { border-color: #f59e0b; background: #fffbeb; color: #ea580c; transform: scale(1.1); box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3); }
+        .practice-pad-container { display: flex; flex-direction: column; align-items: center; background: #f8fafc; padding: 25px; border-radius: 20px; border: 2px dashed #cbd5e1; margin-bottom: 20px; box-shadow: inset 0 2px 10px rgba(0,0,0,0.02); }
+        .practice-char-label { font-size: 20px; font-weight: bold; margin-bottom: 15px; color: #64748b; }
+        
+        /* 连续听写的汉字展示区（小格子） */
+        .word-progress-container { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; align-items: center; min-height: 50px; }
+        .mini-char-box { width: 45px; height: 45px; border: 2px solid #e2e8f0; border-radius: 8px; background: white; display: flex; justify-content: center; align-items: center; font-size: 24px; font-weight: bold; color: #1e293b; }
+        .mini-char-box.active { border-color: #f59e0b; background: #fffbeb; box-shadow: 0 0 10px rgba(245, 158, 11, 0.2); }
+        .mini-char-box.done { border-color: #10b981; background: #d1fae5; color: #065f46; }
 
-        .practice-pad-container { display: none; flex-direction: column; align-items: center; background: #f8fafc; padding: 25px; border-radius: 20px; border: 2px dashed #cbd5e1; margin-bottom: 20px; box-shadow: inset 0 2px 10px rgba(0,0,0,0.02); }
-        .practice-char-label { font-size: 24px; font-weight: bold; margin-bottom: 15px; color: #1e293b; }
-        .hanzi-practice-box { width: 220px; height: 220px; border: 3px solid #cbd5e1; border-radius: 16px; background: white; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .hanzi-practice-box { width: 250px; height: 250px; border: 3px solid #cbd5e1; border-radius: 16px; background: white; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); position: relative; }
+        /* 田字格背景线 */
+        .hanzi-practice-box::before { content: ''; position: absolute; top: 50%; left: 0; width: 100%; height: 1px; background: #e2e8f0; border-top: 1px dashed #cbd5e1; }
+        .hanzi-practice-box::after { content: ''; position: absolute; left: 50%; top: 0; height: 100%; width: 1px; background: #e2e8f0; border-left: 1px dashed #cbd5e1; }
+
         .tool-btn { background: white; border: 2px solid #e2e8f0; padding: 10px 20px; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; color: #475569; transition: 0.2s; }
         .tool-btn:hover { background: #f1f5f9; border-color: #cbd5e1; }
+
+        /* 画板 */
+        .draw-panel { display: none; flex-direction: column; align-items: center; margin-top: 15px; background: #f8fafc; padding: 15px; border-radius: 16px; border: 2px dashed #cbd5e1; }
+        canvas { background: white; border-radius: 12px; border: 1px solid #e2e8f0; touch-action: none; cursor: crosshair; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
+        .draw-tools { display: flex; justify-content: space-between; width: 100%; margin-top: 10px; }
 
         .res-section { border-top: 2px dashed #e2e8f0; margin-top: 20px; padding-top: 20px; text-align: left; }
         .res-card { background: #f1f5f9; padding: 15px; border-radius: 12px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
@@ -83,10 +91,10 @@
         @media (min-width: 768px) {
             body { justify-content: center; padding: 40px; background: #e2e8f0; }
             .container { max-width: 750px; padding: 40px; border-radius: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); }
-            .checkbox-grid { grid-template-columns: 1fr 1fr; gap: 15px; }
-            .word-card-btn { width: 80px; height: 80px; font-size: 40px; }
-            .hanzi-practice-box { width: 280px; height: 280px; }
-            .pinyin-display { font-size: 36px; }
+            .hanzi-practice-box { width: 300px; height: 300px; }
+            .pinyin-display { font-size: 40px; }
+            .btn-action { font-size: 18px; padding: 18px; }
+            .mini-char-box { width: 55px; height: 55px; font-size: 28px; }
         }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
     </style>
@@ -107,8 +115,6 @@
         
         <div id="subject-grid" class="subject-grid"></div>
         
-        <button id="btn-spelling" class="spelling-btn" style="display:none;" onclick="showTopicSelection('华文', true)">✍️ 学听写 (Spelling)</button>
-        
         <div class="res-section">
             <h3 style="margin-top:0;">Resources 📚</h3>
             <div id="res-list"></div>
@@ -116,30 +122,38 @@
     </div>
 
     <div id="topic-screen" class="screen">
-        <h2 id="topic-title" style="margin:0 0 10px 0; color:#0f172a;">Select Topics</h2>
-        <p id="topic-desc" style="color:#64748b; margin-bottom: 25px;"></p>
+        <h2 id="topic-title" style="margin:0 0 5px 0; color:#0f172a;">Select Topics</h2>
+        <p id="topic-desc" style="color:#64748b; margin-bottom: 20px; font-size:14px;"></p>
         
-        <div style="text-align: left; margin-bottom: 15px;">
-            <label class="checkbox-label" id="check-all-label" style="background:#eff6ff; border-color:#3b82f6;">
+        <div style="text-align: center; margin-bottom: 15px;">
+            <label class="checkbox-label" id="check-all-label" style="display:inline-flex; background:#eff6ff; border-color:#3b82f6;">
                 <input type="checkbox" id="check-all" onchange="toggleAllTopics(this)" checked>
-                <b id="check-all-text">🌟 Select All Topics</b>
+                <b id="check-all-text">🌟 全选所有 (Select All)</b>
             </label>
         </div>
 
         <div id="topic-checkboxes" class="checkbox-grid"></div>
         
         <div class="action-row">
-            <button class="btn-action" style="background:#f1f5f9; color:#475569; border:2px solid #e2e8f0; flex:0.4;" onclick="showScreen('menu-screen')">← Back</button>
-            <button class="btn-action" style="background:#3b82f6; color:white; flex:0.6; font-size:18px;" onclick="startQuiz()">Start 🚀</button>
+            <div id="mode-buttons" class="action-buttons-group"></div>
+            <button class="btn-action" style="background:#f8fafc; color:#64748b; border:2px solid #e2e8f0;" onclick="showScreen('menu-screen')">← 返回主页 (Back)</button>
         </div>
     </div>
 
     <div id="quiz-screen" class="screen">
         <div id="progress-bar" class="milestone-track"></div>
-        <div style="text-align:right; font-size:14px; color:#94a3b8; margin-bottom:15px;" id="progress-text"></div>
-        
+        <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom:15px;">
+            <button class="tool-btn" style="color:#10b981; border-color:#10b981; padding: 6px 12px; font-size:14px;" onclick="toggleDrawPad()">✍️ 草稿板</button>
+            <div style="font-size:14px; color:#94a3b8;" id="progress-text"></div>
+        </div>
         <div id="q-text" class="q-text"></div>
-        
+        <div id="draw-panel" class="draw-panel">
+            <canvas id="pad" width="300" height="200"></canvas>
+            <div class="draw-tools">
+                <button class="tool-btn" style="padding: 6px 12px;" onclick="clearPad()">🗑️ 清除</button>
+                <button class="tool-btn" style="padding: 6px 12px;" onclick="toggleDrawPad()">❌ 收起</button>
+            </div>
+        </div>
         <div id="input-container"></div>
         <div id="fb-text" class="feedback"></div>
         <div class="controls">
@@ -152,36 +166,61 @@
     <div id="spelling-screen" class="screen">
         <div id="spell-progress-bar" class="milestone-track"></div>
         
-        <h3 style="color:#64748b; margin-top:0; font-size: 16px;">选择你要练习的字：</h3>
+        <h3 style="color:#64748b; margin-top:0; font-size: 16px;">请听写出这个词语：</h3>
         <div id="spelling-pinyin" class="pinyin-display"></div>
         
-        <div id="word-cards-container" class="word-cards-container"></div>
-        
         <div id="practice-pad-container" class="practice-pad-container">
+            <div id="word-progress-container" class="word-progress-container"></div>
+            
             <div id="practice-char-label" class="practice-char-label"></div>
+            
             <div id="hanzi-practice-box" class="hanzi-practice-box"></div>
+            
             <div style="display: flex; gap: 15px; width: 100%; justify-content: center;">
-                <button class="tool-btn" onclick="retryPractice()">🔄 重写</button>
-                <button class="tool-btn" onclick="closePractice()">❌ 收起</button>
+                <button class="tool-btn" onclick="retryPractice()">🔄 重写本字</button>
             </div>
         </div>
 
         <div class="controls">
             <button class="btn-action" style="background:#f1f5f9; color:#475569; flex:0.3;" onclick="location.reload()">Exit</button>
-            <button class="btn-action" style="background:#10b981; color:white; flex:0.7;" onclick="nextSpellQ()">记住了，下一题 →</button>
+            <button id="spell-next-btn" class="btn-action" style="background:#e2e8f0; color:#94a3b8; flex:0.7; pointer-events:none;" onclick="nextSpellQ()">下一个词 (Next) →</button>
         </div>
     </div>
 
 </div>
 
 <script>
-    const GEMINI_API_KEY = ""; // 留空，不使用 AI 批改
+    const GEMINI_API_KEY = ""; 
     const SHEET_ID = "1vQlpdRHnR9ybEHHgX6fouRI-vXOh8KQNLSjsbt0TYh9R3No_9i7QNv_4ELwJZJGQpTe3oZVXaZijaW4";
     const GIDS = { "English": "1893311738", "Math": "59294467", "Science": "1581471994", "华文": "2020673087", "Resources": "469231602" };
 
     let db = {}, curUser = 'P3', curSub = '', sessionQs = [], curIdx = 0, sessionErrors = 0;
     let isSpellingMode = false;
     let currentWriter = null;
+    let currentSpellWord = "";
+    let currentSpellCharIdx = 0;
+
+    // --- 画板 ---
+    let canvas, ctx, drawing = false;
+    function initDrawPad() {
+        canvas = document.getElementById('pad'); ctx = canvas.getContext('2d');
+        canvas.width = document.getElementById('quiz-screen').clientWidth - 60;
+        ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = 4; ctx.strokeStyle = '#0f172a';
+        canvas.addEventListener('mousedown', startDraw); canvas.addEventListener('mousemove', draw); canvas.addEventListener('mouseup', stopDraw); canvas.addEventListener('mouseout', stopDraw);
+        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDraw(e.touches[0]); }, {passive: false});
+        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e.touches[0]); }, {passive: false});
+        canvas.addEventListener('touchend', stopDraw);
+    }
+    function getMousePos(evt) { const rect = canvas.getBoundingClientRect(); return { x: evt.clientX - rect.left, y: evt.clientY - rect.top }; }
+    function startDraw(e) { drawing = true; const pos = getMousePos(e); ctx.beginPath(); ctx.moveTo(pos.x, pos.y); }
+    function draw(e) { if (!drawing) return; const pos = getMousePos(e); ctx.lineTo(pos.x, pos.y); ctx.stroke(); }
+    function stopDraw() { drawing = false; }
+    function clearPad() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+    function toggleDrawPad() {
+        const p = document.getElementById('draw-panel');
+        if(p.style.display === 'flex') p.style.display = 'none';
+        else { p.style.display = 'flex'; if(!canvas) initDrawPad(); canvas.width = document.getElementById('quiz-screen').clientWidth - 60; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = 4; }
+    }
 
     function updateSchoolTerm() {
         const now = new Date();
@@ -227,28 +266,17 @@
         const colors = {"English": "#3b82f6", "Math": "#ec4899", "华文": "#a855f7", "Science": "#10b981"};
         const orderedSubjects = ["English", "Math", "华文", "Science"];
         
-        let hasSpellingQuestions = false;
-
         if(db[g]) {
             orderedSubjects.forEach(s => {
                 if(db[g][s] && db[g][s].length > 0) {
-                    const hasNormalQs = db[g][s].some(q => (q.Type||"").toUpperCase() !== 'SPELLING');
-                    if(hasNormalQs) {
-                        const btn = document.createElement('button');
-                        btn.className = 'sub-btn'; btn.style.background = colors[s]; btn.innerText = s; 
-                        btn.onclick = () => showTopicSelection(s, false);
-                        grid.appendChild(btn);
-                    }
-                    
-                    // 检查此用户的所有科目中是否有 SPELLING 题
-                    if (db[g][s].some(q => (q.Type||"").toUpperCase() === 'SPELLING')) {
-                        hasSpellingQuestions = true;
-                    }
+                    const btn = document.createElement('button');
+                    btn.className = 'sub-btn'; btn.style.background = colors[s]; btn.innerText = s; 
+                    btn.onclick = () => showTopicSelection(s);
+                    grid.appendChild(btn);
                 }
             });
-            
-            document.getElementById('btn-spelling').style.display = hasSpellingQuestions ? 'block' : 'none';
         }
+        renderRes(g);
     }
 
     function renderRes(g) {
@@ -271,22 +299,28 @@
         return 999;
     }
 
-    function showTopicSelection(s, spellingMode) {
-        curSub = s; isSpellingMode = spellingMode;
+    function showTopicSelection(s) {
+        curSub = s;
         let pool = db[curUser][s];
-        if (!pool) return;
-        
-        pool = pool.filter(q => { let type = (q.Type || "").toString().trim().toUpperCase(); return isSpellingMode ? (type === 'SPELLING') : (type !== 'SPELLING'); });
-        if (pool.length === 0) return;
+        if (!pool || pool.length === 0) return;
 
         let topics = new Set();
-        pool.forEach(q => { let t = (q.Topic || q.topic || q.Lesson || "").toString().trim(); if (t !== "") topics.add(t); });
+        let hasNormalQs = false;
+        let hasSpellingQs = false;
+
+        pool.forEach(q => { 
+            let t = (q.Topic || q.topic || q.Lesson || "").toString().trim(); 
+            if (t !== "") topics.add(t); 
+            if((q.Type||"").toUpperCase() === 'SPELLING') hasSpellingQs = true;
+            else hasNormalQs = true;
+        });
 
         const isCN = (s === '华文');
-        document.getElementById('topic-title').innerText = isSpellingMode ? `你要练习哪里的字？` : (isCN ? `复习进度` : `Select Topics`);
-        document.getElementById('topic-desc').innerText = isCN ? `可以多选组合哦！` : `Choose the topics you want to practice.`;
-        document.getElementById('check-all-text').innerText = isCN ? '🌟 全选所有' : '🌟 Select All';
+        document.getElementById('topic-title').innerText = isCN ? `复习进度` : `Select Topics`;
+        document.getElementById('topic-desc').innerText = isCN ? `你想练习哪里的内容？（可多选）` : `Choose the topics you want to practice.`;
+        document.getElementById('check-all-text').innerText = isCN ? '🌟 全选 (Select All)' : '🌟 Select All';
         document.getElementById('check-all').checked = true;
+        document.getElementById('check-all-label').className = 'checkbox-label selected';
         
         let topicsArr = Array.from(topics).sort((a, b) => getSortWeight(a) - getSortWeight(b));
         let maxWeight = 0; topicsArr.forEach(t => { let w = getSortWeight(t); if(w < 999 && w > maxWeight) maxWeight = w; });
@@ -295,7 +329,7 @@
         if (maxWeight > 5) { let t1 = topicsArr.filter(t => getSortWeight(t) >= 1 && getSortWeight(t) <= 5); if (t1.length > 0) { renderItems.push({ label: isCN ? "🎒 第一学段 (第1-5课)" : "🎒 Term 1", values: t1, isBundle: true }); t1.forEach(t => bundledTopics.add(t)); } }
         if (maxWeight > 10) { let t2 = topicsArr.filter(t => getSortWeight(t) >= 6 && getSortWeight(t) <= 10); if (t2.length > 0) { renderItems.push({ label: isCN ? "🎒 第二学段 (第6-10课)" : "🎒 Term 2", values: t2, isBundle: true }); t2.forEach(t => bundledTopics.add(t)); } }
 
-        topicsArr.forEach(t => { if (!bundledTopics.has(t)) { renderItems.push({ label: `📖 ${t}`, values: [t], isBundle: false }); } });
+        topicsArr.forEach(t => { if (!bundledTopics.has(t)) { renderItems.push({ label: `${t}`, values: [t], isBundle: false }); } });
 
         const boxGrid = document.getElementById('topic-checkboxes'); boxGrid.innerHTML = '';
         renderItems.forEach(item => {
@@ -303,9 +337,30 @@
             const label = document.createElement('label'); label.className = baseClass;
             const cb = document.createElement('input'); cb.type = 'checkbox'; cb.value = JSON.stringify(item.values); cb.checked = true; cb.className = 'topic-cb';
             cb.onchange = () => { label.className = cb.checked ? baseClass : baseClass.replace('selected', '').trim(); syncCheckAll(); };
-            label.appendChild(cb); label.appendChild(document.createTextNode(` ${item.label}`));
+            label.appendChild(cb); label.appendChild(document.createTextNode(item.label));
             boxGrid.appendChild(label);
         });
+
+        const btnGroup = document.getElementById('mode-buttons');
+        btnGroup.innerHTML = '';
+        
+        if (hasNormalQs) {
+            let btnNormal = document.createElement('button');
+            btnNormal.className = 'btn-action';
+            btnNormal.style.background = '#3b82f6'; btnNormal.style.color = 'white';
+            btnNormal.innerHTML = isCN ? '🚀 开始 6~7 闯关' : '🚀 Start Practice';
+            btnNormal.onclick = () => startQuiz(false); 
+            btnGroup.appendChild(btnNormal);
+        }
+
+        if (hasSpellingQs) {
+            let btnSpell = document.createElement('button');
+            btnSpell.className = 'btn-action';
+            btnSpell.style.background = 'linear-gradient(135deg, #f59e0b, #ea580c)'; btnSpell.style.color = 'white';
+            btnSpell.innerHTML = isCN ? '✍️ 完整听写' : '✍️ Full Spelling';
+            btnSpell.onclick = () => startQuiz(true); 
+            btnGroup.appendChild(btnSpell);
+        }
 
         showScreen('topic-screen');
     }
@@ -319,10 +374,11 @@
         document.getElementById('check-all').checked = allChecked; document.getElementById('check-all-label').className = allChecked ? 'checkbox-label selected' : 'checkbox-label';
     }
 
-    function startQuiz() {
+    function startQuiz(spellModeRequested) {
+        isSpellingMode = spellModeRequested;
         let pool = db[curUser][curSub];
         const selectedJSONs = Array.from(document.querySelectorAll('.topic-cb:checked')).map(cb => cb.value);
-        if (selectedJSONs.length === 0) { alert("请至少选择一个知识点！"); return; }
+        if (selectedJSONs.length === 0) { alert("请至少选择一个进度！"); return; }
         
         let selectedTopics = [];
         selectedJSONs.forEach(j => { selectedTopics = selectedTopics.concat(JSON.parse(j)); });
@@ -334,20 +390,37 @@
             return selectedTopics.includes(t) && modeMatch;
         });
 
-        curIdx = 0; sessionErrors = 0; 
+        if (pool.length === 0) {
+            alert(isSpellingMode ? "选中的课文里没有听写词汇哦！" : "选中的课文里没有常规练习题哦！");
+            return;
+        }
 
-        // 听写一次练10个词，常规题目练7题
-        let grabCount = Math.min(pool.length, isSpellingMode ? 10 : 7);
-        sessionQs = pool.sort(() => 0.5 - Math.random()).slice(0, grabCount);
-        
-        if(isSpellingMode) { showScreen('spelling-screen'); renderSpelling(); }
-        else { showScreen('quiz-screen'); renderQ(); }
+        curIdx = 0; sessionErrors = 0; 
+        document.getElementById('draw-panel').style.display = 'none';
+
+        if (isSpellingMode) {
+            sessionQs = pool;
+            showScreen('spelling-screen'); 
+            renderSpelling();
+        } else {
+            let grabCount = Math.min(pool.length, 7);
+            sessionQs = pool.sort(() => 0.5 - Math.random()).slice(0, grabCount);
+            showScreen('quiz-screen'); 
+            renderQ();
+        }
     }
 
     function updateProgress(barId) {
         const bar = document.getElementById(barId);
         const len = sessionQs.length; const pct = len > 1 ? (curIdx / (len - 1)) * 100 : 100;
         let activeIcon = isSpellingMode ? '✍️' : (curSub === '华文' ? '🐼' : (curSub === 'Science' ? '🌱' : (curSub === 'Math' ? '🔢' : '🚀')));
+        
+        if (isSpellingMode && len > 10) {
+            bar.innerHTML = `<div class="milestone-fill" style="width: ${pct}%; transition: width 0.3s;"></div>
+                             <div style="position:absolute; right:0; top:-25px; font-weight:bold; color:#10b981;">${curIdx + 1} / ${len}</div>`;
+            return;
+        }
+
         let html = `<div class="milestone-fill" style="width: ${pct}%"></div>`;
         for(let i=0; i<len; i++) {
             let cls = 'milestone' + (i < curIdx ? ' done' : (i === curIdx ? ' active' : ''));
@@ -356,72 +429,93 @@
         bar.innerHTML = html;
     }
 
-    // --- 靶向练字逻辑 ---
+    // --- 连续隐形听写逻辑 ---
     function renderSpelling() {
         updateProgress('spell-progress-bar');
         const q = sessionQs[curIdx];
-        const pinyin = q.Question.trim();
-        const hanziWord = (q['Correct Answer'] || "").toString().trim();
+        document.getElementById('spelling-pinyin').innerText = q.Question.trim();
+        currentSpellWord = (q['Correct Answer'] || "").toString().trim();
+        currentSpellCharIdx = 0;
         
-        document.getElementById('spelling-pinyin').innerText = pinyin;
-        closePractice(); 
+        // 锁定“下一题”按钮，必须写完才能点
+        const nextBtn = document.getElementById('spell-next-btn');
+        nextBtn.style.background = '#e2e8f0';
+        nextBtn.style.color = '#94a3b8';
+        nextBtn.style.pointerEvents = 'none';
 
-        const container = document.getElementById('word-cards-container');
+        initSpellingProgressBox();
+        startNextChar();
+    }
+
+    function initSpellingProgressBox() {
+        const container = document.getElementById('word-progress-container');
         container.innerHTML = '';
-
-        for (let i = 0; i < hanziWord.length; i++) {
-            let char = hanziWord[i];
+        for (let i = 0; i < currentSpellWord.length; i++) {
+            let char = currentSpellWord[i];
             if(/[，。！？、：；（）《》“”]/u.test(char)) {
                 let span = document.createElement('span');
                 span.innerText = char;
-                span.style.fontSize = '30px'; span.style.color = '#64748b'; span.style.margin = '0 2px';
+                span.style.fontSize = '24px'; span.style.color = '#64748b';
                 container.appendChild(span);
                 continue;
             }
-            let btn = document.createElement('button');
-            btn.className = 'word-card-btn'; btn.innerText = char;
-            btn.onclick = () => openPractice(char, btn);
-            container.appendChild(btn);
+            let box = document.createElement('div');
+            box.id = 'mini-char-' + i;
+            box.className = 'mini-char-box';
+            container.appendChild(box);
         }
     }
 
-    function openPractice(char, btnElement) {
-        document.querySelectorAll('.word-card-btn').forEach(b => b.classList.remove('active'));
-        if(btnElement) btnElement.classList.add('active');
+    function startNextChar() {
+        // 如果遇到了标点符号，直接跳过并显示
+        while(currentSpellCharIdx < currentSpellWord.length && /[，。！？、：；（）《》“”]/u.test(currentSpellWord[currentSpellCharIdx])) {
+            currentSpellCharIdx++;
+        }
 
-        const padContainer = document.getElementById('practice-pad-container');
-        padContainer.style.display = 'flex';
-        document.getElementById('practice-char-label').innerHTML = `正在练习：<span style="color:#f59e0b;">${char}</span>`;
+        if (currentSpellCharIdx >= currentSpellWord.length) {
+            // 整个词写完了解锁按钮
+            document.getElementById('practice-char-label').innerHTML = `<span style="color:#10b981;">🎉 太棒了！整个词写完了！</span>`;
+            const nextBtn = document.getElementById('spell-next-btn');
+            nextBtn.style.background = '#10b981';
+            nextBtn.style.color = 'white';
+            nextBtn.style.pointerEvents = 'auto';
+            if (currentWriter) { currentWriter.cancelQuiz(); currentWriter = null; }
+            return;
+        }
+
+        let char = currentSpellWord[currentSpellCharIdx];
+        document.querySelectorAll('.mini-char-box').forEach((b, idx) => {
+            if(idx < currentSpellCharIdx) b.className = 'mini-char-box done';
+            else if(idx === currentSpellCharIdx) b.className = 'mini-char-box active';
+            else b.className = 'mini-char-box';
+        });
+
+        document.getElementById('practice-char-label').innerHTML = `正在写第 <span style="color:#f59e0b; font-size:24px;">${currentSpellCharIdx + 1}</span> 个字`;
 
         const box = document.getElementById('hanzi-practice-box');
         box.innerHTML = ''; 
-
-        let boxSize = document.body.clientWidth < 400 ? 180 : 260;
-        box.style.width = boxSize + 'px'; box.style.height = boxSize + 'px';
-
+        let boxSize = document.body.clientWidth < 400 ? 220 : 300;
+        
         currentWriter = HanziWriter.create('hanzi-practice-box', char, {
             width: boxSize, height: boxSize, padding: 15,
             showOutline: true, strokeAnimationSpeed: 1, delayBetweenStrokes: 50,
-            outlineColor: '#cbd5e1', strokeColor: '#1e293b', drawingColor: '#3b82f6',
+            // 🌟 核心：极淡的辅助线
+            outlineColor: '#f1f5f9', // 非常淡的灰色
+            strokeColor: '#1e293b', drawingColor: '#3b82f6',
             showCharacter: false
         });
 
         currentWriter.quiz({
-            onComplete: function() { document.getElementById('practice-char-label').innerHTML = `练习：${char} <span style="color:#10b981;">✅ 完美！</span>`; }
+            onComplete: function() { 
+                document.getElementById('mini-char-' + currentSpellCharIdx).innerText = char;
+                currentSpellCharIdx++;
+                setTimeout(() => startNextChar(), 500); // 延迟半秒自动跳下一个字
+            }
         });
     }
 
     function retryPractice() {
-        if(currentWriter) {
-            document.getElementById('practice-char-label').innerHTML = `正在练习：<span style="color:#f59e0b;">${currentWriter._character}</span>`;
-            currentWriter.quiz(); 
-        }
-    }
-
-    function closePractice() {
-        document.getElementById('practice-pad-container').style.display = 'none';
-        if(currentWriter) { currentWriter.cancelQuiz(); currentWriter = null; }
-        document.querySelectorAll('.word-card-btn').forEach(b => b.classList.remove('active'));
+        if(currentWriter) currentWriter.quiz(); 
     }
 
     function nextSpellQ() {
@@ -432,6 +526,7 @@
     // --- 常规答题逻辑 ---
     function renderQ() {
         updateProgress('progress-bar'); 
+        if(ctx && canvas) clearPad();
         const q = sessionQs[curIdx]; const isCN = (curSub === '华文');
         document.getElementById('q-text').innerText = q.Question;
         const container = document.getElementById('input-container');
@@ -478,7 +573,22 @@
         };
 
         if (qType === 'OPEN') {
-            fb.innerHTML = `<span style="color:#0f172a;"><b>${isCN ? "参考答案：" : "Suggested Answer:"}</b></span><br><span style="font-size:18px; color:#10b981;">${correctRaw}</span><br><span style="font-size:14px; color:#64748b;">${isCN ? "(只需意思相近即可)" : "(Check if your meaning is similar)"}</span>`;
+            if (GEMINI_API_KEY && GEMINI_API_KEY !== "YOUR_API_KEY_HERE") {
+                fb.innerHTML = `<span style="color:#3b82f6; font-size: 16px;">⏳ ${isCN ? "老师正在看你的答案..." : "Teacher is reading your answer..."}</span>`;
+                try {
+                    const promptText = `You are a primary school teacher. Question: ${sessionQs[curIdx].Question}. Standard Answer: ${correctRaw}. Student Answer: ${user}. Evaluate meaning. Reply JSON: {"correct": boolean, "comment": "encouraging feedback in ${isCN ? 'Simplified Chinese' : 'English'}"}`;
+                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
+                    });
+                    const data = await res.json();
+                    let aiRes = data.candidates[0].content.parts[0].text.replace(/```json/g, '').replace(/```/g, '').trim();
+                    const result = JSON.parse(aiRes);
+                    if (result.correct) fb.innerHTML = `<span style="color:#10b981;">✅ ${isCN ? "答对啦！" : "Excellent!"}</span><br><span style="font-size:16px; color:#475569;">${result.comment}</span>`;
+                    else { sessionErrors++; fb.innerHTML = `<span style="color:#ef4444;">❌ ${isCN ? "还差一点点。" : "Not quite right."}</span><br><span style="font-size:16px; color:#475569;">${result.comment}</span><br><br><span style="color:#0f172a; font-size: 15px;"><b>${isCN ? "参考答案：" : "Standard Answer:"}</b> ${correctRaw}</span>`; }
+                } catch (e) { fb.innerHTML = `<span style="color:#0f172a;"><b>${isCN ? "参考答案：" : "Suggested Answer:"}</b></span><br><span style="font-size:18px; color:#10b981;">${correctRaw}</span><br><span style="font-size:14px; color:#64748b;">${isCN ? "(只需意思相近即可)" : "(Check if your meaning is similar)"}</span>`; }
+            } else {
+                fb.innerHTML = `<span style="color:#0f172a;"><b>${isCN ? "参考答案：" : "Suggested Answer:"}</b></span><br><span style="font-size:18px; color:#10b981;">${correctRaw}</span><br><span style="font-size:14px; color:#64748b;">${isCN ? "(只需意思相近即可)" : "(Check if your meaning is similar)"}</span>`;
+            }
             showNextState(); return;
         }
 
@@ -510,10 +620,11 @@
     function finishQuiz() {
         const isCN = (curSub === '华文');
         document.querySelectorAll('.milestone-track').forEach(el => el.style.display = 'none');
+        document.getElementById('draw-panel').style.display = 'none';
         
         let msg = ""; let magic67 = `<span class="magic-number">6~7</span>`; 
         if(isSpellingMode) {
-            msg = `🎉 恭喜你完成了今天的练字任务！写得真棒！`;
+            msg = `🎉 恭喜你完成了听写任务！写得真棒！`;
         } else {
             if (sessionErrors <= 1) msg = isCN ? `🎉 恭喜你，今天的${curSub}获得了 ${magic67} 的好成绩！太棒了！` : `🎉 Congratulations, you've got ${magic67} for your ${curSub} today!`;
             else msg = isCN ? `💪 挑战完成！多练几次，争取下次拿到 ${magic67} 哦！` : `💪 Good effort! Keep practicing to get ${magic67} next time!`;
