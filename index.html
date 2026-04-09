@@ -11,53 +11,56 @@
         .container { max-width: 600px; margin: auto; background: #fff; padding: 25px; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; }
         .screen { display: none; }
         .name-selector { display: flex; gap: 10px; justify-content: center; margin: 20px 0; }
-        button.name-btn { padding: 10px 20px; border-radius: 12px; border: 2px solid #e2e8f0; background: white; cursor: pointer; font-weight: 600; }
-        button.name-btn.active { border-color: var(--primary); background: #d1fae5; color: #065f46; }
+        button.name-btn { padding: 10px 20px; border-radius: 12px; border: 2px solid #e2e8f0; background: white; cursor: pointer; font-weight: 600; font-size: 16px; }
+        button.name-btn.active { border-color: var(--primary); background: #d1fae5; color: #065f46; transform: scale(1.05); }
         .subject-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 30px; }
-        button.sub-btn { padding: 20px; border-radius: 16px; border: none; color: white; font-size: 18px; font-weight: bold; cursor: pointer; }
-        .q-text { font-size: 24px; text-align: left; margin: 25px 0; line-height: 1.5; }
-        input.ans-input { font-size: 20px; padding: 15px; width: 100%; border: 2px solid #e2e8f0; border-radius: 12px; box-sizing: border-box; outline: none; }
-        input.ans-input.error-shake { border-color: #ef4444; animation: shake 0.3s; }
-        .feedback { font-size: 18px; margin: 15px 0; min-height: 25px; font-weight: bold; }
-        .controls { display: flex; gap: 10px; margin-top: 20px; }
-        .btn-action { flex: 1; padding: 15px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
-        .res-section { border-top: 2px dashed #e2e8f0; margin-top: 20px; padding-top: 20px; text-align: left; }
-        .res-card { background: #f1f5f9; padding: 15px; border-radius: 12px; margin-bottom: 12px; }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+        button.sub-btn { padding: 20px; border-radius: 16px; border: none; color: white; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        button.sub-btn:active { transform: scale(0.95); }
+        .q-text { font-size: 24px; text-align: left; margin: 25px 0; line-height: 1.5; font-weight: 500; }
+        input.ans-input { font-size: 20px; padding: 15px; width: 100%; border: 2px solid #e2e8f0; border-radius: 12px; box-sizing: border-box; outline: none; transition: 0.3s; }
+        input.ans-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(16,185,129,0.1); }
+        input.ans-input.error-shake { border-color: #ef4444; animation: shake 0.4s; }
+        .feedback { font-size: 18px; margin: 15px 0; min-height: 50px; font-weight: bold; line-height: 1.4; }
+        .controls { display: flex; gap: 10px; margin-top: 10px; }
+        .btn-action { flex: 1; padding: 16px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; font-size: 18px; }
+        .res-section { border-top: 2px dashed #e2e8f0; margin-top: 30px; padding-top: 20px; text-align: left; }
+        .res-card { background: #f1f5f9; padding: 15px; border-radius: 12px; margin-bottom: 12px; border-left: 5px solid var(--primary); }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-8px); } 40% { transform: translateX(8px); } 60% { transform: translateX(-8px); } 80% { transform: translateX(8px); } }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div id="loading" class="screen" style="display:block;">Connecting to Subjects...</div>
+    <div id="loading" class="screen" style="display:block;">
+        <p style="font-size:18px; color:#64748b;">Connecting to Cloud Subjects...</p>
+    </div>
 
     <div id="menu-screen" class="screen">
-        <h2 style="margin-top:0;">Practice Hub</h2>
+        <h2 style="margin:0 0 10px 0; color:#064e3b;">Practice Hub</h2>
         <div class="name-selector">
             <button id="btn-P3" class="name-btn" onclick="switchUser('P3')">Valerie (P3)</button>
             <button id="btn-P1" class="name-btn" onclick="switchUser('P1')">Venissa (P1)</button>
         </div>
         <div id="subject-grid" class="subject-grid"></div>
         <div class="res-section">
-            <h3 style="margin-top:0;">Resources 📚</h3>
+            <h3 style="margin:0 0 15px 0; font-size:18px;">Learning Toolbox 📚</h3>
             <div id="res-list"></div>
         </div>
     </div>
 
     <div id="quiz-screen" class="screen">
         <div id="q-text" class="q-text"></div>
-        <input type="text" id="ans-in" class="ans-input" placeholder="Type answer..." autocomplete="off">
+        <input type="text" id="ans-in" class="ans-input" placeholder="Type your answer..." autocomplete="off">
         <div id="fb-text" class="feedback"></div>
         <div class="controls">
-            <button class="btn-action" style="background:#f1f5f9;" onclick="location.reload()">Exit</button>
-            <button id="sub-btn" class="btn-action" style="background:#111827; color:white;" onclick="checkAns()">Submit</button>
-            <button id="next-btn" class="btn-action" style="background:#10b981; color:white; display:none;" onclick="nextQ()">Next →</button>
+            <button class="btn-action" style="background:#f1f5f9; color:#475569;" onclick="location.reload()">Exit</button>
+            <button id="sub-btn" class="btn-action" style="background:#111827; color:white;" onclick="checkAns()">Submit Answer</button>
+            <button id="next-btn" class="btn-action" style="background:#10b981; color:white; display:none;" onclick="nextQ()">Next Question →</button>
         </div>
     </div>
 </div>
 
 <script>
-    // 配置信息
     const SHEET_ID = "1vQlpdRHnR9ybEHHgX6fouRI-vXOh8KQNLSjsbt0TYh9R3No_9i7QNv_4ELwJZJGQpTe3oZVXaZijaW4";
     const GIDS = { 
         "English": "1055551329", 
@@ -69,20 +72,13 @@
 
     let db = {}, curUser = 'P3', curSub = '', sessionQs = [], curIdx = 0;
 
-// ... 前面的 HTML 和 Style 保持不变 ...
-
     async function init() {
-        const loadingMsg = document.getElementById('loading');
-        // 增加一点延时，确保数据读取不被浏览器缓存卡住
         const loads = Object.entries(GIDS).map(([name, gid]) => {
             return new Promise(res => {
-                const url = `https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/pub?gid=${gid}&single=true&output=csv&t=${Date.now()}`;
+                const url = `https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=${gid}&single=true&output=csv&t=${Date.now()}`;
                 Papa.parse(url, {
                     download: true, header: true, skipEmptyLines: 'greedy',
-                    complete: r => {
-                        console.log(`Loaded ${name}:`, r.data.length, "rows"); // 调试日志
-                        res({ name, data: r.data });
-                    },
+                    complete: r => res({ name, data: r.data }),
                     error: () => res(null)
                 });
             });
@@ -90,66 +86,28 @@
 
         const results = await Promise.all(loads);
         db = {};
+        
         results.forEach(r => {
             if(!r || !r.data || r.data.length === 0) return;
+            
+            // 找到正确的列名（忽略大小写和空格）
+            const keys = Object.keys(r.data[0]);
+            const getK = (target) => keys.find(k => k.trim().toLowerCase() === target.toLowerCase());
+            const kGrade = getK('Grade');
+            const kAns = getK('Correct Answer');
+
             r.data.forEach(row => {
-                let g = (row.Grade || row.grade || "").trim().toUpperCase(); 
+                let g = (row[kGrade] || "").trim().toUpperCase();
                 if(!g) return;
                 if(!db[g]) db[g] = {};
-                // 确保科目名统一
                 if(!db[g][r.name]) db[g][r.name] = [];
+                // 统一存储
+                row._ans = (row[kAns] || "").toString().trim(); 
                 db[g][r.name].push(row);
             });
         });
 
-        loadingMsg.style.display = 'none';
-        showScreen('menu-screen');
-        switchUser('P3'); // 默认展示 Valerie
-    }
-
-    function checkAns() {
-        const input = document.getElementById('ans-in');
-        const user = input.value.trim().toLowerCase();
-        const correctRaw = sessionQs[curIdx]['Correct Answer'].toString().trim();
-        const correct = correctRaw.toLowerCase();
-        const fb = document.getElementById('fb-text');
-        
-        if(user === "") return;
-
-        if(user === correct) {
-            fb.innerHTML = `<span style="color:#10b981;">✅ Excellent! Correct Answer.</span>`;
-            input.disabled = true;
-            document.getElementById('sub-btn').style.display = 'none';
-            document.getElementById('next-btn').style.display = 'block';
-        } else {
-            // 这里加上了答案提示
-            fb.innerHTML = `<span style="color:#ef4444;">❌ Try again!</span><br>
-                            <span style="font-size:14px; color:#94a3b8; font-weight:normal;">
-                               Hint: The answer is "${correctRaw}"
-                            </span>`;
-            input.className = 'ans-input error-shake';
-            setTimeout(() => {
-                input.className = 'ans-input';
-                input.value = ''; // 清空，让孩子根据上面的 Hint 重新输入
-                input.focus();
-            }, 600);
-        }
-    }
-
-        const results = await Promise.all(loads);
-        db = {};
-        results.forEach(r => {
-            if(!r || !r.data) return;
-            r.data.forEach(row => {
-                let g = (row.Grade || "").trim().toUpperCase();
-                if(!g) return;
-                if(!db[g]) db[g] = {};
-                if(!db[g][r.name]) db[g][r.name] = [];
-                db[g][r.name].push(row);
-            });
-        });
-
-        loadingMsg.style.display = 'none';
+        document.getElementById('loading').style.display = 'none';
         showScreen('menu-screen');
         switchUser('P3');
     }
@@ -185,12 +143,12 @@
                 const div = document.createElement('div');
                 div.className = 'res-card';
                 if(r.Type === 'IMAGE') div.innerHTML = `<b>${r.Title}</b><img src="${r.Content}" style="width:100%;margin-top:10px;border-radius:8px;">`;
-                else if(r.Type === 'PDF') div.innerHTML = `<b>${r.Title}</b><br><a href="${r.Content}" target="_blank" style="color:#2563eb;text-decoration:none;display:block;margin-top:8px;">🔗 Open PDF Resource</a>`;
-                else div.innerHTML = `<b>${r.Title}</b><p style="margin:8px 0 0 0;">${r.Content}</p>`;
+                else if(r.Type === 'PDF') div.innerHTML = `<b>${r.Title}</b><br><a href="${r.Content}" target="_blank" style="color:#2563eb;text-decoration:none;display:block;margin-top:8px;">📄 Open PDF Resource</a>`;
+                else div.innerHTML = `<b>${r.Title}</b><p style="margin:8px 0 0 0; color:#475569;">${r.Content}</p>`;
                 list.appendChild(div);
             });
         } else {
-            list.innerHTML = `<p style="color:#94a3b8;">No resources yet.</p>`;
+            list.innerHTML = `<p style="color:#94a3b8; font-size:14px;">No study materials yet for ${g}.</p>`;
         }
     }
 
@@ -205,53 +163,46 @@
         const q = sessionQs[curIdx];
         document.getElementById('q-text').innerText = q.Question;
         const input = document.getElementById('ans-in');
-        input.value = '';
-        input.disabled = false;
+        input.value = ''; input.disabled = false;
         input.className = 'ans-input';
-        document.getElementById('fb-text').innerText = '';
+        document.getElementById('fb-text').innerHTML = '';
         document.getElementById('sub-btn').style.display = 'block';
         document.getElementById('next-btn').style.display = 'none';
-        
-        // 自动聚焦
-        setTimeout(() => input.focus(), 100);
-        // 回车监听
+        setTimeout(() => input.focus(), 200);
         input.onkeypress = (e) => { if(e.key === 'Enter') checkAns(); };
     }
 
     function checkAns() {
         const input = document.getElementById('ans-in');
         const user = input.value.trim().toLowerCase();
-        const correct = sessionQs[curIdx]['Correct Answer'].toString().trim().toLowerCase();
+        const correctStr = sessionQs[curIdx]._ans;
+        const correct = correctStr.toLowerCase();
         const fb = document.getElementById('fb-text');
         
         if(user === "") return;
 
         if(user === correct) {
-            fb.innerText = "✅ Excellent! Correct Answer.";
-            fb.style.color = "#10b981";
+            fb.innerHTML = `<span style="color:#10b981;">✅ Correct! Well done.</span>`;
             input.disabled = true;
             document.getElementById('sub-btn').style.display = 'none';
             document.getElementById('next-btn').style.display = 'block';
-} else {
-            // 在提示语里直接把正确答案写出来
-            fb.innerHTML = `❌ Try again! <br><span style="font-size:14px; color:#94a3b8;">Hint: ${sessionQs[curIdx]['Correct Answer']}</span>`;
-            fb.style.color = "#ef4444";
+        } else {
+            fb.innerHTML = `<span style="color:#ef4444;">❌ Not quite. Try again!</span><br>
+                            <span style="font-size:15px; color:#64748b; font-weight:normal;">
+                               Hint: The answer is "${correctStr}"
+                            </span>`;
             input.className = 'ans-input error-shake';
             setTimeout(() => {
                 input.className = 'ans-input';
-                input.value = ''; // 清空让她照着 Hint 练一遍
-            }, 400);
+                input.value = '';
+                input.focus();
+            }, 500);
         }
     }
 
     function nextQ() {
-        if(curIdx < sessionQs.length - 1) {
-            curIdx++;
-            renderQ();
-        } else {
-            alert("Practice Complete! Great job!");
-            location.reload();
-        }
+        if(curIdx < sessionQs.length - 1) { curIdx++; renderQ(); }
+        else { alert("Amazing! You finished the practice."); location.reload(); }
     }
 
     function showScreen(id) {
