@@ -20,10 +20,12 @@
         @keyframes popPulse { 0% { transform: scale(1); text-shadow: 0 0 5px rgba(253, 224, 71, 0.5); } 100% { transform: scale(1.2) translateY(-3px); text-shadow: 0 0 15px rgba(234, 179, 8, 0.8), 0 0 30px rgba(234, 179, 8, 0.4); } }
 
         .date-badge { display: inline-block; background: #f1f5f9; color: #475569; padding: 6px 14px; border-radius: 20px; font-size: 14px; font-weight: 600; margin-bottom: 20px; border: 1px solid #e2e8f0; }
+        
+        /* 修复：去掉了 transform: scale(1.05)，防止按键跳动 */
         .name-selector { display: flex; gap: 15px; justify-content: center; margin: 25px 0; }
         button.name-btn { padding: 15px 30px; border-radius: 16px; border: 2px solid #e2e8f0; background: white; cursor: pointer; font-weight: 700; font-size: 18px; transition: 0.2s; color: #475569; }
         button.name-btn:hover { background: #f1f5f9; }
-        button.name-btn.active { border-color: var(--primary); background: #d1fae5; color: #065f46; transform: scale(1.05); }
+        button.name-btn.active { border-color: var(--primary); background: #d1fae5; color: #065f46; }
         
         .subject-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-bottom: 15px; }
         button.sub-btn { flex: 1 1 40%; max-width: 45%; padding: 20px; border-radius: 16px; border: none; color: white; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; box-sizing: border-box; }
@@ -111,7 +113,7 @@
         
         <div class="name-selector">
             <button id="btn-P3" class="name-btn" onclick="switchUser('P3')">Valerie (P3)</button>
-            <button id="btn-P1" class="name-btn" onclick="switchUser('P1')">Venessa (P1)</button>
+            <button id="btn-P1" class="name-btn" onclick="switchUser('P1')">Venissa (P1)</button>
         </div>
         
         <div id="subject-grid" class="subject-grid">
@@ -249,9 +251,30 @@
         else { p.style.display = 'flex'; if(!canvas) initDrawPad(); canvas.width = document.getElementById('quiz-screen').clientWidth - 60; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = 4; }
     }
 
+    // 修复：自动推算新加坡学期日历（2026年）
     function updateSchoolTerm() {
         const now = new Date();
-        document.getElementById('school-term-display').innerText = `📅 ${now.toLocaleDateString('en-SG', {weekday:'short', month:'short', day:'numeric'})} | Practice Hub`;
+        const year = now.getFullYear();
+        const t2Start = new Date(year, 2, 23); 
+        const t3Start = new Date(year, 5, 29); 
+        const t4Start = new Date(year, 8, 14); 
+        
+        const daysDiff = (d1, d2) => Math.floor((d1 - d2) / (1000 * 60 * 60 * 24));
+        let termStr = "Term 1";
+        
+        if (now >= t4Start) { 
+            const w = Math.floor(daysDiff(now, t4Start)/7) + 1; 
+            termStr = w <= 10 ? `Term 4 Week ${w}` : "December Holiday"; 
+        } else if (now >= t3Start) {
+            const w = Math.floor(daysDiff(now, t3Start)/7) + 1;
+            termStr = w <= 10 ? `Term 3 Week ${w}` : "September Holiday";
+        } else if (now >= t2Start) {
+            const w = Math.floor(daysDiff(now, t2Start)/7) + 1;
+            termStr = w <= 10 ? `Term 2 Week ${w}` : "June Holiday";
+        }
+        
+        const options = { weekday: 'short', month: 'short', day: 'numeric' };
+        document.getElementById('school-term-display').innerText = `📅 ${now.toLocaleDateString('en-SG', options)} | ${termStr}`;
     }
 
     async function init() {
@@ -288,7 +311,7 @@
         document.getElementById('btn-P3').className = g === 'P3' ? 'name-btn active' : 'name-btn';
         document.getElementById('btn-P1').className = g === 'P1' ? 'name-btn active' : 'name-btn';
         
-        // 渲染资源
+        // 修复：不再重绘科目按钮，只更新 Resource 列表
         const list = document.getElementById('res-list'); list.innerHTML = '';
         if(db[g] && db[g]['Resources']) {
             db[g]['Resources'].forEach(r => {
@@ -309,7 +332,6 @@
     }
 
     function handleSubjectClick(s) {
-        // 关键：点击科目时检查是否选了名字
         if (!curUser) {
             alert("请先在上面选择是 Valerie 还是 Venissa 哦！\nPlease select a name first!");
             return;
