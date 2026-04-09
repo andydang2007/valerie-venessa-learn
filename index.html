@@ -12,13 +12,8 @@
         .container { width: 100%; max-width: 600px; background: #fff; padding: 25px; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; }
         .screen { display: none; width: 100%; }
         
-        /* 6~7 专属金色跃动特效 */
         .magic-number {
-            display: inline-block;
-            font-size: 1.4em;
-            color: #f59e0b; /* 金琥珀色 */
-            font-weight: 900;
-            padding: 0 5px;
+            display: inline-block; font-size: 1.4em; color: #f59e0b; font-weight: 900; padding: 0 5px;
             animation: popPulse 1s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
         }
         @keyframes popPulse {
@@ -30,11 +25,16 @@
         .name-selector { display: flex; gap: 10px; justify-content: center; margin: 20px 0; }
         button.name-btn { padding: 10px 20px; border-radius: 12px; border: 2px solid #e2e8f0; background: white; cursor: pointer; font-weight: 600; transition: 0.2s; }
         button.name-btn.active { border-color: var(--primary); background: #d1fae5; color: #065f46; transform: scale(1.05); }
+        
+        /* 进度选择器样式 */
+        .topic-selector { margin-bottom: 25px; }
+        select.topic-drop { padding: 12px 20px; border-radius: 12px; border: 2px solid #e2e8f0; font-size: 16px; outline: none; background: #f8fafc; color: #334155; font-weight: 600; cursor: pointer; width: 80%; max-width: 300px; transition: 0.2s; }
+        select.topic-drop:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
+
         .subject-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 30px; }
         button.sub-btn { padding: 20px; border-radius: 16px; border: none; color: white; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         button.sub-btn:hover { transform: translateY(-2px); filter: brightness(1.05); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         
-        /* 卡通闯关进度条 */
         .milestone-track { display: flex; justify-content: space-between; position: relative; margin: 15px 0 35px 0; padding: 0 5px; }
         .milestone-track::before { content: ''; position: absolute; top: 50%; left: 15px; right: 15px; height: 6px; background: #e2e8f0; z-index: 1; transform: translateY(-50%); border-radius: 3px; }
         .milestone-fill { position: absolute; top: 50%; left: 15px; height: 6px; background: #10b981; z-index: 1; transform: translateY(-50%); border-radius: 3px; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -85,13 +85,20 @@
     <div id="loading" class="screen" style="display:block;">Syncing Lessons...</div>
 
     <div id="menu-screen" class="screen">
-        <h2 style="margin:0 0 10px 0; color:#0f172a;">Did you <span style="color:#f59e0b; font-weight:900;">6~7</span> today?</h2>
+        <h2 style="margin:0 0 10px 0; color:#0f172a;">Did you <span class="magic-number" style="font-size:1em;">6~7</span> today?</h2>
         <div id="school-term-display" class="date-badge">Loading Date...</div>
         
         <div class="name-selector">
             <button id="btn-P3" class="name-btn" onclick="switchUser('P3')">Valerie (P3)</button>
             <button id="btn-P1" class="name-btn" onclick="switchUser('P1')">Venissa (P1)</button>
         </div>
+        
+        <div class="topic-selector">
+            <select id="topic-dropdown" class="topic-drop">
+                <option value="ALL">🌟 全部进度 (All Topics)</option>
+            </select>
+        </div>
+
         <div id="subject-grid" class="subject-grid"></div>
         <div class="res-section">
             <h3 style="margin-top:0;">Resources 📚</h3>
@@ -185,10 +192,37 @@
         switchUser('P3');
     }
 
+    // 动态提取当前用户拥有的所有 Topic
+    function updateTopicDropdown(g) {
+        const drop = document.getElementById('topic-dropdown');
+        drop.innerHTML = '<option value="ALL">🌟 全部进度 (All Topics)</option>';
+        let topics = new Set();
+        
+        if(db[g]) {
+            Object.keys(db[g]).forEach(s => {
+                if(s === 'Resources') return;
+                db[g][s].forEach(q => {
+                    let t = (q.Topic || q.topic || q.Lesson || "").toString().trim();
+                    if(t !== "") topics.add(t);
+                });
+            });
+        }
+        
+        // 按字母/数字顺序排序
+        Array.from(topics).sort().forEach(t => {
+            let opt = document.createElement('option');
+            opt.value = t;
+            opt.innerText = `📖 ${t}`;
+            drop.appendChild(opt);
+        });
+    }
+
     function switchUser(g) {
         curUser = g;
         document.getElementById('btn-P3').className = g === 'P3' ? 'name-btn active' : 'name-btn';
         document.getElementById('btn-P1').className = g === 'P1' ? 'name-btn active' : 'name-btn';
+        
+        updateTopicDropdown(g); // 刷新下拉菜单
         
         const grid = document.getElementById('subject-grid'); grid.innerHTML = '';
         const colors = {"English": "#3b82f6", "Math": "#ec4899", "华文": "#a855f7", "Science": "#10b981"};
@@ -247,12 +281,30 @@
     function startQuiz(s) {
         curSub = s; curIdx = 0; sessionErrors = 0; 
         
+        let targetTopic = document.getElementById('topic-dropdown').value;
+        let pool = db[curUser][s];
+        
+        // 核心过滤逻辑：如果选择了特定课题，就只抽取该课题的题目
+        if (targetTopic !== "ALL") {
+            pool = pool.filter(q => {
+                let t = (q.Topic || q.topic || q.Lesson || "").toString().trim();
+                return t === targetTopic;
+            });
+        }
+
+        if (!pool || pool.length === 0) {
+            alert(`Oops! 题库里还没有属于 [${targetTopic}] 的 ${s} 题目哦！\n请重新选择进度，或者在 Google Sheet 里补充数据。`);
+            return;
+        }
+
         const exitBtn = document.getElementById('exit-btn');
         exitBtn.innerText = "Exit";
         exitBtn.style.background = "#f1f5f9";
         exitBtn.style.color = "#475569";
 
-        sessionQs = db[curUser][s].sort(() => 0.5 - Math.random()).slice(0, 7);
+        // 从过滤后的题库中抽取最多7题
+        let grabCount = Math.min(pool.length, 7);
+        sessionQs = pool.sort(() => 0.5 - Math.random()).slice(0, grabCount);
         showScreen('quiz-screen'); renderQ();
     }
 
@@ -390,7 +442,7 @@
             document.getElementById('progress-text').innerText = isCN ? "练习完成！" : "Completed!";
             
             let msg = "";
-            let magic67 = `<span class="magic-number">6~7</span>`; // 注入金色跃动特效
+            let magic67 = `<span class="magic-number">6~7</span>`; 
             
             if (sessionErrors <= 1) {
                 if (isCN) {
