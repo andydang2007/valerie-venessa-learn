@@ -11,7 +11,9 @@
         
         /* 保持原版的盒模型，只在必要的地方加 box-sizing */
         body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #1e293b; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; }
-        .container { width: 100%; max-width: 600px; background: #fff; padding: 25px; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; position: relative; }
+        
+        /* 🌟 增加底部 padding 给右下角日期留出空间 */
+        .container { width: 100%; max-width: 600px; background: #fff; padding: 25px 25px 60px 25px; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; position: relative; }
         .screen { display: none; width: 100%; }
         
         .magic-number {
@@ -20,8 +22,6 @@
         }
         @keyframes popPulse { 0% { transform: scale(1); text-shadow: 0 0 5px rgba(253, 224, 71, 0.5); } 100% { transform: scale(1.2) translateY(-3px); text-shadow: 0 0 15px rgba(234, 179, 8, 0.8), 0 0 30px rgba(234, 179, 8, 0.4); } }
 
-        .date-badge { display: inline-block; background: #f1f5f9; color: #475569; padding: 6px 14px; border-radius: 20px; font-size: 14px; font-weight: 600; margin-bottom: 20px; border: 1px solid #e2e8f0; }
-        
         /* 退回你喜欢的原版选人按钮样式 */
         .name-selector { display: flex; gap: 15px; justify-content: center; margin: 25px 0; }
         button.name-btn { padding: 15px 30px; border-radius: 16px; border: 2px solid #e2e8f0; background: white; cursor: pointer; font-weight: 700; font-size: 18px; transition: 0.2s; color: #475569; }
@@ -73,6 +73,10 @@
         .btn-action { flex: 1; padding: 0 15px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; outline: none; transition: 0.2s; font-size: 18px; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
         .btn-action:active { transform: scale(0.98); }
         
+        /* 🌟 糖果色系提交按钮 */
+        #sub-btn, #eng-sub-btn { background: #38bdf8; color: white; box-shadow: 0 4px 10px rgba(56, 189, 248, 0.2); }
+        #sub-btn:hover, #eng-sub-btn:hover { background: #0ea5e9; }
+
         .pinyin-display { font-size: 36px; font-weight: bold; color: #64748b; margin: 5px 0 15px 0; }
         .pinyin-unit { margin: 0 8px; transition: 0.3s; }
         .pinyin-unit.active { color: #ea580c; transform: scale(1.2); text-decoration: underline; }
@@ -93,15 +97,19 @@
         canvas { background: white; border-radius: 12px; border: 1px solid #e2e8f0; touch-action: none; cursor: crosshair; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
         .draw-tools { display: flex; justify-content: space-between; width: 100%; margin-top: 10px; }
 
-        .res-section { border-top: 2px dashed #e2e8f0; margin-top: 20px; padding-top: 20px; text-align: left; }
+        .res-section { border-top: 2px dashed #e2e8f0; margin-top: 20px; padding-top: 20px; text-align: left; position: relative; }
         .res-card { background: #f1f5f9; padding: 15px; border-radius: 12px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+
+        /* 🌟 日期完美放置在右下角，与 Resources 齐平对齐 */
+        #school-term-display { position: absolute; bottom: 20px; right: 25px; font-size: 13px; color: #94a3b8; background: #f8fafc; padding: 6px 12px; border-radius: 12px; border: 1px solid #e2e8f0; font-weight: 600; margin: 0; }
         
         @media (min-width: 768px) {
             body { justify-content: center; padding: 40px; background: #e2e8f0; }
-            .container { max-width: 750px; padding: 40px; border-radius: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); }
+            .container { max-width: 750px; padding: 40px 40px 80px 40px; border-radius: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); }
             /* 原版的桌面端名字按钮大小 */
             button.name-btn { padding: 20px 45px; font-size: 24px; border-radius: 20px; }
             .hanzi-practice-box { width: 300px; height: 300px; }
+            #school-term-display { font-size: 15px; bottom: 30px; right: 40px; padding: 8px 16px; }
         }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
     </style>
@@ -112,15 +120,9 @@
     <div id="loading" class="screen" style="display:block;">Syncing Lessons...</div>
 
     <div id="menu-screen" class="screen">
-        <h2 style="margin:0 0 10px 0; color:#0f172a;">Did you <span class="magic-number" style="font-size:1em;">6~7</span> today?</h2>
-        <div id="school-term-display" class="date-badge">Loading Date...</div>
+        <h2 style="margin:0 0 5px 0; color:#0f172a;">Did you <span class="magic-number" style="font-size:1em;">6~7</span> today?</h2>
         
-        <div style="text-align: center; margin-bottom: 20px;">
-            <button class="tool-btn" style="background: #fffbeb; border-color: #fde68a; color: #d97706; width: 100%; max-width: 300px; padding: 12px; font-size: 16px;" onclick="testSuccessAudio()">
-                🎵 播放测试：点击这里听录音
-            </button>
-            <div id="audio-test-log" style="font-size: 12px; color: #94a3b8; margin-top: 5px;"></div>
-        </div>
+        <div style="font-size: 15px; color: #64748b; margin-top: -5px; margin-bottom: 25px; font-weight: 600;">Aim for a perfect score or just 1 mistake for a 6~7!</div>
 
         <div class="name-selector">
             <button id="btn-P3" class="name-btn" onclick="switchUser('P3')">Valerie (P3)</button>
@@ -138,6 +140,8 @@
             <h3 style="margin-top:0;">Resources 📚</h3>
             <div id="res-list"></div>
         </div>
+
+        <div id="school-term-display">Loading Date...</div>
     </div>
 
     <div id="mode-screen" class="screen">
@@ -183,7 +187,7 @@
         <div id="fb-text" class="feedback"></div>
         <div class="controls">
             <button id="exit-btn" class="btn-action" style="background:#f1f5f9; color:#475569;" onclick="location.reload()">Exit</button>
-            <button id="sub-btn" class="btn-action" style="background:#1e293b; color:white;" onclick="checkAns()">Submit (Enter)</button>
+            <button id="sub-btn" class="btn-action btn-candy" onclick="checkAns()">Submit (Enter)</button>
             <button id="next-btn" class="btn-action" style="background:#10b981; color:white; display:none;" onclick="nextQ()">Next (Enter) →</button>
         </div>
     </div>
@@ -227,34 +231,10 @@
     if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = loadVoices;
     loadVoices();
 
-    // 终极直链解析器
     function getDriveDirectLink(link) {
         if (!link) return "";
         let m = link.match(/\/d\/([a-zA-Z0-9_-]+)/);
         return m ? `https://drive.usercontent.google.com/download?id=${m[1]}` : link;
-    }
-
-    // 🎵 主页的音频测试功能
-    function testSuccessAudio() {
-        const log = document.getElementById('audio-test-log');
-        let testUrl = curUser === 'P1' ? SUCCESS_AUDIO_VENESSA : SUCCESS_AUDIO_VALERIE;
-        
-        if (!testUrl || testUrl.trim() === "") {
-            log.innerText = "⚠️ 请先在代码底部填入录音链接！";
-            return;
-        }
-        
-        log.innerText = "⏳ 正在尝试解析并播放...";
-        let directUrl = getDriveDirectLink(testUrl);
-        
-        let testAudio = new Audio(directUrl);
-        testAudio.oncanplaythrough = () => { log.innerText = "✅ 音频加载成功，正在播放..."; testAudio.play(); };
-        testAudio.onerror = (e) => { 
-            console.error(e);
-            log.innerHTML = `<span style="color:#ef4444;">❌ 播放失败。可能原因：1. Google Drive 未设置为'任何人可见'；2. 浏览器拦截了跨域音频。</span>`; 
-        };
-        // 强制触发加载
-        testAudio.load();
     }
 
     function playTTS(text, lang) {
@@ -302,6 +282,7 @@
         if (p.style.display === 'flex' && !canvas) initDrawPad();
     }
 
+    // 🌟 原版稳定的数据加载引擎，绝对不改动！
     async function init() {
         const now = new Date();
         const t2 = new Date(2026, 2, 23), t3 = new Date(2026, 5, 29), t4 = new Date(2026, 8, 14);
@@ -333,7 +314,6 @@
         curUser = g;
         document.getElementById('btn-P3').className = g === 'P3' ? 'name-btn active' : 'name-btn';
         document.getElementById('btn-P1').className = g === 'P1' ? 'name-btn active' : 'name-btn';
-        document.getElementById('audio-test-log').innerText = ""; // 重置测试日志
         const list = document.getElementById('res-list'); list.innerHTML = '';
         if(db[g] && db[g]['Resources']) db[g]['Resources'].forEach(r => {
             const div = document.createElement('div'); div.className = 'res-card';
@@ -516,7 +496,7 @@
             <input type="text" id="eng-spell-input" class="ans-input" style="text-align:center; font-size:32px; text-transform:lowercase; font-weight:bold; letter-spacing:2px; padding:20px; width:100%; max-width:350px;" autocomplete="off" spellcheck="false" placeholder="Type here..." />
             <div style="display:flex; gap:10px; width:100%; max-width:350px; margin-top:15px; height:55px;">
                 <button class="tool-btn" id="eng-hint-btn" style="flex:0.3; background:#fffbeb; color:#d97706; border-color:#fde68a;" onclick="showEngHint()">💡 Hint</button>
-                <button class="btn-action" id="eng-sub-btn" style="flex:0.7; background:#1e293b; color:white; margin:0;" onclick="checkEngTyping()">Submit</button>
+                <button class="btn-action btn-candy" id="eng-sub-btn" style="flex:0.7; margin:0;" onclick="checkEngTyping()">Submit</button>
             </div>
             <div id="eng-hint-area" style="display:none; flex-wrap:wrap; gap:8px; justify-content:center; width:100%; margin-top:15px;">
                 ${btnsHtml}
@@ -571,7 +551,7 @@
                 pyIndex++;
             }
         }
-        pinyinHtml += `<button class="tool-btn" style="padding:5px 15px; font-size:20px; border-color:#3b82f6; color:#3b82f6; background:#eff6ff; margin-left:10px;" onclick="playTTS('${pinyinArray.join(' ') || currentSpellWord}', 'zh')">🔊</button>`;
+        // 🌟 已移除华文的机器朗读喇叭按钮
         pinyinHtml += '</div>';
 
         document.getElementById('spelling-pinyin').innerHTML = pinyinHtml;
@@ -581,7 +561,6 @@
         container.innerHTML = `<div id="hanzi-practice-box" class="hanzi-practice-box"></div>`;
         
         startNextChar();
-        setTimeout(() => playTTS(pinyinArray.join(' ') || currentSpellWord, 'zh'), 600);
     }
 
     function startNextChar() {
@@ -730,7 +709,6 @@
         if (sessionErrors <= 1) {
             msg = isCN ? `🎉 恭喜你，获得了 ${magic67} 的好成绩！太棒了！` : `🎉 Congratulations, you've got ${magic67} today!`;
             
-            // 触发欢呼声！
             let audioUrl = curUser === 'P1' ? SUCCESS_AUDIO_VENESSA : SUCCESS_AUDIO_VALERIE;
             if (audioUrl) {
                 let directUrl = getDriveDirectLink(audioUrl);
@@ -744,7 +722,7 @@
         const targetScreen = isSpellingMode ? 'spelling-screen' : 'quiz-screen';
         document.getElementById(targetScreen).innerHTML = `
             <div style="text-align:center; padding: 40px 0; font-size: 26px; color: #064e3b; font-weight:bold; line-height: 1.8;">${msg}</div>
-            <button class="btn-action" style="background:#10b981; color:white; width:100%; height:60px; margin-top:20px;" onclick="location.reload()">${isCN ? "返回主菜单" : "Back to Menu"}</button>
+            <button class="btn-action btn-candy" style="width:100%; height:60px; margin-top:20px;" onclick="location.reload()">${isCN ? "返回主菜单" : "Back to Menu"}</button>
         `;
     }
 
