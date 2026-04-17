@@ -25,22 +25,20 @@
         
         @keyframes bounceIn { 0% { opacity: 0; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1); } }
         
-        /* 📅 顶部胶囊日期块（已置顶居中） */
+        /* 📅 顶部胶囊日期块 */
         #school-term-display { 
-            margin: 0 auto 25px auto; font-size: 15px; color: #3b82f6; 
+            margin-bottom: 25px; font-size: 15px; color: #3b82f6; 
             background: rgba(255,255,255,0.7); padding: 10px 20px; 
             border-radius: 50px; font-weight: 900; border: 2px solid #fff; 
             box-shadow: 0 8px 15px rgba(59, 130, 246, 0.1); 
-            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            display: inline-flex; align-items: center; gap: 8px;
             letter-spacing: 0.5px;
         }
 
         .magic-number { display: inline-block; font-size: 1.4em; color: #f59e0b; font-weight: 900; padding: 0 5px; animation: popPulse 1s infinite alternate cubic-bezier(0.4, 0, 0.2, 1); }
         @keyframes popPulse { 0% { transform: scale(1); text-shadow: 0 0 5px rgba(253, 224, 71, 0.5); } 100% { transform: scale(1.2) translateY(-3px); text-shadow: 0 0 15px rgba(234, 179, 8, 0.8), 0 0 30px rgba(234, 179, 8, 0.4); } }
 
-        /* 修复居中和横向拉伸：改为 flex-row 换行居中 */
-        .name-selector { display: flex; flex-direction: row; flex-wrap: wrap; justify-content: center; align-items: center; gap: 20px; width: 100%; margin: 20px 0; }
-        button.name-btn { flex: 1 1 200px; max-width: 320px; padding: 20px; border-radius: 30px; border: 4px solid #e2e8f0; background: white; cursor: pointer; font-weight: 900; font-size: 26px; transition: 0.15s; color: #475569; display: flex; align-items: center; justify-content: center; gap: 15px; box-shadow: 0 8px 0 #cbd5e1; outline: none; margin-bottom: 20px; }
+        button.name-btn { width: 85%; padding: 20px; border-radius: 30px; border: 4px solid #e2e8f0; background: white; cursor: pointer; font-weight: 900; font-size: 26px; transition: 0.15s; color: #475569; display: flex; align-items: center; justify-content: center; gap: 15px; box-shadow: 0 8px 0 #cbd5e1; outline: none; margin-bottom: 20px; }
         button.name-btn:active { transform: translateY(8px); box-shadow: 0 0 0 transparent; }
         
         .grid-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; width: 100%; margin-bottom: 20px; }
@@ -87,8 +85,10 @@
 
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
         .modal-content { background: white; padding: 40px; border-radius: 40px; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.2); width: 90%; max-width: 400px; display: flex; flex-direction: column; align-items: center; border: 5px solid #fff; }
+        
         .pin-input-hub { font-size: 40px; font-weight: 900; letter-spacing: 12px; padding: 20px; width: 180px; text-align: center; border: 4px solid #e2e8f0; border-radius: 25px; margin: 25px 0; outline: none; color: #1e293b; transition: 0.2s; box-shadow: inset 0 4px 6px rgba(0,0,0,0.05); }
-
+        .pin-input-hub:focus { border-color: #f59e0b; background: #fffbeb; }
+        
         @media (min-width: 768px) { .container { padding: 40px 40px 60px 40px; border-radius: 50px; } }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
     </style>
@@ -139,8 +139,8 @@
             <div id="res-list"></div>
         </div>
         
-        <div style="margin-top: 30px; display: flex; justify-content: center; width: 100%;">
-            <button class="btn-action" style="max-width: 400px; background:#f1f5f9; color:#64748b; border:4px solid #e2e8f0; width: 100%; box-shadow: 0 6px 0 #cbd5e1;" onclick="showScreen('user-screen')">← Switch User</button>
+        <div style="margin-top: 30px;">
+            <button class="btn-action" style="background:#f1f5f9; color:#64748b; border:4px solid #e2e8f0; width: 100%; box-shadow: 0 6px 0 #cbd5e1;" onclick="showScreen('user-screen')">← Switch User</button>
         </div>
     </div>
 
@@ -208,7 +208,7 @@
         <div style="font-size: 50px; margin-bottom: 10px;">🛡️</div>
         <h3 style="margin:0 0 10px 0; color:#0f172a; font-size: 26px; font-weight: 900;">Parent Lock</h3>
         <p style="color:#64748b; font-size:16px; margin:0; font-weight: 700;">Locked profile.</p>
-        <input type="tel" id="hub-pin-input" class="pin-input-hub" maxlength="4" placeholder="***" autocomplete="off">
+        <input type="tel" id="hub-pin-input" class="pin-input-hub" maxlength="4" placeholder="***" autocomplete="off" inputmode="numeric" pattern="[0-9]*">
         <div style="display:flex; gap:15px; width: 100%;">
             <button class="btn-action" style="background:#f1f5f9; color:#475569; border: 4px solid #e2e8f0; box-shadow: 0 6px 0 #cbd5e1; flex:1;" onclick="closePinModal()">Cancel</button>
             <button class="btn-action" style="background:#f59e0b; color:white; box-shadow: 0 6px 0 #d97706; flex:1;" onclick="verifyHubPin()">Unlock</button>
@@ -224,15 +224,6 @@
     function showScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
         document.getElementById(id).style.display = 'block';
-        
-        const termDisplay = document.getElementById('school-term-display');
-        if (termDisplay) {
-            if (id === 'user-screen' || id === 'subject-screen') {
-                termDisplay.style.display = 'inline-flex';
-            } else {
-                termDisplay.style.display = 'none';
-            }
-        }
     }
 
     async function init() {
@@ -244,6 +235,7 @@
         else if (now >= t3) { const w = Math.floor(diff(now, t3)/7) + 1; term = w <= 10 ? `Term 3 Wk ${w}` : "Holiday"; }
         else if (now >= t2) { const w = Math.floor(diff(now, t2)/7) + 1; term = w <= 10 ? `Term 2 Wk ${w}` : "Holiday"; }
         
+        // 渲染顶部胶囊块内容
         document.getElementById('school-term-display').innerHTML = `<span>📅 ${now.toLocaleDateString('en-SG', {month:'short', day:'numeric'})}</span><span style="color:#cbd5e1">|</span><span>${term}</span>`;
 
         let cachedHubDB = sessionStorage.getItem('hub_db_cache');
@@ -272,8 +264,20 @@
         showScreen('user-screen');
     }
 
+    // 💡 核心修复：每次点击 Venessa，清空残留记录，并自动呼出数字键盘
     function switchUser(g) {
-        if (g === 'P1') { pendingUser = g; document.getElementById('pin-modal').style.display = 'flex'; return; }
+        if (g === 'P1') { 
+            pendingUser = g; 
+            document.getElementById('pin-modal').style.display = 'flex'; 
+            
+            // 清除旧密码
+            const pinInput = document.getElementById('hub-pin-input');
+            pinInput.value = ''; 
+            
+            // 延迟100ms自动对焦，确保iPad弹起纯数字键盘
+            setTimeout(() => pinInput.focus(), 100); 
+            return; 
+        }
         executeSwitchUser(g);
     }
 
@@ -290,38 +294,36 @@
         showScreen('subject-screen');
     }
 
+    // 💡 核心修复：输对或关掉窗口时，抹除刚才输的密码
     function verifyHubPin() {
         const input = document.getElementById('hub-pin-input').value;
         const now = new Date();
         const mmdd = (now.getMonth() + 1) * 100 + now.getDate();
         const day = now.getDay() === 0 ? 7 : now.getDay();
+        
         if (input === (mmdd + day).toString()) {
             document.getElementById('pin-modal').style.display = 'none';
+            document.getElementById('hub-pin-input').value = ''; // 放行后清除密码
             executeSwitchUser(pendingUser);
         } else {
-            document.getElementById('hub-pin-input').classList.add('error-shake');
-            setTimeout(() => { document.getElementById('hub-pin-input').classList.remove('error-shake'); document.getElementById('hub-pin-input').value = ''; }, 400);
+            const pinInput = document.getElementById('hub-pin-input');
+            pinInput.classList.add('error-shake');
+            setTimeout(() => { 
+                pinInput.classList.remove('error-shake'); 
+                pinInput.value = ''; // 输错清空
+                pinInput.focus();    // 继续弹出键盘让她重输
+            }, 400);
         }
     }
     
-    function closePinModal() { document.getElementById('pin-modal').style.display = 'none'; }
+    function closePinModal() { 
+        document.getElementById('pin-modal').style.display = 'none'; 
+        document.getElementById('hub-pin-input').value = ''; // 取消时清除密码
+    }
+    
     function handleSubjectClick(s) { curSub = s; localStorage.setItem('currentSubject', s); if (s === '华文') showScreen('cn-mode-screen'); else showScreen('mode-screen'); }
     function goToPinyinGame() { window.location.href = "pinyin.html"; }
     function goToSpelling() { window.location.href = "spelling.html"; }
-
-    // 监听回车键，修复密码输入和答题时的键盘便利性
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            const pinModal = document.getElementById('pin-modal');
-            if (pinModal && pinModal.style.display === 'flex') {
-                e.preventDefault();
-                verifyHubPin();
-            } else if (document.getElementById('quiz-screen') && document.getElementById('quiz-screen').style.display === 'block') {
-                if (document.getElementById('sub-btn') && document.getElementById('sub-btn').style.display !== 'none') { e.preventDefault(); checkAns(); }
-                else if (document.getElementById('next-btn') && document.getElementById('next-btn').style.display !== 'none') { e.preventDefault(); nextQ(); }
-            }
-        }
-    });
 
     init();
 </script>
