@@ -87,6 +87,7 @@
         .btn-action { border-radius: 22px; border: none; font-weight: 900; font-size: 22px; cursor: pointer; transition: 0.15s; display: flex; align-items: center; justify-content: center; outline: none; }
         .btn-quit { flex: 1; background: #f1f5f9; color: #64748b; font-size: 18px; border: 3px solid #e2e8f0; box-shadow: 0 6px 0 #cbd5e1; } 
         .btn-nav { flex: 2; background: #38bdf8; color: white; box-shadow: 0 6px 0 #0284c7; } 
+        .btn-nav:active { transform: translateY(6px); box-shadow: 0 0 0 transparent; }
         .btn-nav:disabled { background: #e2e8f0 !important; color: #94a3b8 !important; box-shadow: 0 6px 0 #cbd5e1 !important; transform: translateY(0) !important; cursor: not-allowed; opacity: 0.8; }
 
         @keyframes bounceIn { 0% { opacity: 0; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1); } }
@@ -178,6 +179,17 @@
     }
 
     function init() {
+        // 🔥 闪存逻辑
+        let cachedSpellDB = sessionStorage.getItem('spell_db_cache');
+        if (cachedSpellDB) {
+            db = JSON.parse(cachedSpellDB);
+            document.getElementById('loading').style.display = 'none';
+            if (!db[curUser]) curUser = Object.keys(db)[0] || 'P3';
+            if (!db[curUser][curSub]) curSub = Object.keys(db[curUser])[0] || '华文';
+            loadTopics();
+            return;
+        }
+
         Papa.parse(SHEET_URL + "&t=" + Date.now(), {
             download: true, header: true, skipEmptyLines: 'greedy',
             transformHeader: h => h.replace(/^\uFEFF/, '').trim().toUpperCase(),
@@ -198,8 +210,10 @@
                     });
                 });
                 
-                document.getElementById('loading').style.display = 'none';
+                // 🔥 存入闪存
+                sessionStorage.setItem('spell_db_cache', JSON.stringify(db));
 
+                document.getElementById('loading').style.display = 'none';
                 if (!db[curUser]) curUser = Object.keys(db)[0] || 'P3';
                 if (!db[curUser][curSub]) curSub = Object.keys(db[curUser])[0] || '华文';
 
@@ -476,7 +490,7 @@
     }
 
     function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.style.display='none'); document.getElementById(id).style.display='flex'; }
-    init();
+    window.onload = function() { if(document.getElementById('loading').style.display !== 'none'){ init(); } };
 </script>
 
 </body>
