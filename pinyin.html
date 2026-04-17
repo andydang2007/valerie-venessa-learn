@@ -9,6 +9,11 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script>
+        // ⚠️ 1. 在脚本的最开头，立刻获取主控台存下来的玩家代号
+        // 如果直接打开页面找不到，就默认是 'P3'
+        let currentPlayer = localStorage.getItem('currentPlayer') || 'P3'; 
+    </script>
     <style>
         :root {
             --accent-glow: #00f0ff; 
@@ -37,6 +42,14 @@
             padding: 10px 20px; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px);
             border-bottom: 2px solid rgba(0, 240, 255, 0.2); z-index: 10; gap: 30px;
         }
+
+        .hub-btn {
+            margin-right: auto; background: rgba(0, 240, 255, 0.1); 
+            border: 2px solid var(--accent-glow); color: var(--accent-glow); 
+            padding: 8px 16px; border-radius: 10px; font-weight: 900; 
+            cursor: pointer; transition: 0.2s;
+        }
+        .hub-btn:hover { background: rgba(0, 240, 255, 0.3); transform: scale(1.05); }
 
         .stat-box { display: flex; flex-direction: column; align-items: flex-end; min-width: 80px; }
         .stat-label { font-size: 12px; color: var(--accent-glow); font-weight: bold; letter-spacing: 2px; }
@@ -177,6 +190,7 @@
 <body>
 
     <header>
+        <button class="hub-btn sci-fi-text" onclick="window.location.href='index.html'">← HUB</button>
         <div class="stat-box" style="margin-right: 20px;">
             <span class="stat-label sci-fi-text">TIME</span>
             <span class="stat-value sci-fi-text" id="ui-time">05:00</span>
@@ -214,7 +228,7 @@
             <div class="title-line"><span><span class="psle-cap">L</span>ASER</span><span><span class="psle-cap">E</span>XPEDITION</span></div>
         </h1>
         
-        <div id="loading-ui" class="sci-fi-text">CONNECTING TO HANGAR...</div>
+        <div id="loading-ui" class="sci-fi-text">CONNECTING TO DATABASE...</div>
         
         <div class="ship-selector-title sci-fi-text" id="selector-title">SELECT YOUR FIGHTER</div>
         <div class="ship-selector" id="ship-selector">
@@ -229,6 +243,14 @@
 <script>
     const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQlpdRHnR9ybEHHgX6fouRI-vXOh8KQNLSjsbt0TYh9R3No_9i7QNv_4ELwJZJGQpTe3oZVXaZijaW4/pub?gid=573238154&single=true&output=csv";
     
+    // 汉字转数字映射表
+    const lessonMap = {
+        '第一课': 1, '第二课': 2, '第三课': 3, '第四课': 4, '第五课': 5,
+        '第六课': 6, '第七课': 7, '第八课': 8, '第九课': 9, '第十课': 10,
+        '第十一课': 11, '第十二课': 12, '第十三课': 13, '第十四课': 14, '第十五课': 15,
+        '第十六课': 16, '第十七课': 17, '第十八课': 18, '第十九课': 19
+    };
+
     const SHIPS = ['spaceship1.jpg', 'spaceship2.jpg', 'spaceship3.jpg'];
     const MONSTERS = ['monster1.jpg', 'monster2.jpg', 'monster3.jpg', 'monster4.jpg', 'monster5.jpg'];
     let currentShipIdx = 0;
@@ -250,7 +272,9 @@
 
     let DB_WORDS = [];
     
+    // ⚠️ 2. 把获取到的身份，放进游戏状态里
     let state = {
+        pilot: currentPlayer,
         score: 0, combo: 0, timeLeft: 300, isPlaying: false, hatRemoved: false, dialsTouched: false,
         i: { angle: 0, opts: [], step: 0 }, f: { angle: 0, opts: [], step: 0 }, t: { angle: 0, opts: [], step: 0 },
         targets: [], targetIdCounter: 0, lastSpawnTime: 0, lastTimerTick: 0,
@@ -288,18 +312,42 @@
         try {
             const resp = await fetch(CSV_URL);
             const text = await resp.text();
-            DB_WORDS = text.split('\n').slice(1).map(row => {
-                const cols = row.split(',');
+            
+            // 🔥 解析兼容版：支持 Tab 分隔或逗号分隔，并提取多音字
+            let ALL_WORDS = text.split('\n').slice(1).map(row => {
+                let cols = row.split('\t');
+                if (cols.length < 7) cols = row.split(','); // 如果不是 tab，退回使用逗号
                 if (cols.length < 7) return null;
-                const py = cols[6].trim().split(' / ')[0];
-                return { char: cols[4].trim(), ...parsePinyin(py), py: py };
+                
+                const grade = cols[0].trim();
+                const topic = cols[2].trim();
+                const char = cols[4].trim();
+                const pyStr = cols[6].trim();
+                
+                if (!char || !pyStr) return null;
+                
+                // 提取多音字的第一个读音
+                let py = pyStr.split('/')[0].trim();
+                let lesson = lessonMap[topic] || 99;
+                
+                return { grade: grade, lesson: lesson, char: char, ...parsePinyin(py), py: py };
             }).filter(w => w);
+            
+            // 🔥 核心：根据不同身份自动筛选词库
+            if (currentPlayer === 'P1') {
+                DB_WORDS = ALL_WORDS.filter(w => w.grade === 'P1' && w.lesson <= 8);
+            } else {
+                // 默认 P3 的逻辑
+                DB_WORDS = ALL_WORDS.filter(w => w.grade === 'P1' || w.grade === 'P2' || (w.grade === 'P3' && w.lesson <= 7));
+            }
             
             if(DB_WORDS.length > 0){
                 document.getElementById('loading-ui').style.display = 'none';
                 document.getElementById('selector-title').style.display = 'block';
                 document.getElementById('ship-selector').style.display = 'flex';
                 document.getElementById('btn-start').style.display = 'block';
+            } else {
+                document.getElementById('loading-ui').innerText = "NO WORDS FOUND FOR THIS PROFILE";
             }
         } catch (e) { document.getElementById('loading-ui').innerText = "DB CONNECTION FAILED"; }
     }
@@ -351,8 +399,8 @@
         document.getElementById('ship-selector').style.display = 'none';
         
         let startBtn = document.getElementById('btn-start');
-        startBtn.innerText = "PLAY AGAIN";
-        startBtn.onclick = () => location.reload(); 
+        startBtn.innerText = "BACK TO HUB";
+        startBtn.onclick = () => { window.location.href = 'index.html'; }; 
     }
 
     function getFixedOpts(correct, allArr) {
