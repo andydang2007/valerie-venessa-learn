@@ -9,10 +9,8 @@
     <style>
         :root { --primary: #10b981; --bg: #f8fafc; }
         
-        /* 保持原版的盒模型，只在必要的地方加 box-sizing */
         body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #1e293b; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; }
         
-        /* 🌟 增加底部 padding 给右下角日期留出空间 */
         .container { width: 100%; max-width: 600px; background: #fff; padding: 25px 25px 60px 25px; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; position: relative; }
         .screen { display: none; width: 100%; }
         
@@ -22,12 +20,9 @@
         }
         @keyframes popPulse { 0% { transform: scale(1); text-shadow: 0 0 5px rgba(253, 224, 71, 0.5); } 100% { transform: scale(1.2) translateY(-3px); text-shadow: 0 0 15px rgba(234, 179, 8, 0.8), 0 0 30px rgba(234, 179, 8, 0.4); } }
 
-        /* 退回你喜欢的原版选人按钮样式 */
-        .name-selector { display: flex; gap: 15px; justify-content: center; margin: 25px 0; }
-        button.name-btn { padding: 15px 30px; border-radius: 16px; border: 2px solid #e2e8f0; background: white; cursor: pointer; font-weight: 700; font-size: 18px; transition: 0.2s; color: #475569; }
-        button.name-btn:hover { background: #f1f5f9; }
-        /* 略微调整选中状态，不再用 scale 放大，改为加粗边框和变色，解决主页跳动 */
-        button.name-btn.active { border-color: var(--primary); background: #d1fae5; color: #065f46; border-width: 3px; margin: -1px; }
+        .name-selector { display: flex; flex-direction: column; gap: 20px; align-items: center; margin: 40px 0; }
+        button.name-btn { width: 85%; padding: 25px; border-radius: 20px; border: 2px solid #e2e8f0; background: white; cursor: pointer; font-weight: 900; font-size: 22px; transition: 0.3s; color: #475569; display: flex; align-items: center; justify-content: center; gap: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        button.name-btn:hover { background: #f1f5f9; transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.05); }
         
         .subject-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-bottom: 15px; }
         button.sub-btn { flex: 1 1 40%; max-width: 45%; padding: 20px; border-radius: 16px; border: none; color: white; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; box-sizing: border-box; }
@@ -68,12 +63,10 @@
 
         .feedback { font-size: 18px; margin: 15px 0; min-height: 24px; font-weight: bold; }
         
-        /* 🌟 核心修复：精准锁定控制区高度，解决 Submit 到 Next 的跳动 */
         .controls { display: flex; gap: 10px; margin-top: 20px; height: 55px; align-items: stretch; box-sizing: border-box; }
         .btn-action { flex: 1; padding: 0 15px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; outline: none; transition: 0.2s; font-size: 18px; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
         .btn-action:active { transform: scale(0.98); }
         
-        /* 🌟 糖果色系提交按钮 */
         #sub-btn, #eng-sub-btn { background: #38bdf8; color: white; box-shadow: 0 4px 10px rgba(56, 189, 248, 0.2); }
         #sub-btn:hover, #eng-sub-btn:hover { background: #0ea5e9; }
 
@@ -100,10 +93,8 @@
         .res-section { border-top: 2px dashed #e2e8f0; margin-top: 20px; padding-top: 20px; text-align: left; position: relative; }
         .res-card { background: #f1f5f9; padding: 15px; border-radius: 12px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
 
-        /* 🌟 日期完美放置在右下角，与 Resources 齐平对齐 */
-        #school-term-display { position: absolute; bottom: 20px; right: 25px; font-size: 13px; color: #94a3b8; background: #f8fafc; padding: 6px 12px; border-radius: 12px; border: 1px solid #e2e8f0; font-weight: 600; margin: 0; }
+        #school-term-display { position: absolute; bottom: 20px; right: 25px; font-size: 13px; color: #94a3b8; background: #f8fafc; padding: 6px 12px; border-radius: 12px; border: 1px solid #e2e8f0; font-weight: 600; margin: 0; z-index: 10; }
         
-        /* 🌟 新增：隐藏的悬浮游戏解锁按钮 */
         #game-unlock-btn {
             position: fixed; bottom: 30px; right: 30px; z-index: 999;
             background: linear-gradient(135deg, #a855f7, #ec4899);
@@ -117,11 +108,16 @@
         @keyframes slideInBounce { 0% { transform: translateY(100px) scale(0.5); opacity: 0; } 100% { transform: translateY(0) scale(1); opacity: 1; } }
         @keyframes pulseGlow { 0% { box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4); } 100% { box-shadow: 0 4px 25px rgba(236, 72, 153, 0.8); } }
 
+        /* 🌟 密码锁弹窗样式 */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .modal-content { background: white; padding: 30px; border-radius: 24px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.1); width: 90%; max-width: 350px; display: flex; flex-direction: column; align-items: center; }
+        .pin-input-hub { font-size: 32px; font-weight: 900; letter-spacing: 10px; padding: 15px; width: 150px; text-align: center; border: 3px solid #e2e8f0; border-radius: 16px; margin: 20px 0; outline: none; color: #1e293b; transition: 0.2s; }
+        .pin-input-hub:focus { border-color: #3b82f6; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
+        .pin-input-hub.error-shake { border-color: #ef4444; background: #fef2f2; color: #ef4444; animation: shake 0.3s; }
+
         @media (min-width: 768px) {
             body { justify-content: center; padding: 40px; background: #e2e8f0; }
             .container { max-width: 750px; padding: 40px 40px 80px 40px; border-radius: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); }
-            /* 原版的桌面端名字按钮大小 */
-            button.name-btn { padding: 20px 45px; font-size: 24px; border-radius: 20px; }
             .hanzi-practice-box { width: 300px; height: 300px; }
             #school-term-display { font-size: 15px; bottom: 30px; right: 40px; padding: 8px 16px; }
         }
@@ -133,17 +129,24 @@
 <button id="game-unlock-btn" onclick="goToGame()">🕹️ Game Unlocked！</button>
 
 <div class="container">
-    <div id="loading" class="screen" style="display:block;">Syncing Lessons...</div>
+    <div id="loading" class="screen" style="display:block; padding: 50px 0; font-size: 20px; color: #64748b; font-weight: bold;">Syncing Lessons...</div>
 
-    <div id="menu-screen" class="screen">
-        <h2 style="margin:0 0 5px 0; color:#0f172a;">Did you <span class="magic-number" style="font-size:1em;">6~7</span> today?</h2>
-        
-        <div style="font-size: 15px; color: #64748b; margin-top: -5px; margin-bottom: 25px; font-weight: 600;">Aim for a perfect score or just 1 mistake for a 6~7!</div>
+    <div id="user-screen" class="screen">
+        <h2 style="margin:0 0 5px 0; color:#0f172a; font-size: 28px;">Did you <span class="magic-number" style="font-size:1em;">6~7</span> today?</h2>
+        <div style="font-size: 15px; color: #64748b; margin-top: -5px; font-weight: 600;">Aim for a perfect score or just 1 mistake!</div>
 
         <div class="name-selector">
-            <button id="btn-P3" class="name-btn" onclick="switchUser('P3')">Valerie (P3)</button>
-            <button id="btn-P1" class="name-btn" onclick="switchUser('P1')">Venessa (P1)</button>
+            <button id="btn-P3" class="name-btn" onclick="switchUser('P3')">
+                <span style="font-size: 32px;">👧🏻</span> Valerie (P3)
+            </button>
+            <button id="btn-P1" class="name-btn" onclick="switchUser('P1')">
+                <span style="font-size: 32px;">👶🏻</span> Venessa (P1)
+            </button>
         </div>
+    </div>
+
+    <div id="subject-screen" class="screen">
+        <h2 id="welcome-title" style="margin:0 0 25px 0; color:#0f172a; font-size: 28px;">Welcome!</h2>
         
         <div id="subject-grid" class="subject-grid">
             <button class="sub-btn" style="background:#3b82f6;" onclick="handleSubjectClick('English')">English</button>
@@ -153,11 +156,13 @@
         </div>
 
         <div class="res-section">
-            <h3 style="margin-top:0;">Resources 📚</h3>
+            <h3 style="margin-top:0; color:#334155;">Resources 📚</h3>
             <div id="res-list"></div>
         </div>
-
-        <div id="school-term-display">Loading Date...</div>
+        
+        <div style="margin-top: 30px;">
+            <button class="btn-action" style="background:#f8fafc; color:#64748b; border:2px solid #e2e8f0; width: 100%; padding: 15px;" onclick="showScreen('user-screen')">← Switch User</button>
+        </div>
     </div>
 
     <div id="mode-screen" class="screen">
@@ -165,7 +170,7 @@
         <div style="display:flex; flex-direction:column; gap:15px;">
             <button id="btn-mode-normal" class="btn-action" style="background:#3b82f6; color:white; padding:20px;" onclick="showTopicSelection(curSub, false)">🚀 Start Practice</button>
             <button id="btn-mode-spell" class="btn-action" style="background:linear-gradient(135deg, #f59e0b, #ea580c); color:white; padding:20px;" onclick="showTopicSelection(curSub, true)">✍️ Spelling Game</button>
-            <button id="btn-mode-back" class="btn-action" style="background:#f8fafc; color:#64748b; border:2px solid #e2e8f0; margin-top:15px;" onclick="showScreen('menu-screen')">← Back</button>
+            <button id="btn-mode-back" class="btn-action" style="background:#f8fafc; color:#64748b; border:2px solid #e2e8f0; margin-top:15px;" onclick="showScreen('subject-screen')">← Back to Subjects</button>
         </div>
     </div>
 
@@ -219,12 +224,23 @@
         </div>
     </div>
 
+    <div id="school-term-display">Loading Date...</div>
+</div>
+
+<div id="pin-modal" class="modal-overlay">
+    <div class="modal-content">
+        <h3 style="margin:0 0 10px 0; color:#0f172a; font-size: 22px;">🔒 Parent Lock</h3>
+        <p style="color:#64748b; font-size:14px; margin:0;">Access to Venessa's profile is locked.</p>
+        <p style="color:#94a3b8; font-size:12px; margin-top:5px;">Hint: Ask Dad for today's code.</p>
+        <input type="tel" id="hub-pin-input" class="pin-input-hub" maxlength="4" placeholder="***" autocomplete="off">
+        <div style="display:flex; gap:10px; width: 100%;">
+            <button class="btn-action" style="background:#f1f5f9; color:#475569; flex:1; padding: 15px 0;" onclick="closePinModal()">Cancel</button>
+            <button class="btn-action btn-candy" style="background:#10b981; color:white; flex:1; padding: 15px 0;" onclick="verifyHubPin()">Unlock</button>
+        </div>
+    </div>
 </div>
 
 <script>
-    // ==========================================
-    // 🎵 专属欢呼语音设置区
-    // ==========================================
     const SUCCESS_AUDIO_VALERIE = "https://drive.google.com/file/d/1StoRXMJqWPegTr5Cu6oxlyIvL0iVgFwH/view?usp=sharing"; 
     const SUCCESS_AUDIO_VENESSA = "https://drive.google.com/file/d/1dMcI2VhKCzCKzTnAn570yyTGF0R_MJPh/view?usp=sharing"; 
 
@@ -235,14 +251,14 @@
     let isSpellingMode = false, currentWriter = null, currentSpellWord = "", currentSpellCharIdx = 0;
     let pinyinArray = [];
     
-    // 🌟 新增：15分钟计时器变量
     let practiceStartTime = null;
     let practiceTimerInterval = null;
-    const TIME_LIMIT_MS = 15 * 60 * 1000; // 15分钟
+    const TIME_LIMIT_MS = 15 * 60 * 1000; 
     
+    let pendingUser = null; 
+
     const synth = window.speechSynthesis;
-    let bestEngVoice = null;
-    let bestCNVoice = null;
+    let bestEngVoice = null, bestCNVoice = null;
 
     function loadVoices() {
         const vs = synth.getVoices();
@@ -261,21 +277,17 @@
     function playTTS(text, lang) {
         if (synth.speaking) synth.cancel();
         const u = new SpeechSynthesisUtterance(text);
-        if (lang === 'zh') {
-            if (bestCNVoice) u.voice = bestCNVoice;
-            u.lang = 'zh-CN'; 
-        } else {
-            if (bestEngVoice) u.voice = bestEngVoice;
-            u.lang = 'en-US'; 
-        }
-        u.rate = 0.8; u.volume = 1;
-        synth.speak(u);
+        if (lang === 'zh') { if (bestCNVoice) u.voice = bestCNVoice; u.lang = 'zh-CN'; } 
+        else { if (bestEngVoice) u.voice = bestEngVoice; u.lang = 'en-US'; }
+        u.rate = 0.8; u.volume = 1; synth.speak(u);
     }
 
-    // --- 回车键全局监听 ---
+    // --- 回车键全局监听 (加入密码框的监听) ---
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
-            if (document.getElementById('quiz-screen').style.display === 'block') {
+            if (document.getElementById('pin-modal').style.display === 'flex') {
+                e.preventDefault(); verifyHubPin();
+            } else if (document.getElementById('quiz-screen').style.display === 'block') {
                 if (document.getElementById('sub-btn').style.display !== 'none') { e.preventDefault(); checkAns(); }
                 else if (document.getElementById('next-btn').style.display !== 'none') { e.preventDefault(); nextQ(); }
             } else if (document.getElementById('spelling-screen').style.display === 'block') {
@@ -303,7 +315,6 @@
         if (p.style.display === 'flex' && !canvas) initDrawPad();
     }
 
-    // 🌟 原版稳定的数据加载引擎，绝对不改动！
     async function init() {
         const now = new Date();
         const t2 = new Date(2026, 2, 23), t3 = new Date(2026, 5, 29), t4 = new Date(2026, 8, 14);
@@ -328,19 +339,65 @@
             if(!db[g]) db[g] = {}; if(!db[g][r.name]) db[g][r.name] = []; db[g][r.name].push(row);
         }); });
         document.getElementById('loading').style.display = 'none';
-        showScreen('menu-screen');
+        showScreen('user-screen');
     }
 
+    // 🌟 核心拦截逻辑：判断是否需要密码
     function switchUser(g) {
+        if (g === 'P1') {
+            pendingUser = g;
+            document.getElementById('pin-modal').style.display = 'flex';
+            document.getElementById('hub-pin-input').value = '';
+            setTimeout(() => document.getElementById('hub-pin-input').focus(), 100);
+            return;
+        }
+        executeSwitchUser(g);
+    }
+
+    // 🌟 实际执行切换用户的逻辑，并跳入科目页面
+    function executeSwitchUser(g) {
         curUser = g;
-        document.getElementById('btn-P3').className = g === 'P3' ? 'name-btn active' : 'name-btn';
-        document.getElementById('btn-P1').className = g === 'P1' ? 'name-btn active' : 'name-btn';
+        
+        // 动态设置欢迎标题
+        document.getElementById('welcome-title').innerText = g === 'P3' ? 'Welcome, Valerie (P3)!' : 'Welcome, Venessa (P1)!';
+        
+        // 渲染对应的资源
         const list = document.getElementById('res-list'); list.innerHTML = '';
         if(db[g] && db[g]['Resources']) db[g]['Resources'].forEach(r => {
             const div = document.createElement('div'); div.className = 'res-card';
             div.innerHTML = r.Type === 'IMAGE' ? `<b>${r.Title}</b><img src="${r.Content}" style="width:100%;margin-top:10px;border-radius:8px;">` : `<b>${r.Title}</b><p>${r.Content}</p>`;
             list.appendChild(div);
         });
+        
+        // 切换到科目页面
+        showScreen('subject-screen');
+    }
+
+    // 🌟 关闭密码框
+    function closePinModal() {
+        document.getElementById('pin-modal').style.display = 'none';
+        pendingUser = null;
+    }
+
+    // 🌟 校验老爸的动态密码
+    function verifyHubPin() {
+        const input = document.getElementById('hub-pin-input').value;
+        const now = new Date();
+        const mmdd = (now.getMonth() + 1) * 100 + now.getDate();
+        const day = now.getDay() === 0 ? 7 : now.getDay();
+        const correctPIN = (mmdd + day).toString();
+
+        if (input === correctPIN) {
+            closePinModal();
+            if (pendingUser) {
+                executeSwitchUser(pendingUser);
+                pendingUser = null;
+            }
+        } else {
+            const inpEl = document.getElementById('hub-pin-input');
+            inpEl.classList.add('error-shake');
+            setTimeout(() => { inpEl.classList.remove('error-shake'); inpEl.value = ''; inpEl.focus(); }, 400);
+        }
     }
 
     function getSortWeight(str) {
@@ -351,7 +408,6 @@
     }
 
     function handleSubjectClick(s) {
-        if (!curUser) { alert("Please select Valerie or Venessa first!"); return; }
         curSub = s; let pool = db[curUser][s];
         if (!pool || pool.length === 0) { alert(s === '华文' ? "题库里暂时还没有这科的题目哦！" : "No questions available for this subject yet!"); return; }
 
@@ -363,7 +419,7 @@
             document.getElementById('mode-title').innerText = isCN ? '请选择练习模式' : 'Select Practice Mode';
             document.getElementById('btn-mode-normal').innerText = isCN ? '🚀 随机过关 (Practice)' : '🚀 Start Practice';
             document.getElementById('btn-mode-spell').innerText = isCN ? '✍️ 听写模式 (Spelling)' : '✍️ Spelling Game';
-            document.getElementById('btn-mode-back').innerText = isCN ? '← 返回主页' : '← Back';
+            document.getElementById('btn-mode-back').innerText = isCN ? '← 返回科目' : '← Back to Subjects';
             showScreen('mode-screen');
         } 
         else if (hasSpelling) showTopicSelection(s, true);
@@ -431,20 +487,18 @@
         let pool = db[curUser][curSub];
         let hasNormal = pool.some(q => (q.Type||"").toUpperCase() !== 'SPELLING');
         let hasSpelling = pool.some(q => (q.Type||"").toUpperCase() === 'SPELLING');
-        if (hasNormal && hasSpelling) showScreen('mode-screen'); else showScreen('menu-screen');
+        if (hasNormal && hasSpelling) showScreen('mode-screen'); else showScreen('subject-screen');
     }
 
-    // 🌟 新增：启动时间监控
     function checkPracticeTime() {
         if (!practiceStartTime) return;
         const elapsed = Date.now() - practiceStartTime;
         if (elapsed >= TIME_LIMIT_MS) {
             document.getElementById('game-unlock-btn').style.display = 'flex';
-            clearInterval(practiceTimerInterval); // 显示后停止轮询
+            clearInterval(practiceTimerInterval); 
         }
     }
 
-    // 🌟 核心修改：在开始做题时启动计时
     function startQuiz() {
         let pool = db[curUser][curSub];
         const selectedJSONs = Array.from(document.querySelectorAll('.topic-cb:checked')).map(cb => cb.value);
@@ -462,11 +516,10 @@
 
         curIdx = 0; sessionErrors = 0; document.getElementById('draw-panel').style.display = 'none';
         
-        // 🚀 重置并启动 15 分钟计时器
         practiceStartTime = Date.now();
         document.getElementById('game-unlock-btn').style.display = 'none';
         if (practiceTimerInterval) clearInterval(practiceTimerInterval);
-        practiceTimerInterval = setInterval(checkPracticeTime, 5000); // 每5秒检查一次
+        practiceTimerInterval = setInterval(checkPracticeTime, 5000); 
 
         if (isSpellingMode) {
             if (curSub === 'English') sessionQs = pool.sort(() => 0.5 - Math.random());
@@ -479,18 +532,10 @@
         }
     }
 
-// 🌟 跳转并控制游戏防沉迷机制
     function goToGame() {
-        // 1. 扣除时间：将累计的练习时间清零，重新开始15分钟循环
         localStorage.setItem('accumulatedTime', '0');
-        
-        // 2. 隐藏入口按钮
         document.getElementById('game-unlock-btn').style.display = 'none';
-        
-        // 3. 生成一张独一无二的门票 (利用当前毫秒级时间戳，绝对不会重复)
         const uniqueTicket = 'hub_' + Date.now();
-        
-        // 4. 发车跳转到游戏，把门票像尾巴一样挂在网址后面
         window.location.href = "https://andydang2007.github.io/game/popballoons.html?ticket=" + uniqueTicket; 
     }
     
@@ -751,7 +796,6 @@
         else { finishQuiz(); }
     }
 
-    // 🌟 在退出或完成测验时，停止计时器
     function finishQuiz() {
         if (practiceTimerInterval) clearInterval(practiceTimerInterval);
         document.getElementById('game-unlock-btn').style.display = 'none';
