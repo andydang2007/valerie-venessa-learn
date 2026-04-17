@@ -2,132 +2,125 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Family Learning Hub</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"></script>
+    
     <style>
-        :root { --primary: #10b981; --bg: #f8fafc; }
+        :root { --primary: #10b981; --bg: #f8fafc; --text-main: #1e293b; --text-muted: #64748b; }
         
-        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #1e293b; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; }
+        * { box-sizing: border-box; font-family: 'Nunito', 'Microsoft YaHei', 'Comic Sans MS', sans-serif; -webkit-tap-highlight-color: transparent; }
         
-        .container { width: 100%; max-width: 600px; background: #fff; padding: 25px 25px 60px 25px; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; position: relative; }
-        .screen { display: none; width: 100%; }
+        /* 🌈 马卡龙渐变背景 */
+        body { background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); margin: 0; padding: 20px; color: var(--text-main); display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }
         
-        .magic-number {
-            display: inline-block; font-size: 1.4em; color: #f59e0b; font-weight: 900; padding: 0 5px;
-            animation: popPulse 1s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
-        }
+        /* ☁️ 圆润的白色主面板 */
+        .container { width: 100%; max-width: 650px; background: rgba(255,255,255,0.95); padding: 35px 25px 45px 25px; border-radius: 40px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); text-align: center; position: relative; border: 4px solid #ffffff; backdrop-filter: blur(10px); }
+        .screen { display: none; width: 100%; animation: bounceIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+        
+        @keyframes bounceIn { 0% { opacity: 0; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1); } }
+        
+        .magic-number { display: inline-block; font-size: 1.4em; color: #f59e0b; font-weight: 900; padding: 0 5px; animation: popPulse 1s infinite alternate cubic-bezier(0.4, 0, 0.2, 1); }
         @keyframes popPulse { 0% { transform: scale(1); text-shadow: 0 0 5px rgba(253, 224, 71, 0.5); } 100% { transform: scale(1.2) translateY(-3px); text-shadow: 0 0 15px rgba(234, 179, 8, 0.8), 0 0 30px rgba(234, 179, 8, 0.4); } }
 
+        /* 👑 带有 3D 果冻按压效果的按钮 */
         .name-selector { display: flex; flex-direction: column; gap: 20px; align-items: center; margin: 40px 0; }
-        button.name-btn { width: 85%; padding: 25px; border-radius: 20px; border: 2px solid #e2e8f0; background: white; cursor: pointer; font-weight: 900; font-size: 24px; transition: 0.3s; color: #475569; display: flex; align-items: center; justify-content: center; gap: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
-        button.name-btn:hover { background: #f1f5f9; transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.05); border-color: var(--primary); color: var(--primary); }
-
-        .grid-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; margin-bottom: 20px; }
-        .card-btn { background: white; border: 3px solid #e2e8f0; border-radius: 24px; padding: 25px 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; cursor: pointer; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); color: #475569; font-weight: bold; font-size: 18px; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
-        .card-btn:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.08); border-color: var(--primary); color: var(--primary); }
-        .card-btn .emoji { font-size: 42px; }
+        button.name-btn { width: 85%; padding: 20px; border-radius: 30px; border: 4px solid #e2e8f0; background: white; cursor: pointer; font-weight: 900; font-size: 26px; transition: 0.15s; color: #475569; display: flex; align-items: center; justify-content: center; gap: 15px; box-shadow: 0 8px 0 #cbd5e1; outline: none; }
+        button.name-btn:active { transform: translateY(8px); box-shadow: 0 0 0 transparent; }
         
-        .card-btn.eng:hover { border-color: #3b82f6; color: #3b82f6; }
-        .card-btn.math:hover { border-color: #ec4899; color: #ec4899; }
-        .card-btn.cn:hover { border-color: #a855f7; color: #a855f7; }
-        .card-btn.sci:hover { border-color: #10b981; color: #10b981; }
+        /* 💠 胖乎乎的网格卡片 */
+        .grid-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; width: 100%; margin-bottom: 20px; }
+        .grid-cards.three-col { grid-template-columns: repeat(3, 1fr); }
+        
+        .card-btn { background: white; border: 4px solid #e2e8f0; border-radius: 30px; padding: 25px 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; cursor: pointer; transition: 0.15s; color: #475569; font-weight: 900; font-size: 18px; box-shadow: 0 8px 0 #cbd5e1; }
+        .card-btn:active { transform: translateY(8px); box-shadow: 0 0 0 transparent; }
+        .card-btn .emoji { font-size: 46px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
+        
+        .card-btn.eng { border-color: #bae6fd; } .card-btn.eng:active { border-color: #3b82f6; }
+        .card-btn.math { border-color: #fbcfe8; } .card-btn.math:active { border-color: #ec4899; }
+        .card-btn.cn { border-color: #e9d5ff; } .card-btn.cn:active { border-color: #a855f7; }
+        .card-btn.sci { border-color: #a7f3d0; } .card-btn.sci:active { border-color: #10b981; }
 
-        .checkbox-grid { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 20px; max-height: 250px; overflow-y: auto; padding: 5px; }
-        .checkbox-label { display: flex; align-items: center; padding: 12px 18px; border-radius: 20px; border: 2px solid #e2e8f0; background: white; cursor: pointer; transition: 0.2s; font-size: 16px; font-weight: 500; color: #475569; user-select: none; }
-        .checkbox-label:hover { background: #f8fafc; border-color: #cbd5e1; }
+        .checkbox-grid { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-bottom: 20px; max-height: 300px; overflow-y: auto; padding: 10px; align-content: flex-start; }
+        .checkbox-label { padding: 14px 22px; border-radius: 25px; border: 3px solid #e2e8f0; background: white; cursor: pointer; transition: 0.15s; font-size: 16px; font-weight: 800; color: #475569; user-select: none; box-shadow: 0 5px 0 #cbd5e1; }
+        .checkbox-label:active { transform: translateY(5px); box-shadow: 0 0 0 transparent; }
         .checkbox-label input { display: none; }
-        .checkbox-label.selected { border-color: #3b82f6; background: #eff6ff; color: #1d4ed8; font-weight: bold; box-shadow: 0 2px 5px rgba(59, 130, 246, 0.1); }
-        .checkbox-label.vocab-list { border-color: #d8b4fe; background: #faf5ff; color: #7e22ce; }
-        .checkbox-label.vocab-list:hover { background: #f3e8ff; border-color: #a855f7; }
-        .checkbox-label.vocab-list.selected { border-color: #9333ea; background: #e9d5ff; color: #6b21a8; font-weight: bold; }
-        .bundle-label { width: 100%; justify-content: center; border-radius: 12px; border-width: 2px; border-style: dashed; padding: 10px; margin-top: 5px; }
-        .bundle-label.selected { border-style: solid; }
+        .checkbox-label.selected { border-color: #3b82f6; background: #eff6ff; color: #1d4ed8; box-shadow: 0 5px 0 #93c5fd; }
+        
+        .action-row { display: flex; gap: 15px; margin-top: 20px; }
+        .btn-action { border-radius: 25px; border: none; font-weight: 900; font-size: 20px; cursor: pointer; transition: 0.15s; display: flex; align-items: center; justify-content: center; outline: none; padding: 18px; box-shadow: 0 6px 0 rgba(0,0,0,0.1); }
+        .btn-action:active { transform: translateY(6px); box-shadow: 0 0 0 transparent; }
 
         .milestone-track { display: flex; justify-content: space-between; position: relative; margin: 15px 0 25px 0; padding: 0 5px; }
-        .milestone-track::before { content: ''; position: absolute; top: 50%; left: 15px; right: 15px; height: 6px; background: #e2e8f0; z-index: 1; transform: translateY(-50%); border-radius: 3px; }
-        .milestone-fill { position: absolute; top: 50%; left: 15px; height: 6px; background: #10b981; z-index: 1; transform: translateY(-50%); border-radius: 3px; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-        .milestone { width: 36px; height: 36px; background: #f8fafc; border: 3px solid #cbd5e1; border-radius: 50%; z-index: 2; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: 0.4s; box-sizing: border-box; }
+        .milestone-track::before { content: ''; position: absolute; top: 50%; left: 15px; right: 15px; height: 8px; background: #e2e8f0; z-index: 1; transform: translateY(-50%); border-radius: 4px; }
+        .milestone-fill { position: absolute; top: 50%; left: 15px; height: 8px; background: #10b981; z-index: 1; transform: translateY(-50%); border-radius: 4px; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .milestone { width: 38px; height: 38px; background: #f8fafc; border: 4px solid #cbd5e1; border-radius: 50%; z-index: 2; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: 0.4s; box-sizing: border-box; }
         .milestone.done { border-color: #10b981; background: #d1fae5; }
         .milestone.active { border-color: #3b82f6; background: #eff6ff; font-size: 20px; transform: scale(1.2); box-shadow: 0 0 15px rgba(59,130,246,0.3); animation: bounceActive 1s infinite alternate; }
 
-        .q-text { font-size: 24px; text-align: left; margin: 25px 0; line-height: 1.5; font-weight: 500; }
-        input.ans-input, textarea.ans-input { font-size: 20px; padding: 15px; width: 100%; border: 2px solid #e2e8f0; border-radius: 12px; box-sizing: border-box; outline: none; font-family: inherit; }
+        .q-text { font-size: 26px; text-align: left; margin: 25px 0; line-height: 1.5; font-weight: 800; color: #1e293b; }
+        input.ans-input, textarea.ans-input { font-size: 22px; padding: 18px; width: 100%; border: 4px solid #e2e8f0; border-radius: 20px; box-sizing: border-box; outline: none; font-family: inherit; font-weight: bold; color: #334155; transition: 0.2s; }
+        input.ans-input:focus, textarea.ans-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 5px rgba(59,130,246,0.1); }
         textarea.ans-input { resize: vertical; line-height: 1.4; }
-        input.ans-input.error-shake { border-color: #ef4444; animation: shake 0.3s; background-color: #fef2f2; }
+        input.ans-input.error-shake { border-color: #ef4444; animation: shake 0.3s; background-color: #fef2f2; color: #ef4444; }
         
-        .mcq-list { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
-        button.mcq-btn { padding: 16px; border-radius: 12px; border: 2px solid #e2e8f0; background: white; font-size: 18px; cursor: pointer; text-align: left; transition: 0.2s; font-family: inherit; color: #1e293b; outline: none; }
-        button.mcq-btn.active { border-color: var(--primary); background: #d1fae5; font-weight: bold; color: #065f46; }
+        .mcq-list { display: flex; flex-direction: column; gap: 12px; margin-top: 15px; }
+        button.mcq-btn { padding: 18px; border-radius: 20px; border: 4px solid #e2e8f0; background: white; font-size: 20px; font-weight: 700; cursor: pointer; text-align: left; transition: 0.15s; color: #1e293b; outline: none; box-shadow: 0 5px 0 #cbd5e1; }
+        button.mcq-btn:active { transform: translateY(5px); box-shadow: 0 0 0 transparent; }
+        button.mcq-btn.active { border-color: #3b82f6; background: #eff6ff; font-weight: 900; color: #1d4ed8; box-shadow: 0 5px 0 #93c5fd; }
         button.mcq-btn.error { border-color: #ef4444; background: #fef2f2; color: #b91c1c; animation: shake 0.3s; }
 
-        .feedback { font-size: 18px; margin: 15px 0; min-height: 24px; font-weight: bold; }
+        .feedback { font-size: 20px; margin: 20px 0; min-height: 28px; font-weight: 900; }
         
-        .controls { display: flex; gap: 10px; margin-top: 20px; height: 55px; align-items: stretch; box-sizing: border-box; }
-        .btn-action { flex: 1; padding: 0 15px; border-radius: 16px; border: none; font-weight: bold; cursor: pointer; outline: none; transition: 0.2s; font-size: 18px; display: flex; align-items: center; justify-content: center; box-sizing: border-box; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .btn-action:hover { filter: brightness(0.95); transform: translateY(-2px); }
-        .btn-action:active { transform: scale(0.98); }
-        #sub-btn, #eng-sub-btn { background: #3b82f6; color: white; }
+        .tool-btn { background: white; border: 3px solid #e2e8f0; padding: 10px 20px; border-radius: 15px; font-weight: 900; font-size: 16px; cursor: pointer; color: #475569; transition: 0.15s; box-shadow: 0 4px 0 #cbd5e1; outline: none; }
+        .tool-btn:active { transform: translateY(4px); box-shadow: 0 0 0 transparent; }
 
-        .pinyin-display { font-size: 36px; font-weight: bold; color: #64748b; margin: 5px 0 15px 0; }
-        .pinyin-unit { margin: 0 8px; transition: 0.3s; }
-        .pinyin-unit.active { color: #ea580c; transform: scale(1.2); text-decoration: underline; }
+        .draw-panel { display: none; flex-direction: column; align-items: center; margin-top: 15px; background: #f8fafc; padding: 15px; border-radius: 25px; border: 4px dashed #cbd5e1; }
+        canvas { background: white; border-radius: 15px; border: 2px solid #e2e8f0; touch-action: none; cursor: crosshair; }
         
-        .practice-pad-container { display: flex; flex-direction: column; align-items: center; background: #f8fafc; padding: 25px; border-radius: 20px; border: 2px dashed #cbd5e1; margin-bottom: 20px; box-shadow: inset 0 2px 10px rgba(0,0,0,0.02); width:100%; box-sizing: border-box; }
-        .hanzi-practice-box { width: 250px; height: 250px; border: 3px solid #cbd5e1; border-radius: 16px; background: white; margin: 0 auto 15px auto; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .hanzi-practice-box::before { content: ''; position: absolute; top: 50%; left: 0; width: 100%; height: 1px; background: #e2e8f0; border-top: 1px dashed #cbd5e1; }
-        .hanzi-practice-box::after { content: ''; position: absolute; left: 50%; top: 0; height: 100%; width: 1px; background: #e2e8f0; border-left: 1px dashed #cbd5e1; }
-        .word-card-btn { width: 50px; height: 60px; font-size: 28px; font-weight: bold; border: 2px solid #e2e8f0; border-radius: 12px; background: white; color: #1e293b; cursor: pointer; transition: 0.2s; display: flex; justify-content: center; align-items: center; padding: 0; outline: none; text-transform: lowercase; }
-        .word-card-btn:hover { border-color: #3b82f6; transform: translateY(-3px); box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2); }
-        
-        .tool-btn { background: white; border: 2px solid #e2e8f0; padding: 8px 15px; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; color: #475569; transition: 0.2s; }
-        .tool-btn:hover { background: #f1f5f9; border-color: #cbd5e1; }
-        .draw-panel { display: none; flex-direction: column; align-items: center; margin-top: 15px; background: #f8fafc; padding: 15px; border-radius: 16px; border: 2px dashed #cbd5e1; }
-        canvas { background: white; border-radius: 12px; border: 1px solid #e2e8f0; touch-action: none; cursor: crosshair; }
-        
-        .res-section { border-top: 2px dashed #e2e8f0; margin-top: 20px; padding-top: 20px; text-align: left; position: relative; }
-        .res-card { background: #f1f5f9; padding: 15px; border-radius: 12px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .res-section { border-top: 4px dashed #e2e8f0; margin-top: 30px; padding-top: 25px; text-align: left; }
+        .res-card { background: #f1f5f9; padding: 20px; border-radius: 20px; margin-bottom: 15px; border: 2px solid #e2e8f0; }
 
-        #school-term-display { position: absolute; bottom: 20px; right: 25px; font-size: 13px; color: #94a3b8; background: #f8fafc; padding: 6px 12px; border-radius: 12px; border: 1px solid #e2e8f0; font-weight: 600; margin: 0; z-index: 10; }
+        #school-term-display { position: absolute; bottom: -50px; right: 10px; font-size: 14px; color: #64748b; background: rgba(255,255,255,0.8); padding: 8px 16px; border-radius: 20px; font-weight: 800; border: 2px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.05); backdrop-filter: blur(5px); }
 
         /* 🌟 密码锁弹窗 */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
-        .modal-content { background: white; padding: 40px; border-radius: 30px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.2); width: 90%; max-width: 380px; display: flex; flex-direction: column; align-items: center; }
-        .pin-input-hub { font-size: 36px; font-weight: 900; letter-spacing: 12px; padding: 15px; width: 160px; text-align: center; border: 3px solid #e2e8f0; border-radius: 16px; margin: 25px 0; outline: none; color: #1e293b; transition: 0.2s; font-family: monospace; }
-        .pin-input-hub:focus { border-color: #f59e0b; box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.15); }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
+        .modal-content { background: white; padding: 40px; border-radius: 40px; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.2); width: 90%; max-width: 400px; display: flex; flex-direction: column; align-items: center; border: 5px solid #fff; }
+        .pin-input-hub { font-size: 40px; font-weight: 900; letter-spacing: 12px; padding: 20px; width: 180px; text-align: center; border: 4px solid #e2e8f0; border-radius: 25px; margin: 25px 0; outline: none; color: #1e293b; transition: 0.2s; box-shadow: inset 0 4px 6px rgba(0,0,0,0.05); }
+        .pin-input-hub:focus { border-color: #f59e0b; background: #fffbeb; }
         .pin-input-hub.error-shake { border-color: #ef4444; background: #fef2f2; color: #ef4444; animation: shake 0.3s; }
 
         @media (min-width: 768px) {
-            body { justify-content: center; padding: 40px; background: #e2e8f0; }
-            .container { max-width: 750px; padding: 50px 50px 80px 50px; border-radius: 36px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); }
-            .hanzi-practice-box { width: 300px; height: 300px; }
-            #school-term-display { font-size: 15px; bottom: 30px; right: 40px; padding: 8px 16px; }
+            .container { padding: 40px 40px 60px 40px; border-radius: 50px; }
         }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div id="loading" class="screen" style="display:block; padding: 50px 0; font-size: 20px; color: #64748b; font-weight: bold;">Syncing Lessons...</div>
+    <div id="loading" class="screen" style="display:block; padding: 60px 0; font-size: 24px; color: #3b82f6; font-weight: 900;">
+        🌟 魔法书正在加载...
+    </div>
 
     <div id="user-screen" class="screen">
-        <h2 style="margin:0 0 5px 0; color:#0f172a; font-size: 28px;">Did you <span class="magic-number" style="font-size:1em;">6~7</span> today?</h2>
-        <div style="font-size: 15px; color: #64748b; margin-top: -5px; font-weight: 600;">Aim for a perfect score or just 1 mistake!</div>
+        <h2 style="margin:0 0 5px 0; color:#0f172a; font-size: 32px; font-weight: 900;">Did you <span class="magic-number" style="font-size:1.2em;">6~7</span> today?</h2>
+        <div style="font-size: 16px; color: #64748b; margin-top: 5px; font-weight: 800;">Aim for a perfect score or just 1 mistake!</div>
 
         <div class="name-selector">
             <button class="name-btn" onclick="switchUser('P3')">
-                <span style="font-size: 40px;">👱‍♀️</span> Valerie
+                <span style="font-size: 46px; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.1));">👱‍♀️</span> Valerie
             </button>
             <button class="name-btn" onclick="switchUser('P1')">
-                <span style="font-size: 40px;">👧</span> Venessa
+                <span style="font-size: 46px; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.1));">👧</span> Venessa
             </button>
         </div>
     </div>
 
     <div id="subject-screen" class="screen">
-        <h2 id="welcome-title" style="margin:0 0 25px 0; color:#0f172a; font-size: 28px;">Welcome!</h2>
+        <h2 id="welcome-title" style="margin:0 0 30px 0; color:#0f172a; font-size: 32px; font-weight: 900;">Welcome!</h2>
         
         <div class="grid-cards">
             <div class="card-btn eng" onclick="handleSubjectClick('English')">
@@ -145,91 +138,82 @@
         </div>
 
         <div class="res-section">
-            <h3 style="margin-top:0; color:#334155;">Resources 📚</h3>
+            <h3 style="margin-top:0; color:#334155; font-size: 22px; font-weight: 900;">📚 Resources</h3>
             <div id="res-list"></div>
         </div>
         
         <div style="margin-top: 30px;">
-            <button class="btn-action" style="background:#f1f5f9; color:#64748b; border:2px solid #e2e8f0; width: 100%; padding: 18px;" onclick="showScreen('user-screen')">← Switch User</button>
+            <button class="btn-action" style="background:#f1f5f9; color:#64748b; border:4px solid #e2e8f0; width: 100%; box-shadow: 0 6px 0 #cbd5e1;" onclick="showScreen('user-screen')">← Switch User</button>
         </div>
     </div>
 
     <div id="mode-screen" class="screen">
-        <h2 id="mode-title" style="margin:0 0 25px 0; color:#0f172a;">Select Practice Mode</h2>
+        <h2 style="margin:0 0 30px 0; color:#0f172a; font-size: 28px; font-weight: 900;">Select Practice Mode</h2>
         <div class="grid-cards">
-            <div class="card-btn" style="border-color:#3b82f6; color:#3b82f6;" onclick="showTopicSelection(curSub, false)">
+            <div class="card-btn" style="border-color:#bae6fd; color:#0284c7;" onclick="showTopicSelection(curSub, false)">
                 <div class="emoji">🚀</div> Practice
             </div>
-            <div class="card-btn" style="border-color:#f59e0b; color:#f59e0b;" onclick="showTopicSelection(curSub, true)">
+            <div class="card-btn" style="border-color:#fde68a; color:#b45309;" onclick="showTopicSelection(curSub, true)">
                 <div class="emoji">✍️</div> Spelling
             </div>
         </div>
-        <button class="btn-action" style="background:#f1f5f9; color:#64748b; width: 100%; padding: 18px; margin-top: 10px;" onclick="showScreen('subject-screen')">← Back to Subjects</button>
+        <button class="btn-action" style="background:#f1f5f9; color:#64748b; width: 100%; border:4px solid #e2e8f0; box-shadow: 0 6px 0 #cbd5e1; margin-top: 15px;" onclick="showScreen('subject-screen')">← Back to Subjects</button>
     </div>
 
     <div id="cn-mode-screen" class="screen">
-        <h2 style="margin:0 0 25px 0; color:#0f172a;">你要做什么练习？</h2>
-        <div class="grid-cards">
-            <div class="card-btn" style="border-color:#3b82f6; color:#3b82f6;" onclick="showTopicSelection('华文', false)">
-                <div class="emoji">📝</div> 课文复习
+        <h2 style="margin:0 0 30px 0; color:#0f172a; font-size: 28px; font-weight: 900;">你要做什么练习？</h2>
+        
+        <div class="grid-cards three-col">
+            <div class="card-btn" style="border-color:#bae6fd; color:#0284c7;" onclick="showTopicSelection('华文', false)">
+                <div class="emoji">📝</div> <div style="font-size:16px;">课文复习</div>
             </div>
-            <div class="card-btn" style="border-color:#f59e0b; color:#f59e0b;" onclick="goToSpelling()">
-                <div class="emoji">✍️</div> 学听写
+            <div class="card-btn" style="border-color:#fde68a; color:#b45309;" onclick="goToSpelling()">
+                <div class="emoji">✍️</div> <div style="font-size:16px;">学听写</div>
+            </div>
+            <div class="card-btn" style="border-color:#fbcfe8; color:#be185d;" onclick="goToPinyinGame()">
+                <div class="emoji">🎮</div> <div style="font-size:16px;">拼音游戏</div>
             </div>
         </div>
-        <div class="card-btn" style="border-color:#ec4899; color:#ec4899; width: 100%; flex-direction: row; gap: 20px; padding: 20px;" onclick="goToPinyinGame()">
-            <div class="emoji" style="font-size: 32px;">🎮</div> <span style="font-size: 22px;">拼音游戏厅</span>
-        </div>
-        <button class="btn-action" style="background:#f1f5f9; color:#64748b; width: 100%; padding: 18px; margin-top: 25px;" onclick="showScreen('subject-screen')">← 返回科目选择</button>
+        
+        <button class="btn-action" style="background:#f1f5f9; color:#64748b; width: 100%; border:4px solid #e2e8f0; box-shadow: 0 6px 0 #cbd5e1; margin-top: 25px;" onclick="showScreen('subject-screen')">← 返回科目选择</button>
     </div>
 
     <div id="topic-screen" class="screen">
-        <h2 id="topic-title" style="margin:0 0 5px 0; color:#0f172a;">Select Topics</h2>
-        <p id="topic-desc" style="color:#64748b; margin-bottom: 20px; font-size:14px;"></p>
+        <h2 id="topic-title" style="margin:0 0 5px 0; color:#0f172a; font-size: 28px; font-weight: 900;">Select Topics</h2>
+        <p id="topic-desc" style="color:#64748b; margin-bottom: 20px; font-weight: 700;"></p>
         <div style="text-align: center; margin-bottom: 15px;">
-            <label class="checkbox-label" id="check-all-label" style="display:inline-flex; background:#eff6ff; border-color:#3b82f6;">
+            <label class="checkbox-label" id="check-all-label" style="display:inline-flex; background:#eff6ff; border-color:#3b82f6; box-shadow: 0 5px 0 #93c5fd; color: #1d4ed8;">
                 <input type="checkbox" id="check-all" onchange="toggleAllTopics(this)">
                 <b id="check-all-text">🌟 全选所有 (Select All)</b>
             </label>
         </div>
         <div id="topic-checkboxes" class="checkbox-grid"></div>
-        <div class="action-row" style="display:flex; gap:10px; flex-direction: row;">
-            <button class="btn-action" style="background:#f1f5f9; color:#64748b; flex:0.4; padding: 20px 0;" onclick="goBackFromTopic()">← Back</button>
-            <button class="btn-action" style="background:#10b981; color:white; flex:0.6; padding: 20px 0;" onclick="startQuiz()">Start 🚀</button>
+        <div class="action-row">
+            <button class="btn-action" style="background:#f1f5f9; color:#64748b; border: 4px solid #e2e8f0; box-shadow: 0 6px 0 #cbd5e1; flex:0.4;" onclick="goBackFromTopic()">← Back</button>
+            <button class="btn-action" style="background:#10b981; color:white; box-shadow: 0 6px 0 #059669; flex:0.6;" onclick="startQuiz()">Start 🚀</button>
         </div>
     </div>
 
     <div id="quiz-screen" class="screen">
         <div id="progress-bar" class="milestone-track"></div>
         <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom:15px;">
-            <button class="tool-btn" style="color:#10b981; border-color:#10b981; padding: 6px 12px; font-size:14px;" onclick="toggleDrawPad()">✍️ 草稿板</button>
-            <div style="font-size:14px; color:#94a3b8;" id="progress-text"></div>
+            <button class="tool-btn" style="color:#059669; border-color:#a7f3d0; background:#ecfdf5;" onclick="toggleDrawPad()">✍️ 草稿板</button>
+            <div style="font-size:16px; font-weight: 800; color:#94a3b8;" id="progress-text"></div>
         </div>
         <div id="q-text" class="q-text"></div>
-        <div id="draw-panel" style="display:none; flex-direction: column; align-items: center; margin-bottom:15px; background:#f8fafc; padding:10px; border-radius:12px; border:2px dashed #cbd5e1;">
-            <canvas id="pad" width="300" height="200" style="background:white; border-radius:8px; border:1px solid #e2e8f0; touch-action:none;"></canvas>
-            <div style="display:flex; justify-content: space-between; width:100%; margin-top:8px;">
-                <button class="tool-btn" onclick="clearPad()">🗑️ Clear</button>
+        <div id="draw-panel" class="draw-panel">
+            <canvas id="pad" width="300" height="200"></canvas>
+            <div style="display:flex; justify-content: space-between; width:100%; margin-top:12px;">
+                <button class="tool-btn" style="background:#fef2f2; border-color:#fecaca; color:#e11d48;" onclick="clearPad()">🗑️ Clear</button>
                 <button class="tool-btn" onclick="toggleDrawPad()">❌ Close</button>
             </div>
         </div>
         <div id="input-container"></div>
         <div id="fb-text" class="feedback"></div>
-        <div class="controls">
-            <button id="exit-btn" class="btn-action" style="background:#f1f5f9; color:#475569;" onclick="location.reload()">Exit</button>
-            <button id="sub-btn" class="btn-action" style="background:#3b82f6; color:white;" onclick="checkAns()">Submit (Enter)</button>
-            <button id="next-btn" class="btn-action" style="background:#10b981; color:white; display:none;" onclick="nextQ()">Next (Enter) →</button>
-        </div>
-    </div>
-
-    <div id="spelling-screen" class="screen">
-        <div id="spell-progress-bar" class="milestone-track"></div>
-        <div id="spelling-pinyin" class="pinyin-display" style="display:flex; justify-content:center; align-items:center; flex-wrap:wrap;"></div>
-        <div id="practice-pad-container" class="practice-pad-container"></div>
-        <div id="spell-fb" class="feedback"></div>
-        <div class="controls">
-            <button class="btn-action" style="background:#f1f5f9; color:#475569; flex:0.3;" onclick="location.reload()">Exit</button>
-            <button id="spell-next-btn" class="btn-action" style="background:#e2e8f0; color:#94a3b8; flex:0.7; pointer-events:none;" onclick="nextSpellQ()">Next (Enter) →</button>
+        <div class="action-row" style="margin-top: 10px;">
+            <button id="exit-btn" class="btn-action" style="background:#f1f5f9; color:#64748b; border: 4px solid #e2e8f0; box-shadow: 0 6px 0 #cbd5e1; flex: 0.8;" onclick="location.reload()">Quit 🏠</button>
+            <button id="sub-btn" class="btn-action" style="background:#3b82f6; color:white; box-shadow: 0 6px 0 #2563eb; flex: 1.2;" onclick="checkAns()">Submit</button>
+            <button id="next-btn" class="btn-action" style="background:#10b981; color:white; box-shadow: 0 6px 0 #059669; flex: 1.2; display:none;" onclick="nextQ()">Next ➡️</button>
         </div>
     </div>
 
@@ -238,24 +222,21 @@
 
 <div id="pin-modal" class="modal-overlay">
     <div class="modal-content">
-        <div style="font-size: 40px; margin-bottom: 10px;">🛡️</div>
-        <h3 style="margin:0 0 10px 0; color:#0f172a; font-size: 22px;">Parent Lock</h3>
-        <p style="color:#64748b; font-size:15px; margin:0;">Access to Venessa's profile is locked.</p>
-        <p style="color:#94a3b8; font-size:13px; margin-top:8px;">( Dad's Code: MM*100+DD+Day )</p>
+        <div style="font-size: 50px; margin-bottom: 10px; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.1));">🛡️</div>
+        <h3 style="margin:0 0 10px 0; color:#0f172a; font-size: 26px; font-weight: 900;">Parent Lock</h3>
+        <p style="color:#64748b; font-size:16px; margin:0; font-weight: 700;">Access to Venessa's profile is locked.</p>
+        <p style="color:#94a3b8; font-size:14px; margin-top:8px; font-weight: 800;">( Code: MM*100+DD+Day )</p>
         
         <input type="tel" id="hub-pin-input" class="pin-input-hub" maxlength="4" placeholder="***" autocomplete="off">
         
         <div style="display:flex; gap:15px; width: 100%;">
-            <button class="btn-action" style="background:#f1f5f9; color:#475569; flex:1; padding: 18px 0;" onclick="closePinModal()">Cancel</button>
-            <button class="btn-action" style="background:#f59e0b; color:white; flex:1; padding: 18px 0;" onclick="verifyHubPin()">Unlock</button>
+            <button class="btn-action" style="background:#f1f5f9; color:#475569; border: 4px solid #e2e8f0; box-shadow: 0 6px 0 #cbd5e1; flex:1;" onclick="closePinModal()">Cancel</button>
+            <button class="btn-action" style="background:#f59e0b; color:white; box-shadow: 0 6px 0 #d97706; flex:1;" onclick="verifyHubPin()">Unlock</button>
         </div>
     </div>
 </div>
 
 <script>
-    // ⚠️ 你的 Google Apps Script Web App URL
-    const GOOGLE_LOG_URL = "YOUR_DEPLOYED_URL_HERE"; 
-    
     const SUCCESS_AUDIO_VALERIE = "https://drive.google.com/file/d/1StoRXMJqWPegTr5Cu6oxlyIvL0iVgFwH/view?usp=sharing"; 
     const SUCCESS_AUDIO_VENESSA = "https://drive.google.com/file/d/1dMcI2VhKCzCKzTnAn570yyTGF0R_MJPh/view?usp=sharing"; 
 
@@ -263,34 +244,21 @@
     const GIDS = { "English": "1893311738", "Math": "59294467", "Science": "1581471994", "华文": "2020673087", "Resources": "469231602" };
 
     let db = {}, curUser = '', curSub = '', sessionQs = [], curIdx = 0, sessionErrors = 0;
-    let isSpellingMode = false, currentWriter = null, currentSpellWord = "", currentSpellCharIdx = 0;
-    let pinyinArray = [];
-    
+    let isSpellingMode = false;
     let pendingUser = null; 
 
-    const synth = window.speechSynthesis;
-    let bestEngVoice = null, bestCNVoice = null;
-
-    function loadVoices() {
-        const vs = synth.getVoices();
-        bestEngVoice = vs.find(v => v.name.includes('Google') && v.lang.startsWith('en')) || vs.find(v => v.lang.startsWith('en')) || vs[0];
-        bestCNVoice = vs.find(v => (v.name.includes('Google') || v.name.includes('Ting-Ting')) && v.lang.includes('zh')) || vs.find(v => v.lang.includes('zh')) || vs[0];
-    }
-    if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = loadVoices;
-    loadVoices();
-
-    function getDriveDirectLink(link) {
-        if (!link) return "";
-        let m = link.match(/\/d\/([a-zA-Z0-9_-]+)/);
-        return m ? `https://drive.usercontent.google.com/download?id=${m[1]}` : link;
-    }
-
-    function playTTS(text, lang) {
-        if (synth.speaking) synth.cancel();
-        const u = new SpeechSynthesisUtterance(text);
-        if (lang === 'zh') { if (bestCNVoice) u.voice = bestCNVoice; u.lang = 'zh-CN'; } 
-        else { if (bestEngVoice) u.voice = bestEngVoice; u.lang = 'en-US'; }
-        u.rate = 0.8; u.volume = 1; synth.speak(u);
+    // 智能隐藏日期的控制函数
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+        document.getElementById(id).style.display = 'block';
+        
+        // 只有主菜单和科目选择页显示日期，一旦进入学习相关页面自动隐藏
+        const termDisplay = document.getElementById('school-term-display');
+        if (id === 'user-screen' || id === 'subject-screen') {
+            termDisplay.style.display = 'block';
+        } else {
+            termDisplay.style.display = 'none';
+        }
     }
 
     document.addEventListener('keydown', (e) => {
@@ -300,9 +268,6 @@
             } else if (document.getElementById('quiz-screen').style.display === 'block') {
                 if (document.getElementById('sub-btn').style.display !== 'none') { e.preventDefault(); checkAns(); }
                 else if (document.getElementById('next-btn').style.display !== 'none') { e.preventDefault(); nextQ(); }
-            } else if (document.getElementById('spelling-screen').style.display === 'block') {
-                if (curSub === 'English' && document.getElementById('eng-sub-btn') && document.getElementById('eng-sub-btn').style.display !== 'none') { e.preventDefault(); checkEngTyping(); }
-                else if (document.getElementById('spell-next-btn').style.pointerEvents === 'auto') { e.preventDefault(); nextSpellQ(); }
             }
         }
     });
@@ -310,7 +275,7 @@
     let canvas, ctx, drawing = false;
     function initDrawPad() {
         canvas = document.getElementById('pad'); ctx = canvas.getContext('2d');
-        ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = 4; ctx.strokeStyle = '#1e293b';
+        ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = 5; ctx.strokeStyle = '#1e293b';
         const start = (e) => { drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); };
         const move = (e) => { if (!drawing) return; e.preventDefault(); const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); };
         const stop = () => { drawing = false; };
@@ -365,15 +330,22 @@
 
     function executeSwitchUser(g) {
         curUser = g;
+        localStorage.setItem('currentPlayer', curUser);
+
         document.getElementById('welcome-title').innerText = g === 'P3' ? 'Welcome, Valerie!' : 'Welcome, Venessa!';
         document.getElementById('cn-subject-btn').innerHTML = g === 'P3' ? '<div class="emoji">🐼</div> 高级华文' : '<div class="emoji">🐼</div> 华文';
         
         const list = document.getElementById('res-list'); list.innerHTML = '';
-        if(db[g] && db[g]['Resources']) db[g]['Resources'].forEach(r => {
-            const div = document.createElement('div'); div.className = 'res-card';
-            div.innerHTML = r.Type === 'IMAGE' ? `<b>${r.Title}</b><img src="${r.Content}" style="width:100%;margin-top:10px;border-radius:8px;">` : `<b>${r.Title}</b><p>${r.Content}</p>`;
-            list.appendChild(div);
-        });
+        if(db[g] && db[g]['Resources'] && db[g]['Resources'].length > 0) {
+            document.querySelector('.res-section').style.display = 'block';
+            db[g]['Resources'].forEach(r => {
+                const div = document.createElement('div'); div.className = 'res-card';
+                div.innerHTML = r.Type === 'IMAGE' ? `<b style="font-size:18px;">${r.Title}</b><img src="${r.Content}" style="width:100%;margin-top:12px;border-radius:12px;border:2px solid #e2e8f0;">` : `<b style="font-size:18px;">${r.Title}</b><p style="margin-top:8px; font-weight:700; color:#475569;">${r.Content}</p>`;
+                list.appendChild(div);
+            });
+        } else {
+            document.querySelector('.res-section').style.display = 'none';
+        }
         
         showScreen('subject-screen');
     }
@@ -410,7 +382,10 @@
     }
 
     function handleSubjectClick(s) {
-        curSub = s; let pool = db[curUser][s];
+        curSub = s; 
+        localStorage.setItem('currentSubject', curSub);
+        let pool = db[curUser][s];
+        
         if (!pool || pool.length === 0) { alert(s === '华文' ? "题库里暂时还没有这科的题目哦！" : "No questions available for this subject yet!"); return; }
 
         if (s === '华文') {
@@ -425,16 +400,8 @@
         }
     }
 
-    // 🌟🌟 新增：指向同代码库的其他 HTML 文件
-    function goToPinyinGame() {
-        localStorage.setItem('currentPlayer', curUser);
-        window.location.href = "pinyin.html"; 
-    }
-
-    function goToSpelling() {
-        localStorage.setItem('currentPlayer', curUser);
-        window.location.href = "spelling.html"; 
-    }
+    function goToPinyinGame() { window.location.href = "pinyin.html"; }
+    function goToSpelling() { window.location.href = "spelling.html"; }
 
     function showTopicSelection(s, isS) {
         curSub = s; isSpellingMode = isS; let pool = db[curUser][s];
@@ -504,18 +471,6 @@
         }
     }
 
-    function logToCloud(mistakesArray) {
-        if (!GOOGLE_LOG_URL || GOOGLE_LOG_URL.includes("YOUR_DEPLOYED_URL_HERE")) return;
-        const payload = {
-            pilot: curUser,
-            grade: curUser,
-            score: "Quiz Mode",
-            maxCombo: "N/A",
-            mistakes: mistakesArray.join(', ')
-        };
-        fetch(GOOGLE_LOG_URL, { method: 'POST', body: JSON.stringify(payload) }).catch(e => console.warn("Log error", e));
-    }
-
     function startQuiz() {
         let pool = db[curUser][curSub];
         const selectedJSONs = Array.from(document.querySelectorAll('.topic-cb:checked')).map(cb => cb.value);
@@ -532,17 +487,10 @@
         });
 
         curIdx = 0; sessionErrors = 0; document.getElementById('draw-panel').style.display = 'none';
-        window.currentSessionMistakes = [];
 
-        if (isSpellingMode) {
-            if (curSub === 'English') sessionQs = pool.sort(() => 0.5 - Math.random());
-            else sessionQs = pool;
-            showScreen('spelling-screen'); renderSpelling();
-        } else {
-            let grabCount = Math.min(pool.length, 7);
-            sessionQs = pool.sort(() => 0.5 - Math.random()).slice(0, grabCount);
-            showScreen('quiz-screen'); renderQ();
-        }
+        let grabCount = Math.min(pool.length, 7);
+        sessionQs = pool.sort(() => 0.5 - Math.random()).slice(0, grabCount);
+        showScreen('quiz-screen'); renderQ();
     }
 
     function updateProgress(barId) {
@@ -550,169 +498,12 @@
         const len = sessionQs.length; const pct = len > 1 ? (curIdx / (len - 1)) * 100 : 100;
         let activeIcon = isSpellingMode ? '✍️' : (curSub === '华文' ? '🐼' : (curSub === 'Science' ? '🌱' : (curSub === 'Math' ? '🔢' : '🚀')));
         
-        if (isSpellingMode && len > 10) {
-            bar.innerHTML = `<div class="milestone-fill" style="width: ${pct}%; transition: width 0.3s;"></div>
-                             <div style="position:absolute; right:0; top:-25px; font-weight:bold; color:#10b981;">${curIdx + 1} / ${len}</div>`;
-            return;
-        }
-
         let html = `<div class="milestone-fill" style="width: ${pct}%"></div>`;
         for(let i=0; i<len; i++) {
             let cls = 'milestone' + (i < curIdx ? ' done' : (i === curIdx ? ' active' : ''));
             html += `<div class="${cls}">${i < curIdx ? '⭐' : (i === curIdx ? activeIcon : '☁️')}</div>`;
         }
         bar.innerHTML = html;
-    }
-
-    function renderSpelling() {
-        updateProgress('spell-progress-bar');
-        const q = sessionQs[curIdx];
-        document.getElementById('spell-fb').innerText = '';
-        const nextBtn = document.getElementById('spell-next-btn');
-        nextBtn.style.background = '#e2e8f0'; nextBtn.style.pointerEvents = 'none';
-
-        if (curSub === 'English') renderEnglishSpelling(q);
-        else renderChineseSpelling(q);
-    }
-
-    function renderEnglishSpelling(q) {
-        currentSpellWord = (q['Correct Answer'] || "").toString().trim().toLowerCase();
-        
-        document.getElementById('spelling-pinyin').innerHTML = `
-            <button class="tool-btn" style="font-size:24px; padding:12px 25px; border-color:#3b82f6; color:#3b82f6; background:#eff6ff; border-radius:16px; box-shadow:0 4px 6px rgba(59,130,246,0.2);" onclick="playTTS('${currentSpellWord}', 'en')">
-                🔊 Listen & Spell
-            </button>`;
-        
-        let letters = currentSpellWord.split('');
-        const alpha = "abcdefghijklmnopqrstuvwxyz";
-        letters.push(alpha[Math.floor(Math.random() * alpha.length)]);
-        letters.push(alpha[Math.floor(Math.random() * alpha.length)]);
-        letters.sort(() => Math.random() - 0.5);
-        
-        let btnsHtml = '';
-        letters.forEach((l, idx) => {
-            btnsHtml += `<button class="word-card-btn" onclick="document.getElementById('eng-spell-input').value+='${l}'; document.getElementById('eng-spell-input').focus();">${l}</button>`;
-        });
-        
-        const container = document.getElementById('practice-pad-container');
-        container.style.display = 'flex';
-        container.innerHTML = `
-            <input type="text" id="eng-spell-input" class="ans-input" style="text-align:center; font-size:32px; text-transform:lowercase; font-weight:bold; letter-spacing:2px; padding:20px; width:100%; max-width:350px;" autocomplete="off" spellcheck="false" placeholder="Type here..." />
-            <div style="display:flex; gap:10px; width:100%; max-width:350px; margin-top:15px; height:55px;">
-                <button class="tool-btn" id="eng-hint-btn" style="flex:0.3; background:#fffbeb; color:#d97706; border-color:#fde68a;" onclick="showEngHint()">💡 Hint</button>
-                <button class="btn-action btn-candy" id="eng-sub-btn" style="flex:0.7; margin:0;" onclick="checkEngTyping()">Submit</button>
-            </div>
-            <div id="eng-hint-area" style="display:none; flex-wrap:wrap; gap:8px; justify-content:center; width:100%; margin-top:15px;">
-                ${btnsHtml}
-            </div>
-        `;
-        
-        setTimeout(() => playTTS(currentSpellWord, 'en'), 600);
-        setTimeout(() => document.getElementById('eng-spell-input').focus(), 700);
-    }
-
-    function showEngHint() {
-        document.getElementById('eng-hint-area').style.display = 'flex';
-        document.getElementById('eng-hint-btn').style.display = 'none';
-        document.getElementById('eng-spell-input').focus();
-    }
-
-    function checkEngTyping() {
-        const inp = document.getElementById('eng-spell-input');
-        if(inp.value.trim().toLowerCase() === currentSpellWord) {
-            inp.style.borderColor = '#10b981'; inp.style.color = '#10b981'; inp.disabled = true;
-            document.getElementById('eng-sub-btn').style.display = 'none';
-            if (document.getElementById('eng-hint-btn')) document.getElementById('eng-hint-btn').style.display = 'none';
-            if (document.getElementById('eng-hint-area')) document.getElementById('eng-hint-area').style.display = 'none';
-            
-            playTTS("Excellent!", 'en');
-            const nextBtn = document.getElementById('spell-next-btn');
-            nextBtn.style.background = '#10b981'; nextBtn.style.color = 'white'; nextBtn.style.pointerEvents = 'auto';
-        } else {
-            sessionErrors++;
-            if(window.currentSessionMistakes) window.currentSessionMistakes.push(currentSpellWord);
-            inp.classList.add('error-shake');
-            inp.style.borderColor = '#ef4444'; inp.style.color = '#ef4444'; inp.style.background = '#fef2f2';
-            setTimeout(() => {
-                inp.classList.remove('error-shake');
-                inp.style.borderColor = '#e2e8f0'; inp.style.color = '#1e293b'; inp.style.background = 'white';
-                inp.focus();
-            }, 400);
-        }
-    }
-
-    function renderChineseSpelling(q) {
-        currentSpellWord = (q['Correct Answer'] || "").toString().trim();
-        pinyinArray = q.Question.trim().split(/\s+/);
-        currentSpellCharIdx = 0;
-        
-        let pinyinHtml = '<div style="display:flex; gap:5px; justify-content:center; align-items:center; flex-wrap:wrap;">';
-        let pyIndex = 0;
-        for (let i = 0; i < currentSpellWord.length; i++) {
-            let char = currentSpellWord[i];
-            if (!/[，。！？、：；（）《》“”]/u.test(char)) {
-                let py = pinyinArray[pyIndex] || "";
-                pinyinHtml += `<span class="pinyin-unit" id="py-idx-${i}">${py}</span>`;
-                pyIndex++;
-            }
-        }
-        pinyinHtml += '</div>';
-
-        document.getElementById('spelling-pinyin').innerHTML = pinyinHtml;
-        
-        const container = document.getElementById('practice-pad-container');
-        container.style.display = 'flex';
-        container.innerHTML = `<div id="hanzi-practice-box" class="hanzi-practice-box"></div>`;
-        
-        startNextChar();
-    }
-
-    function startNextChar() {
-        while(currentSpellCharIdx < currentSpellWord.length && /[，。！？、：；（）《》“”]/u.test(currentSpellWord[currentSpellCharIdx])) { currentSpellCharIdx++; }
-
-        if (currentSpellCharIdx >= currentSpellWord.length) {
-            document.querySelectorAll('span[id^="py-idx-"]').forEach(el => {
-                el.style.color = '#10b981'; el.style.fontWeight = 'bold'; el.style.transform = 'scale(1)'; el.style.textDecoration = 'none';
-            });
-            const nextBtn = document.getElementById('spell-next-btn');
-            nextBtn.style.background = '#10b981'; nextBtn.style.color = 'white'; nextBtn.style.pointerEvents = 'auto';
-            if (currentWriter) { currentWriter.cancelQuiz(); currentWriter = null; }
-            return;
-        }
-
-        document.querySelectorAll('span[id^="py-idx-"]').forEach(el => {
-            el.style.color = '#cbd5e1'; el.style.fontWeight = 'normal'; el.style.transform = 'scale(1)'; el.style.textDecoration = 'none';
-        });
-        let curPy = document.getElementById(`py-idx-${currentSpellCharIdx}`);
-        if (curPy) { curPy.classList.add('active'); }
-
-        let char = currentSpellWord[currentSpellCharIdx];
-        const box = document.getElementById('hanzi-practice-box');
-        box.innerHTML = ''; 
-        let boxSize = document.body.clientWidth < 400 ? 250 : 280;
-        
-        currentWriter = HanziWriter.create('hanzi-practice-box', char, {
-            width: boxSize, height: boxSize, padding: 15,
-            showOutline: false, strokeAnimationSpeed: 1, delayBetweenStrokes: 50,
-            strokeColor: '#1e293b', drawingColor: '#3b82f6', showCharacter: false
-        });
-
-        currentWriter.quiz({
-            onMistake: function() { 
-                sessionErrors++; 
-                if(window.currentSessionMistakes) window.currentSessionMistakes.push(char);
-            },
-            onComplete: function() { 
-                currentSpellCharIdx++;
-                setTimeout(() => startNextChar(), 500); 
-            }
-        });
-    }
-
-    function nextSpellQ() {
-        if(synth.speaking) synth.cancel();
-        if(curIdx < sessionQs.length - 1) { curIdx++; renderSpelling(); } 
-        else { finishQuiz(); }
     }
 
     function renderQ() {
@@ -762,7 +553,7 @@
         };
 
         if (qType === 'OPEN') {
-            fb.innerHTML = `<span style="color:#0f172a;"><b>${isCN ? "参考答案：" : "Suggested Answer:"}</b></span><br><span style="font-size:18px; color:#10b981;">${correctRaw}</span><br><span style="font-size:14px; color:#64748b;">${isCN ? "(只需意思相近即可)" : "(Check if your meaning is similar)"}</span>`;
+            fb.innerHTML = `<span style="color:#0f172a;"><b>${isCN ? "参考答案：" : "Suggested Answer:"}</b></span><br><span style="font-size:24px; font-weight:900; color:#10b981;">${correctRaw}</span><br><span style="font-size:16px; color:#64748b;">${isCN ? "(只需意思相近即可)" : "(Check if your meaning is similar)"}</span>`;
             showNextState(); return;
         }
 
@@ -773,14 +564,13 @@
             else { input.className = 'ans-input'; }
         } else {
             sessionErrors++; 
-            if(window.currentSessionMistakes) window.currentSessionMistakes.push(sessionQs[curIdx].Question);
             if (qType === 'MCQ') {
                 fb.innerHTML = `<span style="color:#ef4444;">${isCN ? "❌ 不对哦，试试其他选项！" : "❌ Not quite. Try another option!"}</span>`;
                 const activeBtn = document.querySelector('.mcq-btn.active');
                 if(activeBtn) { activeBtn.classList.remove('active'); activeBtn.classList.add('error'); }
                 input.value = ''; 
             } else {
-                fb.innerHTML = `<span style="color:#ef4444;">${isCN ? "❌ 拼写不对哦，请检查一下！" : "❌ Not quite. Check your spelling!"}</span><br><span style="font-size:15px; color:#64748b;">${isCN ? "提示：" : "Hint: "}<b>${correctRaw}</b></span>`;
+                fb.innerHTML = `<span style="color:#ef4444;">${isCN ? "❌ 拼写不对哦，请检查一下！" : "❌ Not quite. Check your spelling!"}</span><br><span style="font-size:18px; color:#64748b;">${isCN ? "提示：" : "Hint: "}<b style="color:#0f172a;">${correctRaw}</b></span>`;
                 input.className = 'ans-input error-shake';
                 setTimeout(() => { input.className = 'ans-input'; input.style.backgroundColor = '#fef2f2'; input.select(); }, 300);
             }
@@ -793,13 +583,11 @@
     }
 
     function finishQuiz() {
-        logToCloud(window.currentSessionMistakes || []);
-
         const isCN = (curSub === '华文');
         document.querySelectorAll('.milestone-track').forEach(el => el.style.display = 'none');
         document.getElementById('draw-panel').style.display = 'none';
         
-        let msg = ""; let magic67 = `<span class="magic-number">6~7</span>`; 
+        let msg = ""; let magic67 = `<span class="magic-number" style="font-size: 1.5em;">6~7</span>`; 
         
         if (sessionErrors <= 1) {
             msg = isCN ? `🎉 恭喜你，获得了 ${magic67} 的好成绩！太棒了！` : `🎉 Congratulations, you've got ${magic67} today!`;
@@ -814,16 +602,10 @@
             msg = isCN ? `💪 挑战完成！多练几次，争取下次拿到 ${magic67} 哦！` : `💪 Good effort! Keep practicing to get ${magic67} next time!`;
         }
 
-        const targetScreen = isSpellingMode ? 'spelling-screen' : 'quiz-screen';
-        document.getElementById(targetScreen).innerHTML = `
-            <div style="text-align:center; padding: 40px 0; font-size: 26px; color: #064e3b; font-weight:bold; line-height: 1.8;">${msg}</div>
-            <button class="btn-action" style="background:#10b981; color:white; width:100%; padding:20px; margin-top:20px;" onclick="location.reload()">${isCN ? "返回主菜单" : "Back to Menu"}</button>
+        document.getElementById('quiz-screen').innerHTML = `
+            <div style="text-align:center; padding: 50px 0; font-size: 28px; color: #064e3b; font-weight:900; line-height: 1.8;">${msg}</div>
+            <button class="btn-action" style="background:#10b981; color:white; width:100%; padding:22px; margin-top:20px; box-shadow: 0 6px 0 #059669;" onclick="location.reload()">${isCN ? "返回主菜单 🏠" : "Back to Menu 🏠"}</button>
         `;
-    }
-
-    function showScreen(id) {
-        document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
-        document.getElementById(id).style.display = 'block';
     }
 
     init();
