@@ -6,12 +6,9 @@
     <title>Pinyin Shooter: Laser Expedition</title>
     
     <link rel="apple-touch-icon" href="spaceship2.jpg">
-    
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script>
-        // ⚠️ 1. 在脚本的最开头，立刻获取主控台存下来的玩家代号
-        // 如果直接打开页面找不到，就默认是 'P3'
         let currentPlayer = localStorage.getItem('currentPlayer') || 'P3'; 
     </script>
     <style>
@@ -243,7 +240,6 @@
 <script>
     const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQlpdRHnR9ybEHHgX6fouRI-vXOh8KQNLSjsbt0TYh9R3No_9i7QNv_4ELwJZJGQpTe3oZVXaZijaW4/pub?gid=573238154&single=true&output=csv";
     
-    // 汉字转数字映射表
     const lessonMap = {
         '第一课': 1, '第二课': 2, '第三课': 3, '第四课': 4, '第五课': 5,
         '第六课': 6, '第七课': 7, '第八课': 8, '第九课': 9, '第十课': 10,
@@ -272,7 +268,6 @@
 
     let DB_WORDS = [];
     
-    // ⚠️ 2. 把获取到的身份，放进游戏状态里
     let state = {
         pilot: currentPlayer,
         score: 0, combo: 0, timeLeft: 300, isPlaying: false, hatRemoved: false, dialsTouched: false,
@@ -310,34 +305,38 @@
 
     async function loadDB() {
         try {
-            const resp = await fetch(CSV_URL);
-            const text = await resp.text();
+            // 🔥 闪存逻辑
+            let ALL_WORDS = [];
+            let cachedPinyinDB = sessionStorage.getItem('pinyin_db_cache');
             
-            // 🔥 解析兼容版：支持 Tab 分隔或逗号分隔，并提取多音字
-            let ALL_WORDS = text.split('\n').slice(1).map(row => {
-                let cols = row.split('\t');
-                if (cols.length < 7) cols = row.split(','); // 如果不是 tab，退回使用逗号
-                if (cols.length < 7) return null;
-                
-                const grade = cols[0].trim();
-                const topic = cols[2].trim();
-                const char = cols[4].trim();
-                const pyStr = cols[6].trim();
-                
-                if (!char || !pyStr) return null;
-                
-                // 提取多音字的第一个读音
-                let py = pyStr.split('/')[0].trim();
-                let lesson = lessonMap[topic] || 99;
-                
-                return { grade: grade, lesson: lesson, char: char, ...parsePinyin(py), py: py };
-            }).filter(w => w);
+            if (cachedPinyinDB) {
+                ALL_WORDS = JSON.parse(cachedPinyinDB);
+            } else {
+                const resp = await fetch(CSV_URL);
+                const text = await resp.text();
+                ALL_WORDS = text.split('\n').slice(1).map(row => {
+                    let cols = row.split('\t');
+                    if (cols.length < 7) cols = row.split(','); 
+                    if (cols.length < 7) return null;
+                    
+                    const grade = cols[0].trim();
+                    const topic = cols[2].trim();
+                    const char = cols[4].trim();
+                    const pyStr = cols[6].trim();
+                    
+                    if (!char || !pyStr) return null;
+                    
+                    let py = pyStr.split('/')[0].trim();
+                    let lesson = lessonMap[topic] || 99;
+                    
+                    return { grade: grade, lesson: lesson, char: char, ...parsePinyin(py), py: py };
+                }).filter(w => w);
+                sessionStorage.setItem('pinyin_db_cache', JSON.stringify(ALL_WORDS));
+            }
             
-            // 🔥 核心：根据不同身份自动筛选词库
             if (currentPlayer === 'P1') {
                 DB_WORDS = ALL_WORDS.filter(w => w.grade === 'P1' && w.lesson <= 8);
             } else {
-                // 默认 P3 的逻辑
                 DB_WORDS = ALL_WORDS.filter(w => w.grade === 'P1' || w.grade === 'P2' || (w.grade === 'P3' && w.lesson <= 7));
             }
             
