@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Family Learning Hub</title>
+
+    <link rel="apple-touch-icon" href="https://img.icons8.com/fluency/240/paper-plane.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="LearningHub">
+
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    
+    <style>
+        :root { --primary: #10b981; --bg: #f8fafc; --text-main: #1e293b; --text-muted: #64748b; }
+        * { box-sizing: border-box; font-family: 'Nunito', 'Microsoft YaHei', 'Comic Sans MS', sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body { background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); margin: 0; padding: 20px; color: var(--text-main); display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; overflow-x: hidden; }
+        
+        .container { width: 100%; max-width: 850px; background: rgba(255,255,255,0.95); padding: 30px 20px; border-radius: 40px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); text-align: center; position: relative; border: 4px solid #ffffff; backdrop-filter: blur(12px); display: flex; flex-direction: column; align-items: center; }
+        .screen { display: none; width: 100%; animation: bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+        
+        @keyframes bounceIn { 0% { opacity: 0; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1); } }
+        
+        /* 👑 顶部导航栏 */
+        .app-header { display: none; width: 100%; justify-content: space-between; align-items: center; margin-bottom: 25px; padding: 0 10px; animation: bounceIn 0.5s; }
+        .header-date { display: flex; align-items: center; gap: 8px; background: #f8fafc; color: #3b82f6; padding: 10px 20px; border-radius: 20px; font-weight: 900; font-size: 15px; border: 3px solid #e2e8f0; box-shadow: 0 4px 0 #cbd5e1; line-height: 1; }
+        .header-switch { display: flex; align-items: center; gap: 6px; background: white; color: #64748b; padding: 10px 20px; border-radius: 20px; font-weight: 900; font-size: 15px; cursor: pointer; border: 3px solid #e2e8f0; box-shadow: 0 4px 0 #cbd5e1; transition: 0.15s; outline: none; line-height: 1; }
+        .header-switch:active { transform: translateY(4px); box-shadow: 0 0 0 transparent; }
+
+        .magic-number { display: inline-block; font-size: 1.4em; color: #f59e0b; font-weight: 900; padding: 0 5px; animation: popPulse 1s infinite alternate; }
+        @keyframes popPulse { 0% { transform: scale(1); } 100% { transform: scale(1.15); text-shadow: 0 0 10px rgba(245, 158, 11, 0.3); } }
+
+        .name-selector { display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: center; gap: 30px; width: 100%; margin: 30px 0; }
+        button.name-btn { width: 280px; padding: 25px; border-radius: 35px; border: 4px solid #e2e8f0; background: white; cursor: pointer; font-weight: 900; font-size: 28px; transition: 0.15s; color: #475569; display: flex; align-items: center; justify-content: center; gap: 15px; box-shadow: 0 10px 0 #cbd5e1; outline: none; }
+        button.name-btn:active { transform: translateY(8px); box-shadow: 0 2px 0 #cbd5e1; }
+        
+        .grid-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; width: 100%; margin-bottom: 25px; }
+        .grid-cards.three-col { grid-template-columns: repeat(3, 1fr); }
+        .card-btn { background: white; border: 4px solid #e2e8f0; border-radius: 30px; padding: 30px 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; cursor: pointer; transition: 0.15s; color: #475569; font-weight: 900; font-size: 18px; box-shadow: 0 10px 0 #cbd5e1; }
+        .card-btn:active { transform: translateY(8px); box-shadow: 0 2px 0 #cbd5e1; }
+        .card-btn .emoji { font-size: 50px; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.1)); }
+        
+        .btn-action { width: 100%; border-radius: 25px; border: none; font-weight: 900; font-size: 20px; cursor: pointer; transition: 0.15s; display: flex; align-items: center; justify-content: center; outline: none; padding: 20px; box-shadow: 0 8px 0 rgba(0,0,0,0.1); }
+        .btn-action:active { transform: translateY(6px); box-shadow: 0 2px 0 rgba(0,0,0,0.1); }
+
+        /* 📝 去除了Checkbox的纯胶囊设计 */
+        .checkbox-grid { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-bottom: 20px; max-height: 400px; overflow-y: auto; }
+        .topic-cb { padding: 14px 22px; border-radius: 25px; border: 3px solid #e2e8f0; background: white; cursor: pointer; transition: 0.15s; font-size: 16px; font-weight: 800; color: #475569; user-select: none; box-shadow: 0 5px 0 #cbd5e1; display: flex; align-items: center; }
+        .topic-cb:active { transform: translateY(5px); box-shadow: 0 0 0 transparent; }
+        .topic-cb.selected { border-color: #3b82f6; background: #eff6ff; color: #1d4ed8; box-shadow: 0 5px 0 #93c5fd; }
+        
+        /* 🎮 测验界面的响应式大布局 */
+        .quiz-wrapper { display: flex; flex-direction: column; width: 100%; gap: 15px; }
+        .progress-col { width: 100%; display: flex; flex-direction: column; }
+        .quiz-main-col { width: 100%; display: flex; flex-direction: column; align-items: stretch; text-align: left; }
+
+        /* 默认：横向进度条 */
+        .milestone-track { display: flex; flex-direction: row; justify-content: space-between; align-items: center; position: relative; padding: 0 5px; width: 100%; height: 38px; }
+        .milestone-track::before { content: ''; position: absolute; left: 15px; right: 15px; top: 50%; height: 8px; background: #e2e8f0; z-index: 1; transform: translateY(-50%); border-radius: 4px; }
+        .milestone-fill { position: absolute; left: 15px; top: 50%; height: 8px; background: #10b981; z-index: 1; transform: translateY(-50%); border-radius: 4px; transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); width: var(--pct); }
+        
+        .milestone { width: 38px; height: 38px; background: #f8fafc; border: 4px solid #cbd5e1; border-radius: 50%; z-index: 2; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: 0.4s; box-sizing: border-box; }
+        .milestone.done { border-color: #10b981; background: #d1fae5; }
+        .milestone.active { border-color: #3b82f6; background: #eff6ff; font-size: 20px; transform: scale(1.2); box-shadow: 0 0 15px rgba(59,130,246,0.3); animation: bounceActive 1s infinite alternate; }
+
+        .q-text { font-size: 26px; text-align: left; margin: 15px 0; line-height: 1.5; font-weight: 800; color: #1e293b; width: 100%; }
+        input.ans-input, textarea.ans-input { font-size: 22px; padding: 18px; width: 100%; border: 4px solid #e2e8f0; border-radius: 20px; box-sizing: border-box; outline: none; font-family: inherit; font-weight: bold; color: #334155; }
+        input.ans-input.error-shake { border-color: #ef4444; animation: shake 0.3s; background-color: #fef2f2; color: #ef4444; }
+        
+        .mcq-list { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; width: 100%; }
+        button.mcq-btn { padding: 18px; border-radius: 20px; border: 4px solid #e2e8f0; background: white; font-size: 20px; font-weight: 700; cursor: pointer; text-align: left; transition: 0.15s; color: #1e293b; outline: none; box-shadow: 0 5px 0 #cbd5e1; }
+        button.mcq-btn.active { border-color: #3b82f6; background: #eff6ff; font-weight: 900; color: #1d4ed8; box-shadow: 0 5px 0 #93c5fd; }
+        button.mcq-btn.error { border-color: #ef4444; background: #fef2f2; color: #b91c1c; animation: shake 0.3s; }
+
+        .feedback { font-size: 20px; margin: 15px 0; min-height: 28px; font-weight: 900; width: 100%; }
+        .tool-btn { background: white; border: 3px solid #e2e8f0; padding: 10px 20px; border-radius: 15px; font-weight: 900; font-size: 16px; cursor: pointer; color: #475569; transition: 0.15s; box-shadow: 0 4px 0 #cbd5e1; outline: none; }
+        .tool-btn:active { transform: translateY(4px); box-shadow: 0 0 0 transparent; }
+
+        .draw-panel { display: none; flex-direction: column; align-items: center; margin-top: 15px; background: #f8fafc; padding: 15px; border-radius: 25px; border: 4px dashed #cbd5e1; width: 100%; }
+        canvas { background: white; border-radius: 15px; border: 2px solid #e2e8f0; touch-action: none; cursor: crosshair; }
+        
+        .res-section { border-top: 4px dashed #e2e8f0; margin-top: 20px; padding-top: 25px; text-align: left; width: 100%; }
+        .res-card { background: #f1f5f9; padding: 20px; border-radius: 20px; margin-bottom: 15px; border: 2px solid #e2e8f0; }
+
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
+        .modal-content { background: white; padding: 40px; border-radius: 40px; text-align: center; width: 90%; max-width: 400px; border: 5px solid #fff; box-shadow: 0 30px 60px rgba(0,0,0,0.3); display: flex; flex-direction: column; align-items: center; }
+        .pin-input-hub { font-size: 44px; font-weight: 900; letter-spacing: 12px; padding: 20px; width: 200px; text-align: center; border: 4px solid #e2e8f0; border-radius: 25px; margin: 25px 0; outline: none; background: #f8fafc; color: #1e293b; transition: 0.2s; }
+        .pin-input-hub:focus { border-color: #f59e0b; background: #fffbeb; }
+        .error-shake { border-color: #ef4444 !important; animation: shake 0.3s; background-color: #fef2f2 !important; }
+        
+        /* 📱 iPad横屏：进度条左靠 */
+        @media (min-width: 768px) { 
+            .container { padding: 40px 60px; } 
+            .grid-cards { gap: 25px; } 
+            
+            .quiz-wrapper { flex-direction: row; gap: 40px; align-items: stretch; }
+            .progress-col { flex: 0 0 60px; align-items: center; justify-content: flex-start; }
+            .quiz-main-col { flex: 1; }
+
+            .milestone-track { flex-direction: column; width: 38px; height: 100%; min-height: 400px; padding: 15px 0; margin: 0; }
+            .milestone-track::before { top: 15px; bottom: 15px; left: 50%; width: 8px; height: auto; transform: translateX(-50%); }
+            .milestone-fill { top: 15px; left: 50%; width: 8px; height: var(--pct); transform: translateX(-50%); }
+        }
+
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header class="app-header" id="app-header">
+        <div class="header-date" id="school-term-display">📅 Loading...</div>
+        <button class="header-switch" onclick="showScreen('user-screen')">👤 Switch</button>
+    </header>
+
+    <div id="loading" class="screen" style="display:block; padding: 50px 0; font-size: 24px; color: #3b82f6; font-weight: 900;">
+        🌟 魔法书正在加载...
+    </div>
+
+    <div id="user-screen" class="screen">
+        <h2 style="margin:0; color:#0f172a; font-size: 32px; font-weight: 900;">Did you <span class="magic-number">6~7</span> today?</h2>
+        <p style="font-size: 16px; color: #64748b; margin: 10px 0 20px 0; font-weight: 800;">Aim for a perfect score or just 1 mistake for a 6~7!</p>
+
+        <div class="name-selector">
+            <button class="name-btn" onclick="switchUser('P3')">
+                <span style="font-size: 50px;">👱‍♀️</span> Valerie
+            </button>
+            <button class="name-btn" onclick="switchUser('P1')">
+                <span style="font-size: 50px;">👧</span> Venessa
+            </button>
+        </div>
+    </div>
+
+    <div id="subject-screen" class="screen">
+        <h2 id="welcome-title" style="margin-bottom:30px; color:#0f172a; font-size: 32px; font-weight: 900;">Welcome!</h2>
+        <div class="grid-cards">
+            <div class="card-btn" style="border-color:#bae6fd;" onclick="handleSubjectClick('English')"><div class="emoji">🔤</div> English</div>
+            <div class="card-btn" style="border-color:#fbcfe8;" onclick="handleSubjectClick('Math')"><div class="emoji">🔢</div> Math</div>
+            <div class="card-btn" id="cn-subject-btn" style="border-color:#e9d5ff;" onclick="handleSubjectClick('华文')"><div class="emoji">🐼</div> 华文</div>
+            <div class="card-btn" style="border-color:#a7f3d0;" onclick="handleSubjectClick('Science')"><div class="emoji">🌱</div> Science</div>
+        </div>
+
+        <div class="res-section">
+            <h3 style="margin-top:0; color:#334155; font-size: 22px; font-weight: 900;">📚 Resources</h3>
+            <div id="res-list"></div>
+        </div>
+    </div>
+
+    <div id="mode-screen" class="screen">
+        <h2 style="margin-bottom:30px; font-size: 28px; font-weight: 900;">Select Mode</h2>
+        <div class="grid-cards">
+            <div class="card-btn" style="border-color:#bae6fd; color:#0284c7;" onclick="showTopicSelection(curSub)"><div class="emoji">🚀</div> Practice</div>
+            <div class="card-btn" style="border-color:#fde68a; color:#b45309;" onclick="goToSpelling()"><div class="emoji">✍️</div> Spelling</div>
+        </div>
+        <button class="btn-action" style="background:#f1f5f9; color:#64748b; border:4px solid #e2e8f0; box-shadow: 0 8px 0 #cbd5e1; margin-top: 15px;" onclick="showScreen('subject-screen')">← Back</button>
+    </div>
+
+    <div id="cn-mode-screen" class="screen">
+        <h2 style="margin-bottom:30px; font-size: 28px; font-weight: 900; color: #0f172a;">要做什么练习？</h2>
+        <div class="grid-cards three-col">
+            <div class="card-btn" style="border-color:#bae6fd; color:#0284c7;" onclick="showTopicSelection('华文')"><div class="emoji">📝</div> <div style="font-size:16px;">复习</div></div>
+            <div class="card-btn" style="border-color:#fde68a; color:#b45309;" onclick="goToSpelling()"><div class="emoji">✍️</div> <div style="font-size:16px;">听写</div></div>
+            <div class="card-btn" style="border-color:#fbcfe8; color:#be185d;" onclick="goToPinyinGame()"><div class="emoji">🎮</div> <div style="font-size:16px;">拼音</div></div>
+        </div>
+        <button class="btn-action" style="background:#f1f5f9; color:#64748b; border:4px solid #e2e8f0; box-shadow: 0 8px 0 #cbd5e1; margin-top: 25px;" onclick="showScreen('subject-screen')">← 返回</button>
+    </div>
+
+    <div id="topic-screen" class="screen">
+        <h2 id="topic-title" style="margin:0 0 5px 0; color:#0f172a; font-size: 28px; font-weight: 900;">Select Topics</h2>
+        <p id="topic-desc" style="color:#64748b; margin-bottom: 20px; font-weight: 700;">Choose the topics you want to practice.</p>
+        <div style="text-align: center; margin-bottom: 15px;">
+            <div id="check-all-btn" class="topic-cb" style="display:inline-flex; padding: 14px 22px; justify-content: center;" onclick="toggleAllTopics(this)">
+                🌟 全选所有 (Select All)
+            </div>
+        </div>
+        <div id="topic-checkboxes" class="checkbox-grid"></div>
+        <div style="display: flex; gap: 15px; margin-top: 20px; width: 100%;">
+            <button class="btn-action" style="background:#f1f5f9; color:#64748b; border: 4px solid #e2e8f0; box-shadow: 0 6px 0 #cbd5e1; flex:0.4;" onclick="goBackFromTopic()">← Back</button>
+            <button class="btn-action" style="background:#10b981; color:white; box-shadow: 0 6px 0 #059669; flex:0.6;" onclick="startQuiz()">Start 🚀</button>
+        </div>
+    </div>
+
+    <div id="quiz-screen" class="screen">
+        <div class="quiz-wrapper">
+            <div class="progress-col">
+                <div id="progress-bar" class="milestone-track"></div>
+                <div id="progress-text" style="font-size:16px; font-weight: 800; color:#94a3b8; margin-top: 10px;"></div>
+            </div>
+            
+            <div class="quiz-main-col">
+                <div style="display:flex; justify-content: flex-end; width:100%;">
+                    <button id="draw-pad-btn" class="tool-btn" style="color:#059669; border-color:#a7f3d0; background:#ecfdf5; display:none;" onclick="toggleDrawPad()">✍️ 草稿板</button>
+                </div>
+                
+                <div id="q-text" class="q-text"></div>
+                
+                <div id="draw-panel" class="draw-panel">
+                    <canvas id="pad" width="300" height="200"></canvas>
+                    <div style="display:flex; justify-content: space-between; width:100%; margin-top:12px;">
+                        <button class="tool-btn" style="background:#fef2f2; border-color:#fecaca; color:#e11d48;" onclick="clearPad()">🗑️ Clear</button>
+                        <button class="tool-btn" onclick="toggleDrawPad()">❌ Close</button>
+                    </div>
+                </div>
+
+                <div id="input-container" style="width: 100%;"></div>
+                <div id="fb-text" class="feedback"></div>
+
+                <div style="display:flex; gap:15px; margin-top: 10px; width: 100%;">
+                    <button id="exit-btn" class="btn-action" style="background:#f1f5f9; color:#64748b; border: 4px solid #e2e8f0; box-shadow: 0 6px 0 #cbd5e1; flex: 0.8;" onclick="location.reload()">Quit 🏠</button>
+                    <button id="sub-btn" class="btn-action" style="background:#3b82f6; color:white; box-shadow: 0 6px 0 #2563eb; flex: 1.2;" onclick="checkAns()">Submit</button>
+                    <button id="next-btn" class="btn-action" style="background:#10b981; color:white; box-shadow: 0 6px 0 #059669; flex: 1.2; display:none;" onclick="nextQ()">Next ➡️</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div id="pin-modal" class="modal-overlay">
+    <div class="modal-content">
+        <div style="font-size: 50px; margin-bottom: 10px; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.1));">🛡️</div>
+        <h3 style="margin:0 0 10px 0; color:#0f172a; font-size: 26px; font-weight: 900;">Parent Lock</h3>
+        <p style="color:#64748b; font-size:16px; margin:0; font-weight: 700;">Access to Venessa's profile is locked.</p>
+        <p style="color:#94a3b8; font-size:14px; margin-top:8px; font-weight: 800;">Hint: Ask Dad for today's code.</p>
+        
+        <input type="tel" id="hub-pin-input" class="pin-input-hub" maxlength="4" placeholder="***" autocomplete="off" inputmode="numeric" pattern="[0-9]*">
+        
+        <div style="display:flex; gap:15px; width: 100%;">
+            <button class="btn-action" style="background:#f1f5f9; color:#475569; border: 4px solid #e2e8f0; box-shadow: 0 6px 0 #cbd5e1; flex:1;" onclick="closePinModal()">Cancel</button>
+            <button class="btn-action" style="background:#f59e0b; color:white; box-shadow: 0 6px 0 #d97706; flex:1;" onclick="verifyHubPin()">Unlock</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const SHEET_ID = "1vQlpdRHnR9ybEHHgX6fouRI-vXOh8KQNLSjsbt0TYh9R3No_9i7QNv_4ELwJZJGQpTe3oZVXaZijaW4";
+    const GIDS = { "English": "1893311738", "Math": "59294467", "Science": "1581471994", "华文": "2020673087", "Resources": "469231602" };
+    
+    let db = {}, curUser = '', curSub = '', sessionQs = [], curIdx = 0, sessionErrors = 0, pendingUser = null;
+    let canvas, ctx, drawing = false;
+
+    // 智能隐藏顶栏逻辑
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+        document.getElementById(id).style.display = 'block';
+        
+        const header = document.getElementById('app-header');
+        if (id === 'user-screen' || id === 'loading') {
+            header.style.display = 'none';
+        } else {
+            header.style.display = 'flex';
+        }
+    }
+
+    async function init() {
+        const now = new Date();
+        const t2 = new Date(2026, 2, 23), t3 = new Date(2026, 5, 29), t4 = new Date(2026, 8, 14);
+        const diff = (d1, d2) => Math.floor((d1 - d2) / 864e5);
+        let term = "Term 1";
+        if (now >= t4) { const w = Math.floor(diff(now, t4)/7) + 1; term = w <= 10 ? `Term 4 Week ${w}` : "Holiday"; }
+        else if (now >= t3) { const w = Math.floor(diff(now, t3)/7) + 1; term = w <= 10 ? `Term 3 Week ${w}` : "Holiday"; }
+        else if (now >= t2) { const w = Math.floor(diff(now, t2)/7) + 1; term = w <= 10 ? `Term 2 Week ${w}` : "Holiday"; }
+        
+        // 更新顶部的日期和星期格式 (修复了文字错位)
+        document.getElementById('school-term-display').innerHTML = `<span>📅 ${now.toLocaleDateString('en-SG', {month:'short', year:'numeric'})}</span><span style="color:#cbd5e1">|</span><span>${term}</span>`;
+
+        let cached = sessionStorage.getItem('hub_db_cache');
+        if (cached) { 
+            try {
+                db = JSON.parse(cached); 
+                if (Object.keys(db).length > 0) {
+                    document.getElementById('loading').style.display='none'; showScreen('user-screen'); return;
+                }
+            } catch(e) { sessionStorage.removeItem('hub_db_cache'); }
+        }
+
+        const loads = Object.entries(GIDS).map(([name, gid]) => new Promise(res => {
+            Papa.parse(`https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=${gid}&single=true&output=csv&t=${Date.now()}`, {
+                download: true, header: true, skipEmptyLines: 'greedy',
+                complete: r => res({ name, data: r.data.map(row => { let n = {}; Object.keys(row).forEach(k => n[k.trim()] = row[k]); return n; }) }),
+                error: () => res({name, data: []})
+            });
+        }));
+        
+        const timeoutPromise = new Promise(res => setTimeout(() => res('timeout'), 4000));
+        const results = await Promise.race([Promise.all(loads), timeoutPromise]);
+
+        if (results === 'timeout') {
+            document.getElementById('loading').innerHTML = "⚠️ 网络慢，请刷新重试。"; return;
+        }
+
+        db = {};
+        results.forEach(r => { 
+            if(r && r.data) {
+                r.data.forEach(row => { 
+                    let g = (row.Grade || row.GRADE || "").toUpperCase(); if(!g) return;
+                    if(!db[g]) db[g] = {}; if(!db[g][r.name]) db[g][r.name] = []; db[g][r.name].push(row);
+                });
+            }
+        });
+
+        if (Object.keys(db).length > 0) {
+            sessionStorage.setItem('hub_db_cache', JSON.stringify(db));
+            document.getElementById('loading').style.display='none';
+            showScreen('user-screen');
+        } else { document.getElementById('loading').innerText = "⚠️ Data error."; }
+    }
+
+    // 点击 Venessa 时：清空并聚焦唤起纯数字键盘
+    function switchUser(g) {
+        if (g === 'P1') { 
+            pendingUser = g; 
+            document.getElementById('pin-modal').style.display = 'flex'; 
+            const pinInput = document.getElementById('hub-pin-input');
+            pinInput.value = '';
+            setTimeout(() => pinInput.focus(), 100);
+            return; 
+        }
+        executeSwitchUser(g);
+    }
+
+    function executeSwitchUser(g) {
+        curUser = g; localStorage.setItem('currentPlayer', g);
+        document.getElementById('welcome-title').innerText = `Welcome, ${g==='P3'?'Valerie':'Venessa'}!`;
+        document.getElementById('cn-subject-btn').innerHTML = `<div class="emoji">🐼</div> ${g==='P3'?'高级华文':'华文'}`;
+        
+        const list = document.getElementById('res-list'); list.innerHTML = '';
+        if(db[g] && db[g]['Resources'] && db[g]['Resources'].length > 0) {
+            document.querySelector('.res-section').style.display = 'block';
+            db[g]['Resources'].forEach(r => {
+                const div = document.createElement('div'); div.className = 'res-card';
+                div.innerHTML = r.Type === 'IMAGE' ? `<b>${r.Title}</b><img src="${r.Content}" style="width:100%;margin-top:12px;border-radius:15px;border:2px solid #fff;">` : `<b style="font-size:18px;">${r.Title}</b><p style="margin-top:8px; font-weight:700; color:#475569;">${r.Content}</p>`;
+                list.appendChild(div);
+            });
+        } else { document.querySelector('.res-section').style.display = 'none'; }
+        showScreen('subject-screen');
+    }
+
+    // 输对后立刻清空
+    function verifyHubPin() {
+        const input = document.getElementById('hub-pin-input').value;
+        const now = new Date();
+        if (input === ((now.getMonth() + 1) * 100 + now.getDate() + (now.getDay() === 0 ? 7 : now.getDay())).toString()) {
+            document.getElementById('pin-modal').style.display = 'none';
+            document.getElementById('hub-pin-input').value = '';
+            executeSwitchUser(pendingUser);
+        } else {
+            const el = document.getElementById('hub-pin-input');
+            el.classList.add('error-shake');
+            setTimeout(() => { 
+                el.classList.remove('error-shake'); 
+                el.value = ''; 
+                el.focus(); 
+            }, 400);
+        }
+    }
+    
+    // 取消时立刻清空
+    function closePinModal() { 
+        document.getElementById('pin-modal').style.display = 'none'; 
+        document.getElementById('hub-pin-input').value = '';
+    }
+    
+    // 💡 修复2：Math 和 Science 直接跳过模式选择，进入 Topic
+    function handleSubjectClick(s) { 
+        curSub = s; 
+        localStorage.setItem('currentSubject', s); 
+        
+        if (s === '华文') {
+            showScreen('cn-mode-screen');
+        } else if (s === 'English') {
+            showScreen('mode-screen');
+        } else {
+            // Math 和 Science 直接进章节选择
+            showTopicSelection(s); 
+        }
+    }
+
+    function goToPinyinGame() { window.location.href = "pinyin.html"; }
+    function goToSpelling() { window.location.href = "spelling.html"; }
+
+    function getSortWeight(str) {
+        const numMatch = str.match(/\d+/); if (numMatch) return parseInt(numMatch[0]);
+        const cnNums = { "十": 10, "九": 9, "八": 8, "七": 7, "六": 6, "五": 5, "四": 4, "三": 3, "二": 2, "一": 1 };
+        for (let key in cnNums) { if (str.includes(key)) return cnNums[key]; }
+        return 999;
+    }
+
+    function showTopicSelection(s) {
+        curSub = s; let pool = db[curUser][s];
+        pool = pool.filter(q => (q.Type || "").toString().trim().toUpperCase() !== 'SPELLING');
+        let topics = new Set();
+        pool.forEach(q => { let t = (q.Topic || q.topic || q.Lesson || "").toString().trim(); if (t !== "") topics.add(t); });
+
+        const isCN = (s === '华文');
+        document.getElementById('topic-title').innerText = isCN ? '你要复习哪里的内容？' : 'Select Practice Topics';
+        
+        // 重置全选按钮状态
+        const checkAllBtn = document.getElementById('check-all-btn');
+        checkAllBtn.classList.remove('selected');
+        checkAllBtn.innerHTML = isCN ? '🌟 全选所有' : '🌟 Select All';
+        
+        let topicsArr = Array.from(topics).sort((a, b) => getSortWeight(a) - getSortWeight(b));
+        const boxGrid = document.getElementById('topic-checkboxes'); boxGrid.innerHTML = '';
+        
+        // 💡 修复3：彻底抛弃原生 Checkbox，改用完美的胶囊 Div 设计
+        topicsArr.forEach(t => {
+            const label = document.createElement('div'); 
+            label.className = 'topic-cb';
+            label.innerText = t;
+            label.dataset.val = JSON.stringify([t]);
+            label.onclick = function() { 
+                this.classList.toggle('selected'); 
+                syncCheckAll(); 
+            };
+            boxGrid.appendChild(label);
+        });
+        showScreen('topic-screen');
+    }
+
+    function toggleAllTopics(masterBtn) {
+        let isSelecting = !masterBtn.classList.contains('selected');
+        if (isSelecting) {
+            masterBtn.classList.add('selected');
+            masterBtn.innerHTML = '🌟 取消全选';
+            document.querySelectorAll('.topic-cb').forEach(cb => { if(cb.id !== 'check-all-btn') cb.classList.add('selected'); });
+        } else {
+            masterBtn.classList.remove('selected');
+            masterBtn.innerHTML = curSub === '华文' ? '🌟 全选所有' : '🌟 Select All';
+            document.querySelectorAll('.topic-cb').forEach(cb => { if(cb.id !== 'check-all-btn') cb.classList.remove('selected'); });
+        }
+    }
+
+    function syncCheckAll() {
+        const allItems = Array.from(document.querySelectorAll('.topic-cb:not(#check-all-btn)'));
+        if (allItems.length === 0) return;
+        const allChecked = allItems.every(cb => cb.classList.contains('selected'));
+        const master = document.getElementById('check-all-btn');
+        if (allChecked) {
+            master.classList.add('selected'); master.innerHTML = '🌟 取消全选';
+        } else {
+            master.classList.remove('selected'); master.innerHTML = curSub === '华文' ? '🌟 全选所有' : '🌟 Select All';
+        }
+    }
+
+    function goBackFromTopic() { 
+        if (curSub === '华文') showScreen('cn-mode-screen'); 
+        else if (curSub === 'English') showScreen('mode-screen');
+        else showScreen('subject-screen'); // Math 和 Sci 退回科目页
+    }
+
+    function startQuiz() {
+        let pool = db[curUser][curSub];
+        const selectedJSONs = Array.from(document.querySelectorAll('.topic-cb.selected:not(#check-all-btn)')).map(cb => cb.dataset.val);
+        if (selectedJSONs.length === 0) { alert(curSub === '华文' ? "请至少选择一项！" : "Please select a topic!"); return; }
+        
+        let selectedTopics = [];
+        selectedJSONs.forEach(j => { selectedTopics = selectedTopics.concat(JSON.parse(j)); });
+        
+        pool = pool.filter(q => {
+            let t = (q.Topic || q.topic || q.Lesson || "").toString().trim();
+            return selectedTopics.includes(t) && (q.Type || "").toString().trim().toUpperCase() !== 'SPELLING';
+        });
+
+        curIdx = 0; sessionErrors = 0; 
+        
+        // 💡 修复5：草稿板只给 P3 并且是 Math 才能看到
+        document.getElementById('draw-panel').style.display = 'none';
+        if (curUser === 'P3' && curSub === 'Math') {
+            document.getElementById('draw-pad-btn').style.display = 'block';
+        } else {
+            document.getElementById('draw-pad-btn').style.display = 'none';
+        }
+
+        sessionQs = pool.sort(() => 0.5 - Math.random()).slice(0, Math.min(pool.length, 7));
+        
+        if (sessionQs.length === 0) { alert("No questions available."); return; }
+        showScreen('quiz-screen'); renderQ();
+    }
+
+    // 💡 修复4：进度条根据屏幕尺寸自适应 (横竖皆美)
+    function updateProgress() {
+        const bar = document.getElementById('progress-bar');
+        const len = sessionQs.length; const pct = len > 1 ? (curIdx / (len - 1)) * 100 : 100;
+        let activeIcon = curSub === '华文' ? '🐼' : (curSub === 'Science' ? '🌱' : (curSub === 'Math' ? '🔢' : '🚀'));
+        
+        // 使用 CSS 变量注入进度，适配横竖屏
+        let html = `<div class="milestone-fill" style="--pct: ${pct}%"></div>`;
+        for(let i=0; i<len; i++) html += `<div class="milestone${i < curIdx ? ' done' : (i === curIdx ? ' active' : '')}">${i < curIdx ? '⭐' : (i === curIdx ? activeIcon : '☁️')}</div>`;
+        bar.innerHTML = html;
+        document.getElementById('progress-text').innerText = `${curIdx + 1} / ${len}`;
+    }
+
+    function renderQ() {
+        updateProgress(); if(ctx && canvas) clearPad();
+        const q = sessionQs[curIdx]; const isCN = (curSub === '华文');
+        document.getElementById('q-text').innerText = q.Question;
+        const container = document.getElementById('input-container');
+        const qType = (q.Type || "").toString().trim().toUpperCase();
+        
+        if (qType === 'OPEN') {
+            container.innerHTML = `<textarea id="ans-in" class="ans-input" rows="5" placeholder="${isCN ? '输入你的完整答案...' : 'Type full answer...'}"></textarea>`;
+            setTimeout(() => document.getElementById('ans-in').focus(), 100);
+        } else if (qType === 'MCQ') {
+            const opts = (q.Options || q.options || "").toString().split('/').map(o => o.trim()).filter(o => o);
+            let html = `<div class="mcq-list">`;
+            opts.forEach(opt => { html += `<button class="mcq-btn" onclick="selectMCQ(this, '${opt.replace(/'/g, "\\'").replace(/"/g, "&quot;")}')">${opt}</button>`; });
+            html += `</div><input type="hidden" id="ans-in" value="">`;
+            container.innerHTML = html;
+        } else {
+            container.innerHTML = `<input type="text" id="ans-in" class="ans-input" placeholder="${isCN ? '在此输入...' : 'Type here...'}" autocomplete="off">`;
+            setTimeout(() => document.getElementById('ans-in').focus(), 100);
+        }
+        document.getElementById('fb-text').innerText = '';
+        document.getElementById('sub-btn').style.display = 'flex'; document.getElementById('next-btn').style.display = 'none';
+    }
+
+    function selectMCQ(btn, val) {
+        if(document.getElementById('sub-btn').style.display === 'none') return; 
+        document.querySelectorAll('.mcq-btn').forEach(b => { b.classList.remove('active'); b.classList.remove('error'); });
+        btn.classList.add('active'); document.getElementById('ans-in').value = val;
+    }
+
+    // 💡 修复6：选择题做错了，不会立刻锁死，允许重选！
+    function checkAns() {
+        const input = document.getElementById('ans-in');
+        const user = input.value.trim().toLowerCase();
+        const correctRaw = (sessionQs[curIdx]['Correct Answer'] || sessionQs[curIdx]['ANSWER'] || "").toString().trim();
+        const fb = document.getElementById('fb-text');
+        const qType = (sessionQs[curIdx]['Type'] || "").toString().trim().toUpperCase();
+        const isCN = (curSub === '华文');
+        
+        if(user === "") { if(qType === 'MCQ') alert(isCN ? "请选择一个选项！" : "Please select!"); return; }
+
+        if (qType === 'OPEN') {
+            input.disabled = true; document.getElementById('sub-btn').style.display = 'none'; document.getElementById('next-btn').style.display = 'flex';
+            fb.innerHTML = `<span style="color:#0f172a;"><b>${isCN ? "参考答案：" : "Suggested Answer:"}</b></span><br><span style="font-size:24px; font-weight:900; color:#10b981;">${correctRaw}</span>`;
+            return;
+        }
+
+        if(user === correctRaw.toLowerCase()) {
+            // 选对了才锁死并显示下一步
+            input.disabled = true; document.getElementById('sub-btn').style.display = 'none'; document.getElementById('next-btn').style.display = 'flex';
+            fb.innerHTML = `<span style="color:#10b981;">${isCN ? "✅ 答对啦！非常棒。" : "✅ Correct! Well done."}</span>`;
+            if (qType === 'MCQ') document.querySelectorAll('.mcq-btn').forEach(b => { if(!b.classList.contains('active')) b.style.opacity = '0.5'; }); 
+        } else {
+            // 选错了，不锁死！允许重选
+            sessionErrors++; 
+            if (qType === 'MCQ') {
+                fb.innerHTML = `<span style="color:#ef4444;">${isCN ? "❌ 不对哦，试试其他选项！" : "❌ Not quite. Try another option!"}</span>`;
+                const activeBtn = document.querySelector('.mcq-btn.active'); 
+                if(activeBtn) { activeBtn.classList.remove('active'); activeBtn.classList.add('error'); }
+                input.value = ''; // 清空隐藏输入框的值，等待下一次点击重选
+            } else {
+                fb.innerHTML = `<span style="color:#ef4444;">${isCN ? "❌ 不对哦！" : "❌ Not quite!"}</span><br><span style="font-size:18px; color:#64748b;">${isCN ? "正确答案：" : "Answer: "}<b style="color:#0f172a;">${correctRaw}</b></span>`;
+                input.classList.add('error-shake');
+                setTimeout(()=> input.classList.remove('error-shake'), 400);
+            }
+        }
+    }
+
+    function nextQ() { if(curIdx < sessionQs.length - 1) { curIdx++; renderQ(); } else { finishQuiz(); } }
+
+    function finishQuiz() {
+        const isCN = (curSub === '华文');
+        let msg = sessionErrors <= 1 ? (isCN ? `🎉 恭喜你，获得了 <span class="magic-number">6~7</span> ！太棒了！` : `🎉 Congratulations, you've got <span class="magic-number">6~7</span> today!`) : (isCN ? `💪 挑战完成！多练几次，争取拿到 <span class="magic-number">6~7</span> ！` : `💪 Good effort! Keep practicing to get <span class="magic-number">6~7</span> !`);
+        document.getElementById('quiz-screen').innerHTML = `<div style="text-align:center; padding: 50px 0; font-size: 28px; color: #064e3b; font-weight:900; line-height: 1.8;">${msg}</div><button class="btn-action" style="background:#10b981; color:white; width:100%; padding:22px; margin-top:20px; box-shadow: 0 6px 0 #059669;" onclick="location.reload()">${isCN ? "返回主菜单 🏠" : "Back to Menu 🏠"}</button>`;
+    }
+
+    // 草稿板逻辑
+    function initDrawPad() {
+        canvas = document.getElementById('pad'); ctx = canvas.getContext('2d');
+        ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = 5; ctx.strokeStyle = '#1e293b';
+        const start = (e) => { drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); };
+        const move = (e) => { if (!drawing) return; e.preventDefault(); const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); };
+        const stop = () => { drawing = false; };
+        const getPos = (e) => { const r = canvas.getBoundingClientRect(); const t = e.touches ? e.touches[0] : e; return { x: t.clientX - r.left, y: t.clientY - r.top }; };
+        canvas.addEventListener('mousedown', start); canvas.addEventListener('mousemove', move); window.addEventListener('mouseup', stop);
+        canvas.addEventListener('touchstart', start, {passive:false}); canvas.addEventListener('touchmove', move, {passive:false}); canvas.addEventListener('touchend', stop);
+    }
+    function clearPad() { ctx.clearRect(0,0,canvas.width,canvas.height); }
+    function toggleDrawPad() { const p = document.getElementById('draw-panel'); p.style.display = p.style.display === 'none' ? 'flex' : 'none'; if (p.style.display === 'flex' && !canvas) initDrawPad(); }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            const pinModal = document.getElementById('pin-modal');
+            if (pinModal && pinModal.style.display === 'flex') {
+                e.preventDefault();
+                verifyHubPin();
+            } else if (document.getElementById('quiz-screen') && document.getElementById('quiz-screen').style.display === 'block') {
+                if (document.getElementById('sub-btn') && document.getElementById('sub-btn').style.display !== 'none') { e.preventDefault(); checkAns(); }
+                else if (document.getElementById('next-btn') && document.getElementById('next-btn').style.display !== 'none') { e.preventDefault(); nextQ(); }
+            }
+        }
+    });
+
+    init();
+</script>
+</body>
+</html>
