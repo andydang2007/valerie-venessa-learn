@@ -58,6 +58,18 @@
         .draw-panel { display: none; flex-direction: column; align-items: center; margin-top: 15px; background: #f8fafc; padding: 15px; border-radius: 25px; border: 4px dashed #cbd5e1; width: 100%; }
         canvas { background: white; border-radius: 15px; border: 2px solid #e2e8f0; touch-action: none; cursor: crosshair; }
 
+        /* 👑 弹窗专属样式 (Epic Reveal) */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
+        .epic-modal { background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); padding: 40px; border-radius: 40px; text-align: center; width: 90%; max-width: 450px; border: 6px solid #fde68a; box-shadow: inset 0 0 30px rgba(245, 158, 11, 0.2), 0 30px 60px rgba(0,0,0,0.4); display: flex; flex-direction: column; align-items: center; position: relative; animation: epicPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes epicPop { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        
+        .epic-icon { font-size: 80px; margin-top: -80px; background: white; width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 6px solid #fde68a; box-shadow: 0 10px 20px rgba(245, 158, 11, 0.3); z-index: 2; animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        
+        .epic-title { font-size: 32px; font-weight: 900; color: #b45309; margin: 20px 0 10px 0; }
+        .epic-desc { font-size: 18px; font-weight: 800; color: #92400e; line-height: 1.5; margin-bottom: 30px; }
+        .epic-highlight { color: #ea580c; font-size: 22px; font-weight: 900; background: white; padding: 5px 15px; border-radius: 15px; border: 2px dashed #fcd34d; display: inline-block; margin: 10px 0; }
+
         .stat-badge { background: #fffbeb; color: #d97706; padding: 8px 15px; border-radius: 20px; font-weight: 900; font-size: 16px; border: 2px solid #fde68a; display: inline-block; margin-top: 10px; }
 
         @media (min-width: 768px) { 
@@ -121,6 +133,18 @@
     <div id="finish-screen" class="screen"></div>
 </div>
 
+<div id="badge-modal" class="modal-overlay">
+    <div class="epic-modal">
+        <div class="epic-icon" id="badge-icon">⚡️</div>
+        <div class="epic-title" id="badge-title">新纪录诞生！</div>
+        <div class="epic-desc" id="badge-desc"></div>
+        <div style="font-size:12px; color:#b45309; font-weight:800; margin-bottom: 20px;">
+            ☁️ 荣誉正在同步至总控台...
+        </div>
+        <button class="btn-action" style="background:#f59e0b; color:white; box-shadow: 0 8px 0 #d97706;" onclick="closeBadgeModal()">Awesome! 🚀</button>
+    </div>
+</div>
+
 <script>
     const SHEET_ID = "1vQlpdRHnR9ybEHHgX6fouRI-vXOh8KQNLSjsbt0TYh9R3No_9i7QNv_4ELwJZJGQpTe3oZVXaZijaW4";
     const GIDS = { "English": "1893311738", "Math": "59294467", "Science": "1581471994", "华文": "2020673087" };
@@ -128,11 +152,12 @@
     let db = {}, sessionQs = [], curIdx = 0, sessionErrors = 0;
     let canvas, ctx, drawing = false;
     let currentTermNum = 1;
+    let startTime = 0; // ⚡️ 计时器起点
     
     let curUser = localStorage.getItem('currentPlayer') || 'P3';
     let curSub = localStorage.getItem('currentSubject') || 'English';
 
-    // === 本地错题记忆系统 ===
+    // === 本地错题记忆系统 (BugTracker) ===
     function getMistakes() { return JSON.parse(localStorage.getItem('hub_mistakes') || '{}'); }
     function saveMistakes(m) { localStorage.setItem('hub_mistakes', JSON.stringify(m)); }
     function getQuestionKey(sub, grade, qText) { return `${grade}_${sub}_${qText.trim()}`; }
@@ -142,32 +167,37 @@
         const today = new Date().toISOString().split('T')[0];
         const key = `practice_stats_${today}_${curUser}_${curSub}`;
         let stats = JSON.parse(localStorage.getItem(key) || '{"perfects":0, "gamesPlayed":0, "date":""}');
-        if(stats.date !== today) stats = { perfects: 0, gamesPlayed: 0, date: today }; // 跨天重置
+        if(stats.date !== today) stats = { perfects: 0, gamesPlayed: 0, date: today }; 
         return { key, stats };
     }
     
     function recordGameLogic(isPerfect) {
         if (!isPerfect) return { trigger: false, msg: "" };
-        
         let { key, stats } = getDailyStats();
         stats.perfects++;
         
-        let triggerGame = false;
-        let bonusMsg = "";
-
-        // 累计两次 6~7，且今天该科目没玩满3次
+        let triggerGame = false; let bonusMsg = "";
         if (stats.perfects % 2 === 0 && stats.gamesPlayed < 3) {
-            triggerGame = true;
-            stats.gamesPlayed++;
+            triggerGame = true; stats.gamesPlayed++;
             bonusMsg = "🎉 完美达标！即将进入气球大作战！🎈";
         } else if (stats.gamesPlayed >= 3) {
-            bonusMsg = "🌟 太强了！你今天已经赢得了最高次数的游戏奖励，明天再来挑战吧！";
+            bonusMsg = "🌟 太强了！你今天已经赢得了最高次数的游戏奖励！";
         } else {
             bonusMsg = "🔥 再获得一次 6~7 就能解锁打气球游戏啦！加油！";
         }
-
         localStorage.setItem(key, JSON.stringify(stats));
         return { trigger: triggerGame, msg: bonusMsg, stats: stats };
+    }
+
+    // ⚡️ 个人最高纪录 (PB) 追踪器
+    function checkAndRecordSpeed(timeTakenSec) {
+        const key = `pb_speed_${curUser}_${curSub}`;
+        let pb = localStorage.getItem(key);
+        if (!pb || timeTakenSec < parseInt(pb)) {
+            localStorage.setItem(key, timeTakenSec);
+            return { isNewRecord: true, oldRecord: pb ? parseInt(pb) : null };
+        }
+        return { isNewRecord: false, oldRecord: parseInt(pb) };
     }
 
     function showScreen(id) {
@@ -188,9 +218,7 @@
         if (cached) { 
             try {
                 db = JSON.parse(cached); 
-                if (Object.keys(db).length > 0) {
-                    startQuiz(); return;
-                }
+                if (Object.keys(db).length > 0) { startQuiz(); return; }
             } catch(e) { sessionStorage.removeItem('hub_db_cache'); }
         }
 
@@ -230,14 +258,12 @@
             let t = q.Term || q.TERM;
             if (!t) return true; 
             let tNum = parseInt(t.toString().replace(/\D/g, ''));
-            if (isNaN(tNum)) return true;
-            return tNum <= currentTermNum;
+            return isNaN(tNum) || tNum <= currentTermNum;
         });
 
         if (mainPool.length === 0) { 
             document.getElementById('loading').innerHTML = "⚠️ 目前没有可用的练习题。请返回主页。"; 
-            setTimeout(() => window.location.href='index.html', 3000);
-            return; 
+            setTimeout(() => window.location.href='index.html', 3000); return; 
         }
 
         // Tier 1: 低年级预热 (限额 2)
@@ -245,11 +271,10 @@
         let lowerPicked = [];
         if (lowerGrade && db[lowerGrade] && db[lowerGrade][curSub]) {
             let lPool = db[lowerGrade][curSub].filter(q => (q.Type || "").toString().trim().toUpperCase() !== 'SPELLING');
-            lPool.sort(() => 0.5 - Math.random());
-            lowerPicked = lPool.slice(0, 2);
+            lPool.sort(() => 0.5 - Math.random()); lowerPicked = lPool.slice(0, 2);
         }
 
-        // Tier 2: 错题精准复习 (动态限额 5，带权重抽取)
+        // Tier 2: 错题精准复习 (动态限额 5)
         let mistakes = getMistakes();
         let eligibleMistakes = [];
         let freshNewPool = []; 
@@ -264,10 +289,9 @@
         if (eligibleMistakes.length > 0) {
             let weightedList = [];
             eligibleMistakes.forEach(item => {
-                let w = Math.max(1, 5 - item.level); // Level 1->权重4, Level 4->权重1
+                let w = Math.max(1, 5 - item.level); 
                 for(let i=0; i<w; i++) weightedList.push(item.q);
             });
-            
             let targetMistakes = Math.min(5, eligibleMistakes.length);
             while (mistakesPicked.length < targetMistakes && weightedList.length > 0) {
                 let idx = Math.floor(Math.random() * weightedList.length);
@@ -277,7 +301,7 @@
             }
         }
 
-        // Tier 3: 探索新知 (吸收剩余全部限额)
+        // Tier 3: 探索新知 
         let remainingQuota = 15 - lowerPicked.length - mistakesPicked.length;
         freshNewPool.sort(() => 0.5 - Math.random());
         let newPicked = freshNewPool.slice(0, remainingQuota);
@@ -292,6 +316,9 @@
         if (curUser === 'P3' && curSub === 'Math') document.getElementById('draw-pad-btn').style.display = 'block';
         else document.getElementById('draw-pad-btn').style.display = 'none';
 
+        // 开始计时 ⏱️
+        startTime = Date.now();
+
         showScreen('quiz-screen'); renderQ();
     }
 
@@ -299,7 +326,6 @@
         const bar = document.getElementById('progress-bar');
         const len = sessionQs.length; const pct = len > 1 ? (curIdx / (len - 1)) * 100 : 100;
         let activeIcon = curSub === '华文' ? '🐼' : (curSub === 'Science' ? '🌱' : (curSub === 'Math' ? '🔢' : '🚀'));
-        
         let html = `<div class="milestone-fill" style="--pct: ${pct}%"></div>`;
         for(let i=0; i<len; i++) html += `<div class="milestone${i < curIdx ? ' done' : (i === curIdx ? ' active' : '')}">${i < curIdx ? '⭐' : (i === curIdx ? activeIcon : '☁️')}</div>`;
         bar.innerHTML = html;
@@ -394,20 +420,61 @@
 
     function nextQ() { if(curIdx < sessionQs.length - 1) { curIdx++; renderQ(); } else { finishQuiz(); } }
 
+    // 🏆 结算与动画控制
+    let pendingGameResult = null; // 暂存气球游戏逻辑
+
     function finishQuiz() {
+        const timeTakenSec = Math.floor((Date.now() - startTime) / 1000);
+        const isPerfect = sessionErrors <= 1; 
         const isCN = (curSub === '华文');
-        let isPerfect = sessionErrors <= 1; 
         
-        // 调用打气球逻辑引擎
-        let gameResult = recordGameLogic(isPerfect);
-        
+        pendingGameResult = recordGameLogic(isPerfect);
+
+        // ⚡️ 检查是否打破速度记录（仅在获得6~7分时计算）
+        if (isPerfect) {
+            let speedStats = checkAndRecordSpeed(timeTakenSec);
+            if (speedStats.isNewRecord) {
+                showBadgeModal(
+                    "⚡️", 
+                    isCN ? "极速突破！" : "New Speed Record!", 
+                    isCN ? `太厉害了！你只用了 <span class="epic-highlight">${timeTakenSec}秒</span> 就完成了练习！<br><br>打破了之前的 ${speedStats.oldRecord ? speedStats.oldRecord : '初始'}秒 记录！` 
+                         : `Amazing! You finished in <span class="epic-highlight">${timeTakenSec}s</span>!<br><br>Beating your old record of ${speedStats.oldRecord ? speedStats.oldRecord : 'N/A'}s!`
+                );
+                return; // 暂停流程，等待用户点击Awesome
+            }
+        }
+
+        // 如果没有触发史诗级徽章，直接跳到最终结算
+        renderFinalScreen();
+    }
+
+    function showBadgeModal(icon, title, desc) {
+        document.getElementById('badge-icon').innerText = icon;
+        document.getElementById('badge-title').innerText = title;
+        document.getElementById('badge-desc').innerHTML = desc;
+        document.getElementById('badge-modal').style.display = 'flex';
+        if (typeof confetti === 'function') confetti({ particleCount: 300, spread: 150, origin: { y: 0.3 }, zIndex: 1001 });
+    }
+
+    function closeBadgeModal() {
+        document.getElementById('badge-modal').style.display = 'none';
+        renderFinalScreen(); // 继续跳转到结算
+    }
+
+    function renderFinalScreen() {
+        const isCN = (curSub === '华文');
+        const isPerfect = sessionErrors <= 1;
         let titleMsg = isPerfect ? (isCN ? `🎉 获得了 <span class="magic-number">6~7</span>！` : `🎉 You got <span class="magic-number">6~7</span>!`) : (isCN ? `💪 挑战完成！多练几次争取 6~7！` : `💪 Keep practicing to get 6~7!`);
         
         let html = `<div style="text-align:center; padding: 40px 0;"><h1 style="font-size:32px; color:#0f172a; font-weight:900;">${titleMsg}</h1>`;
         
-        // 如果有额外的奖励提示语（打气球倒计时/进度）
-        if (gameResult.msg) {
-            html += `<div class="stat-badge">${gameResult.msg}</div>`;
+        if (pendingGameResult && pendingGameResult.msg) {
+            html += `<div class="stat-badge">${pendingGameResult.msg}</div>`;
+        }
+
+        // 🐛 错题收录提示
+        if (sessionErrors > 0) {
+            html += `<p style="color:#ef4444; font-weight:800; margin-top:25px;">🐞 已将 ${sessionErrors} 道错题关进【捉虫日记】。明天再来挑战它们！</p>`;
         }
 
         html += `<button class="btn-action" style="background:#f1f5f9; color:#64748b; width:100%; max-width: 300px; margin: 40px auto 0 auto; border: 4px solid #e2e8f0; box-shadow: 0 6px 0 #cbd5e1;" onclick="window.location.href='index.html'">🏠 Back to Hub</button></div>`;
@@ -415,15 +482,10 @@
         document.getElementById('finish-screen').innerHTML = html;
         showScreen('finish-screen');
 
-        if (isPerfect) {
-            if (typeof confetti === 'function') confetti({ particleCount: 300, spread: 100, origin: { y: 0.5 } });
-            
-            // 如果成功触发了游戏，3秒后传送！
-            if (gameResult.trigger) {
-                setTimeout(() => { 
-                    window.location.href = "https://andydang2007.github.io/game/popballoons.html?ticket=" + Date.now(); 
-                }, 3000);
-            }
+        if (isPerfect && pendingGameResult && pendingGameResult.trigger) {
+            setTimeout(() => { 
+                window.location.href = "https://andydang2007.github.io/game/popballoons.html?ticket=" + Date.now(); 
+            }, 3000);
         }
     }
 
@@ -445,6 +507,8 @@
             if (document.getElementById('quiz-screen').style.display === 'flex') {
                 if (document.getElementById('sub-btn').style.display !== 'none') { e.preventDefault(); checkAns(); }
                 else if (document.getElementById('next-btn').style.display !== 'none') { e.preventDefault(); nextQ(); }
+            } else if (document.getElementById('badge-modal').style.display === 'flex') {
+                e.preventDefault(); closeBadgeModal();
             }
         }
     });
