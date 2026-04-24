@@ -33,22 +33,33 @@
         button.name-btn:active { transform: translateY(8px); box-shadow: 0 0 0 transparent; }
         .name-btn .avatar { font-size: 46px; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.1)); }
 
-        /* 🏆 荣誉墙设计 */
+        /* 🏆 豪华荣誉墙设计 */
         .dashboard-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; width: 100%; justify-content: center; }
         .dashboard-header .avatar { font-size: 50px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15)); }
         .dashboard-header h2 { margin: 0; font-size: 28px; color: #0f172a; font-weight: 900; }
 
-        .honor-wall { width: 100%; background: #f8fafc; border: 4px dashed #cbd5e1; border-radius: 30px; padding: 20px; margin-bottom: 30px; text-align: left; }
-        .honor-wall h3 { margin: 0 0 15px 0; font-size: 20px; color: #f59e0b; display: flex; align-items: center; gap: 8px; }
+        .honor-wall { width: 100%; background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 4px solid #fde68a; border-radius: 30px; padding: 20px; margin-bottom: 30px; text-align: left; box-shadow: inset 0 4px 15px rgba(245, 158, 11, 0.1), 0 10px 20px rgba(0,0,0,0.05); position: relative; overflow: hidden; }
+        .honor-wall::after { content: '✨'; position: absolute; top: -15px; right: -5px; font-size: 100px; opacity: 0.15; transform: rotate(15deg); pointer-events: none; }
         
-        .badges-scroll { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
+        .honor-wall h3 { margin: 0 0 15px 0; font-size: 22px; color: #d97706; display: flex; align-items: center; justify-content: space-between; font-weight: 900; z-index: 2; position: relative; }
+        
+        .total-trophies { font-size: 16px; background: white; padding: 6px 14px; border-radius: 20px; color: #f59e0b; border: 2px solid #fcd34d; box-shadow: 0 4px 0 #fde68a; display: flex; align-items: center; gap: 5px; }
+        .total-number { font-size: 20px; font-weight: 900; color: #d97706; }
+        
+        .badges-scroll { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 15px; scrollbar-width: none; z-index: 2; position: relative; padding-top: 10px; }
         .badges-scroll::-webkit-scrollbar { display: none; }
         
-        .badge-item { min-width: 80px; display: flex; flex-direction: column; align-items: center; gap: 8px; opacity: 0.4; filter: grayscale(100%); transition: 0.3s; }
+        .badge-item { min-width: 85px; display: flex; flex-direction: column; align-items: center; gap: 10px; opacity: 0.4; filter: grayscale(100%); transition: 0.3s; position: relative; }
         .badge-item.unlocked { opacity: 1; filter: grayscale(0%); animation: unlockPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .badge-icon { width: 60px; height: 60px; border-radius: 20px; background: white; border: 3px solid #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 32px; box-shadow: 0 4px 0 #cbd5e1; }
+        
+        .badge-icon-wrapper { position: relative; }
+        .badge-icon { width: 65px; height: 65px; border-radius: 22px; background: white; border: 3px solid #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 34px; box-shadow: 0 4px 0 #cbd5e1; transition: 0.2s; }
         .badge-item.unlocked .badge-icon { border-color: #f59e0b; background: #fffbeb; box-shadow: 0 4px 0 #d97706, 0 0 15px rgba(245, 158, 11, 0.3); }
-        .badge-name { font-size: 12px; font-weight: 800; color: #64748b; text-align: center; line-height: 1.2; }
+        
+        /* 徽章角标：记录拿了多少次 */
+        .badge-count { position: absolute; top: -10px; right: -10px; background: #ef4444; color: white; font-size: 13px; font-weight: 900; padding: 3px 8px; border-radius: 12px; border: 2px solid white; box-shadow: 0 3px 6px rgba(0,0,0,0.2); animation: popPulse 2s infinite alternate; z-index: 3; }
+
+        .badge-name { font-size: 13px; font-weight: 900; color: #64748b; text-align: center; line-height: 1.2; }
         .badge-item.unlocked .badge-name { color: #d97706; }
 
         @keyframes unlockPop { 0% { transform: scale(0.8); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
@@ -110,7 +121,9 @@
         </div>
 
         <div class="honor-wall">
-            <h3>🏆 My Badges</h3>
+            <h3>🏆 My Badges 
+                <div class="total-trophies">Total: <span class="total-number" id="total-badge-count">0</span></div>
+            </h3>
             <div class="badges-scroll" id="badges-container">
                 </div>
         </div>
@@ -182,7 +195,6 @@
     let pendingUser = null;
     let currentUser = '';
 
-    // 初始化日期与学期
     function initDate() {
         const now = new Date();
         const t2 = new Date(2026, 2, 23), t3 = new Date(2026, 5, 29), t4 = new Date(2026, 8, 14);
@@ -201,17 +213,13 @@
         document.getElementById(id).style.display = 'flex';
     }
 
-    function showSubMenu(menuId) {
-        showScreen(menuId);
-    }
+    function showSubMenu(menuId) { showScreen(menuId); }
 
-    // 核心路由：跳转到独立引擎
     function launchPractice(subject) {
         localStorage.setItem('currentSubject', subject);
         window.location.href = 'practice.html';
     }
 
-    // 用户切换逻辑
     function switchUser(g) {
         if (g === 'P1') { 
             pendingUser = g; document.getElementById('pin-modal').style.display = 'flex'; 
@@ -225,7 +233,6 @@
         currentUser = g;
         localStorage.setItem('currentPlayer', g);
         
-        // 更新 UI
         document.getElementById('dash-avatar').innerText = g === 'P3' ? '👱‍♀️' : '👧';
         document.getElementById('dash-name').innerText = `Hello, ${g === 'P3' ? 'Valerie' : 'Venessa'}!`;
         document.getElementById('cn-label').innerText = g === 'P3' ? '高级华文' : '华文';
@@ -234,7 +241,6 @@
         showScreen('dashboard-screen');
     }
 
-    // 🔐 PIN码验证
     function verifyHubPin() {
         const input = document.getElementById('hub-pin-input').value;
         const now = new Date();
@@ -242,64 +248,84 @@
         const day = now.getDay() === 0 ? 7 : now.getDay();
         
         if (input === (mmdd + day).toString()) {
-            closePinModal();
-            executeSwitchUser(pendingUser);
+            closePinModal(); executeSwitchUser(pendingUser);
         } else {
             const el = document.getElementById('hub-pin-input'); el.classList.add('error-shake');
             setTimeout(() => { el.classList.remove('error-shake'); el.value = ''; el.focus(); }, 400);
         }
     }
     
-    function closePinModal() { 
-        document.getElementById('pin-modal').style.display = 'none'; 
-        document.getElementById('hub-pin-input').value = ''; 
-    }
+    function closePinModal() { document.getElementById('pin-modal').style.display = 'none'; document.getElementById('hub-pin-input').value = ''; }
 
-    // 🏆 荣誉墙徽章渲染引擎
+    // 🏆 全新皇家徽章渲染引擎：统计所有科目、重复获取次数
     function renderBadges() {
         const container = document.getElementById('badges-container');
-        container.innerHTML = ''; // 清空
+        container.innerHTML = ''; 
 
-        // 获取该用户积累的数据 (从 localStorage 扫描)
         let totalPerfects = 0;
-        let balloonGamesUnlocked = 0;
+        let totalGames = 0;
+        let activeDates = new Set();
+        let subPerfects = { 'English': 0, 'Math': 0, '华文': 0, 'Science': 0 };
         
+        // 扫描本地存储，聚合该用户的所有成绩
         for (let i = 0; i < localStorage.length; i++) {
             let key = localStorage.key(i);
             if (key.startsWith('practice_stats_') && key.includes(`_${currentUser}_`)) {
                 try {
+                    let parts = key.split('_');
+                    let date = parts[2];
+                    let sub = parts[4];
+                    
                     let stats = JSON.parse(localStorage.getItem(key));
-                    totalPerfects += (stats.perfects || 0);
-                    balloonGamesUnlocked += (stats.gamesPlayed || 0);
+                    let perf = stats.perfects || 0;
+                    let games = stats.gamesPlayed || 0;
+                    
+                    totalPerfects += perf;
+                    totalGames += games;
+                    if (perf > 0 || games > 0) activeDates.add(date);
+                    if (sub && subPerfects[sub] !== undefined) subPerfects[sub] += perf;
                 } catch(e) {}
             }
         }
 
-        // 定义系统徽章库
+        // 定义 7 个可无限叠加的徽章
         const badgesDef = [
-            { id: 'first_blood', icon: '🎯', name: '神射手', desc: 'Score 6~7 once', unlocked: totalPerfects >= 1 },
-            { id: 'sharp_shooter', icon: '🔥', name: '连击王', desc: 'Score 6~7 3 times', unlocked: totalPerfects >= 3 },
-            { id: 'balloon_master', icon: '🎈', name: '气球猎手', desc: 'Unlock Balloon Game', unlocked: balloonGamesUnlocked >= 1 },
-            { id: 'grand_master', icon: '👑', name: '学霸', desc: 'Unlock 5 Games', unlocked: balloonGamesUnlocked >= 5 }
+            { id: 'perfect', icon: '🎯', name: '神射手', count: totalPerfects },
+            { id: 'balloon', icon: '🎈', name: '气球猎人', count: totalGames },
+            { id: 'streak',  icon: '📅', name: '全勤王者', count: activeDates.size },
+            { id: 'eng',     icon: '🔤', name: '英语达人', count: subPerfects['English'] },
+            { id: 'math',    icon: '🔢', name: '数学天才', count: subPerfects['Math'] },
+            { id: 'cn',      icon: '🐼', name: '华文小将', count: subPerfects['华文'] },
+            { id: 'sci',     icon: '🌱', name: '科学博士', count: subPerfects['Science'] }
         ];
 
-        // 渲染 HTML
+        let totalTrophies = 0;
+
         badgesDef.forEach(b => {
+            totalTrophies += b.count;
+            
             const div = document.createElement('div');
-            div.className = `badge-item ${b.unlocked ? 'unlocked' : ''}`;
+            div.className = `badge-item ${b.count > 0 ? 'unlocked' : ''}`;
+            
+            // 角标：如果次数 > 1，则显示 xN (或者只要 >0 就显示，更有成就感)
+            let countHtml = b.count > 0 ? `<div class="badge-count">x${b.count}</div>` : '';
+            
             div.innerHTML = `
-                <div class="badge-icon">${b.icon}</div>
+                <div class="badge-icon-wrapper">
+                    <div class="badge-icon">${b.icon}</div>
+                    ${countHtml}
+                </div>
                 <div class="badge-name">${b.name}</div>
             `;
             container.appendChild(div);
         });
+
+        // 更新总徽章数
+        document.getElementById('total-badge-count').innerText = totalTrophies;
     }
 
-    // 绑定回车键验证
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && document.getElementById('pin-modal').style.display === 'flex') {
-            verifyHubPin();
-        }
+        if (e.key === 'Enter' && document.getElementById('pin-modal').style.display === 'flex') { verifyHubPin(); }
     });
 
     initDate();
