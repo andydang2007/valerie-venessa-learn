@@ -7,11 +7,15 @@
     
     <link rel="apple-touch-icon" href="spaceship2.jpg">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script>
-        // 💡 与 3.0 主页解耦逻辑对齐
         let currentUser = localStorage.getItem('currentPlayer') || 'Valerie'; 
-        let currentGrade = localStorage.getItem('currentGrade') || (currentUser === 'Venessa' ? 'P1' : 'P3');
+        let currentGrade = localStorage.getItem('currentGrade');
+        if (!currentGrade) {
+            currentGrade = (currentUser === 'Venessa' || currentUser === 'P1') ? 'P1' : 'P3';
+        }
+        let isSister = (currentGrade === 'P1' || currentUser === 'Venessa' || currentUser === 'P1');
     </script>
     <style>
         :root {
@@ -173,11 +177,11 @@
         .ship-selector { display: none; gap: 25px; margin-bottom: 60px; align-items: center; justify-content: center; }
         .ship-option { width: 80px; height: 80px; padding: 5px; box-sizing: border-box; border-radius: 10px; border: 2px solid #334155; object-fit: contain; cursor: pointer; transition: 0.2s; mix-blend-mode: screen; background: #000; }
         .ship-option.selected { border-color: var(--accent-glow); box-shadow: 0 0 15px var(--accent-glow); transform: scale(1.15); }
-        .start-btn { padding: 18px 50px; border: 2px solid var(--accent-glow); background: rgba(0, 240, 255, 0.05); color: var(--accent-glow); font-size: 26px; font-weight: 900; cursor: pointer; box-shadow: 0 0 15px rgba(0, 240, 255, 0.3), inset 0 0 15px rgba(0, 240, 255, 0.2); letter-spacing: 3px; clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%); transition: all 0.2s; display: none; margin-top: 15px; }
+        .start-btn { padding: 18px 50px; border: 2px solid var(--accent-glow); background: rgba(0, 240, 255, 0.05); color: var(--accent-glow); font-size: 26px; font-weight: 900; cursor: pointer; box-shadow: 0 0 15px rgba(0, 240, 255, 0.3), inset 0 0 15px rgba(0, 240, 255, 0.2); letter-spacing: 3px; clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%); transition: all 0.2s; display: none; margin-top: 15px;}
         .start-btn:active { transform: scale(0.95); }
 
-        /* 🏆 徽章结算样式 */
-        .reward-box { margin-top: 20px; background: rgba(255,255,255,0.1); padding: 15px 25px; border-radius: 20px; border: 2px solid #fde68a; display: inline-block; animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .reward-box { margin-top: 20px; background: rgba(255,255,255,0.1); padding: 15px 25px; border-radius: 20px; border: 2px solid #fde68a; display: inline-block; animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-align: center; }
+
         @media (max-width: 800px) {
             .game-title { font-size: 5vw; margin-bottom: 40px; gap: 10px; } .psle-cap { font-size: 9vw; }
             .ship-selector { margin-bottom: 40px;}
@@ -242,7 +246,6 @@
     </div>
 
 <script>
-    // 💡 同步 API (复用主页的通道)
     const SYNC_API_URL = "https://script.google.com/macros/s/AKfycbyNi-a8VpHLrIpd0x5Fnb_825ZzFrLp4h2oMKot3xefrLGiLe3Pj-d8L-xWQh5w-Kkd/exec";
     const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQlpdRHnR9ybEHHgX6fouRI-vXOh8KQNLSjsbt0TYh9R3No_9i7QNv_4ELwJZJGQpTe3oZVXaZijaW4/pub?gid=573238154&single=true&output=csv";
     
@@ -313,6 +316,7 @@
         return { i: initial, f: final, t: tone };
     }
 
+    // 💡 全新升级的 PapaParse 引擎
     async function loadDB() {
         try {
             let ALL_WORDS = [];
@@ -320,45 +324,79 @@
             
             if (cachedPinyinDB) {
                 ALL_WORDS = JSON.parse(cachedPinyinDB);
+                filterAndStart(ALL_WORDS);
             } else {
-                const resp = await fetch(CSV_URL);
-                const text = await resp.text();
-                ALL_WORDS = text.split('\n').slice(1).map(row => {
-                    let cols = row.split('\t');
-                    if (cols.length < 7) cols = row.split(','); 
-                    if (cols.length < 7) return null;
-                    
-                    const grade = cols[0].trim();
-                    const topic = cols[2].trim();
-                    const char = cols[4].trim();
-                    const pyStr = cols[6].trim();
-                    
-                    if (!char || !pyStr) return null;
-                    
-                    let py = pyStr.split('/')[0].trim();
-                    let lesson = lessonMap[topic] || 99;
-                    
-                    return { grade: grade, lesson: lesson, char: char, ...parsePinyin(py), py: py };
-                }).filter(w => w);
-                sessionStorage.setItem('pinyin_db_cache', JSON.stringify(ALL_WORDS));
-            }
-            
-            // 💡 使用 currentGrade (P1 或 P3) 过滤词库
-            if (currentGrade === 'P1') {
-                DB_WORDS = ALL_WORDS.filter(w => w.grade === 'P1' && w.lesson <= 8);
-            } else {
-                DB_WORDS = ALL_WORDS.filter(w => w.grade === 'P1' || w.grade === 'P2' || (w.grade === 'P3' && w.lesson <= 7));
-            }
-            
-            if(DB_WORDS.length > 0){
-                document.getElementById('loading-ui').style.display = 'none';
-                document.getElementById('selector-title').style.display = 'block';
-                document.getElementById('ship-selector').style.display = 'flex';
-                document.getElementById('btn-start').style.display = 'block';
-            } else {
-                document.getElementById('loading-ui').innerText = "NO WORDS FOUND FOR THIS PROFILE";
+                Papa.parse(CSV_URL, {
+                    download: true,
+                    header: true,
+                    skipEmptyLines: 'greedy',
+                    complete: function(results) {
+                        ALL_WORDS = results.data.map(row => {
+                            let keys = Object.keys(row);
+                            
+                            // 💡 智能寻找列名，无惧插列
+                            let kGrade = keys.find(k => /grade|年级/i.test(k)) || keys[0];
+                            let kTopic = keys.find(k => /topic|lesson|课/i.test(k)) || keys[2];
+                            let kType = keys.find(k => /type|类型/i.test(k)) || keys[3]; 
+                            let kChar = keys.find(k => /chinese|char|word|question|汉字|词|题目/i.test(k)) || keys[4];
+                            let kPy = keys.find(k => /pinyin|correct|answer|拼音|答案/i.test(k)) || keys[6];
+                            
+                            // 💡 过滤掉不是 PINYIN 的题型（防止听写题混进来）
+                            let typeVal = (row[kType] || "").toString().trim().toUpperCase();
+                            if (typeVal && typeVal !== 'PINYIN') return null;
+
+                            let grade = (row[kGrade] || "").trim().toUpperCase();
+                            let topic = (row[kTopic] || "").trim();
+                            
+                            // 💡 智能分离 "衣yī"：用正则只保留纯汉字
+                            let charRaw = (row[kChar] || "").trim();
+                            let char = charRaw.replace(/[^\u4e00-\u9fa5]/g, '') || charRaw[0]; 
+                            
+                            let pyStr = (row[kPy] || "").trim();
+                            
+                            if (!char || !pyStr) return null;
+                            
+                            let py = pyStr.split('/')[0].trim();
+                            let lesson = lessonMap[topic] || 99;
+                            // 兼容直接写数字的课
+                            if (lesson === 99 && topic) {
+                                let match = topic.match(/\d+/);
+                                if (match) lesson = parseInt(match[0]);
+                            }
+                            
+                            return { grade: grade, lesson: lesson, char: char, ...parsePinyin(py), py: py };
+                        }).filter(w => w);
+                        
+                        sessionStorage.setItem('pinyin_db_cache', JSON.stringify(ALL_WORDS));
+                        filterAndStart(ALL_WORDS);
+                    },
+                    error: function() {
+                        document.getElementById('loading-ui').innerText = "DB CONNECTION FAILED";
+                    }
+                });
             }
         } catch (e) { document.getElementById('loading-ui').innerText = "DB CONNECTION FAILED"; }
+    }
+
+    // 💡 过滤与动态解锁接口
+    function filterAndStart(ALL_WORDS) {
+        // 读取本地存储的最大解锁课数（默认为8）。以后在 tingxie 过关时更新这个值即可！
+        let maxLesson = parseInt(localStorage.getItem(`max_lesson_${currentUser}`) || "8");
+
+        if (isSister) {
+            DB_WORDS = ALL_WORDS.filter(w => w.grade === 'P1' && w.lesson <= maxLesson);
+        } else {
+            DB_WORDS = ALL_WORDS.filter(w => w.grade === 'P1' || w.grade === 'P2' || (w.grade === 'P3' && w.lesson <= maxLesson));
+        }
+        
+        if(DB_WORDS.length > 0){
+            document.getElementById('loading-ui').style.display = 'none';
+            document.getElementById('selector-title').style.display = 'block';
+            document.getElementById('ship-selector').style.display = 'flex';
+            document.getElementById('btn-start').style.display = 'block';
+        } else {
+            document.getElementById('loading-ui').innerText = "NO WORDS FOUND FOR THIS PROFILE";
+        }
     }
 
     function initAudio() {
@@ -396,12 +434,11 @@
         gameLoop();
     }
 
-    // 💡 终极游戏结算逻辑：每日 1 次拼音高手徽章
     function endGame() {
         state.isPlaying = false;
         document.getElementById('overlay').style.display = 'flex';
         
-        const threshold = currentUser === 'Venessa' ? 3000 : 7000;
+        const threshold = isSister ? 3000 : 7000;
         const today = new Date().toISOString().split('T')[0];
         const badgeDateKey = `pinyin_badge_date_${currentUser}`;
         const badgeCountKey = `pinyin_badge_count_${currentUser}`;
@@ -411,17 +448,14 @@
 
         if (state.score >= threshold) {
             if (lastBadgeDate !== today) {
-                // 🎉 满足条件且今天还没拿过：发徽章发钱！
                 localStorage.setItem(badgeDateKey, today);
                 let currentCount = parseInt(localStorage.getItem(badgeCountKey) || "0");
                 localStorage.setItem(badgeCountKey, currentCount + 1);
 
-                // 算金币：妹妹双倍，姐姐1倍
-                let coinGain = currentUser === 'Venessa' ? 2 : 1;
+                let coinGain = isSister ? 2 : 1;
                 let vaultCoins = parseInt(localStorage.getItem('gold_coins_vault') || "0");
                 localStorage.setItem('gold_coins_vault', vaultCoins + coinGain);
 
-                // 同步云端
                 syncToCloud({ type: 'badge', user: currentUser, subject: '拼音', icon: '🎮', title: '拼音高手', desc: `镭射射击达到 ${state.score} 分！` });
                 syncToCloud({ type: 'coin_update', user: currentUser, amount: coinGain, total: vaultCoins + coinGain });
 
@@ -436,15 +470,13 @@
                 `;
                 confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
             } else {
-                // 🛑 达到分数，但今天已经拿过了（防刷金币机制）
                 resultHTML = `
                     <div style="font-size: 48px; color: #39ff14; text-shadow: 0 0 20px #39ff14;">MISSION ACCOMPLISHED</div>
                     <div style="font-size: 24px; color: #fff; margin-top: 10px;">FINAL SCORE: ${state.score}</div>
-                    <div style="font-size: 16px; color: #94a3b8; margin-top: 25px; max-width: 300px;">(你太棒了！但【拼音高手】每天只能获得 1 枚，明天再来赚金币吧！)</div>
+                    <div style="font-size: 16px; color: #94a3b8; margin-top: 25px; max-width: 300px; margin-left:auto; margin-right:auto; line-height: 1.5;">(你太棒了！但【拼音高手】每天只发 1 枚，明天再来赚金币吧！)</div>
                 `;
             }
         } else {
-            // ❌ 未达到分数
             resultHTML = `
                 <div style="font-size: 48px; color: #ff003c; text-shadow: 0 0 20px #ff003c;">TIME'S UP</div>
                 <div style="font-size: 24px; color: #fff; margin-top: 10px;">FINAL SCORE: ${state.score}</div>
