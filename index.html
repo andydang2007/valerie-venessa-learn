@@ -36,7 +36,7 @@
         .dashboard-header .avatar { font-size: 50px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15)); }
         .dashboard-header h2 { margin: 0; font-size: 28px; color: #0f172a; font-weight: 900; }
 
-        /* 🏆 豪华荣誉墙设计 (重构为多层网格) */
+        /* 🏆 豪华荣誉墙 */
         .honor-wall { width: 100%; background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 4px solid #fde68a; border-radius: 30px; padding: 20px; margin-bottom: 30px; text-align: left; box-shadow: inset 0 4px 15px rgba(245, 158, 11, 0.1), 0 10px 20px rgba(0,0,0,0.05); position: relative; overflow: hidden; }
         .honor-wall::after { content: '✨'; position: absolute; top: -15px; right: -5px; font-size: 100px; opacity: 0.15; transform: rotate(15deg); pointer-events: none; }
         
@@ -45,12 +45,10 @@
         .total-trophies { font-size: 16px; background: white; padding: 6px 14px; border-radius: 20px; color: #f59e0b; border: 2px solid #fcd34d; box-shadow: 0 4px 0 #fde68a; display: flex; align-items: center; gap: 5px; }
         .total-number { font-size: 20px; font-weight: 900; color: #d97706; }
         
-        /* 全新分层网格布局 */
         .badges-container { display: flex; flex-direction: column; gap: 20px; position: relative; z-index: 2; }
         .badge-category { width: 100%; }
         .badge-category-title { font-size: 16px; color: #b45309; font-weight: 900; margin-bottom: 12px; border-bottom: 2px dashed #fde68a; padding-bottom: 5px; display: flex; align-items: center; gap: 6px; }
         
-        /* 强制 1 排 5 个，自动换行 */
         .badge-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px 6px; width: 100%; justify-items: center; }
         
         .badge-item { display: flex; flex-direction: column; align-items: center; gap: 6px; opacity: 0.5; filter: grayscale(100%); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; width: 100%; }
@@ -101,7 +99,6 @@
         @media (min-width: 768px) { 
             .container { padding: 40px 50px; max-width: 750px; } 
             .grid-cards { grid-template-columns: repeat(4, 1fr); }
-            /* 桌面端放大徽章尺寸 */
             .badge-grid { gap: 15px 10px; }
             .badge-icon { width: 56px; height: 56px; font-size: 30px; border-radius: 18px; }
             .badge-name { font-size: 13px; }
@@ -272,7 +269,7 @@
     
     function closePinModal() { document.getElementById('pin-modal').style.display = 'none'; document.getElementById('hub-pin-input').value = ''; }
 
-    // 🏆 分层分类、智能隐藏的徽章渲染引擎
+    // 🏆 修复版：加入了极速突破计数器
     function renderBadges() {
         const container = document.getElementById('badges-container');
         container.innerHTML = ''; 
@@ -282,7 +279,9 @@
         let activeDates = new Set();
         let subPerfects = { 'English': 0, 'Math': 0, '华文': 0, 'Science': 0 };
         
-        // 1. 聚合本地数据
+        // 读取极速突破次数
+        let totalSpeedBreaks = parseInt(localStorage.getItem(`speed_breaks_${currentUser}`) || '0');
+        
         for (let i = 0; i < localStorage.length; i++) {
             let key = localStorage.key(i);
             if (key.startsWith('practice_stats_') && key.includes(`_${currentUser}_`)) {
@@ -305,7 +304,6 @@
         let totalDays = activeDates.size;
         let totalTrophies = 0;
 
-        // 辅助渲染单个 Badge 的函数
         const renderItemHTML = (b) => {
             if (!b.isMystery) totalTrophies += b.count;
             
@@ -314,7 +312,6 @@
             if (b.tier) classes.push(b.tier);
             if (b.isMystery) classes.push('locked-mystery');
             
-            // 只有数量 > 1 且不是盲盒才显示角标
             let countHtml = (b.count > 1 && !b.isMystery) ? `<div class="badge-count">x${b.count}</div>` : '';
             let progressHtml = b.isMystery ? `<div class="badge-progress">${b.progress}</div>` : '';
             
@@ -331,10 +328,11 @@
         };
 
         // ==========================================
-        // 层级 1：🌟 核心成就 (只要没拿到，就显示灰色占位，保证墙面不空)
+        // 层级 1：🌟 核心成就 (加入极速突破)
         // ==========================================
         const coreBadges = [
             { icon: '🎯', name: '神射手', count: totalPerfects },
+            { icon: '⚡️', name: '极速突破', count: totalSpeedBreaks },
             { icon: '🎈', name: '气球猎人', count: totalGames }
         ];
         let coreHTML = coreBadges.map(renderItemHTML).join('');
@@ -345,7 +343,7 @@
             </div>`;
 
         // ==========================================
-        // 层级 2：🎓 学科大师 (没有拿到任何学科徽章前，隐藏整个区域)
+        // 层级 2：🎓 学科大师
         // ==========================================
         let subTotalUnlocked = subPerfects['English'] + subPerfects['Math'] + subPerfects['华文'] + subPerfects['Science'];
         if (subTotalUnlocked > 0) {
@@ -364,7 +362,7 @@
         }
 
         // ==========================================
-        // 层级 3：📅 毅力打卡 (只要开始打卡 1 天，就显示此区域及阶梯盲盒)
+        // 层级 3：📅 毅力打卡
         // ==========================================
         if (totalDays > 0) {
             let nextStreakGoal = 3;
@@ -378,13 +376,11 @@
 
             let streakBadges = [];
             
-            // 加入已获得的打卡徽章
             earnedStreaks.forEach(day => {
                 let tier = day >= 15 ? 'gold' : (day >= 10 ? 'silver' : 'bronze');
                 streakBadges.push({ icon: '📅', name: `打卡${day}天`, count: 1, tier: tier });
             });
 
-            // 加入探路灯盲盒
             if (nextStreakGoal !== null) {
                 streakBadges.push({ 
                     icon: '🎁', name: `打卡${nextStreakGoal}天解锁`, count: 0, isMystery: true, 
@@ -400,7 +396,6 @@
                 </div>`;
         }
 
-        // 更新右上角总计数
         document.getElementById('total-badge-count').innerText = totalTrophies;
     }
 
@@ -410,7 +405,7 @@
 
     initDate();
     
-    // 如果之前有登录记录，直接进入 Dashboard
+    // 自动加载上次用户
     let lastUser = localStorage.getItem('currentPlayer');
     if(lastUser === 'P3' || lastUser === 'P1') {
         executeSwitchUser(lastUser);
