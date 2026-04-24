@@ -32,18 +32,20 @@
         button.name-btn:active { transform: translateY(8px); box-shadow: 0 0 0 transparent; }
         .name-btn .avatar { font-size: 46px; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.1)); }
 
-        .dashboard-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; width: 100%; justify-content: center; }
+        .dashboard-header { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 25px; width: 100%; }
+        .dashboard-header .avatar-row { display: flex; align-items: center; gap: 15px; }
         .dashboard-header .avatar { font-size: 50px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15)); }
         .dashboard-header h2 { margin: 0; font-size: 28px; color: #0f172a; font-weight: 900; }
+        .streak-badge { font-size: 14px; color: #d97706; background: #fffbeb; padding: 5px 15px; border-radius: 20px; font-weight: 900; border: 2px solid #fde68a; box-shadow: 0 4px 0 #fde68a; }
 
         /* 🏆 豪华荣誉墙 */
         .honor-wall { width: 100%; background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 4px solid #fde68a; border-radius: 30px; padding: 20px; margin-bottom: 30px; text-align: left; box-shadow: inset 0 4px 15px rgba(245, 158, 11, 0.1), 0 10px 20px rgba(0,0,0,0.05); position: relative; overflow: hidden; }
         .honor-wall::after { content: '✨'; position: absolute; top: -15px; right: -5px; font-size: 100px; opacity: 0.15; transform: rotate(15deg); pointer-events: none; }
         
-        .honor-wall h3 { margin: 0 0 15px 0; font-size: 22px; color: #d97706; display: flex; align-items: center; justify-content: space-between; font-weight: 900; z-index: 2; position: relative; }
+        .honor-wall h3 { margin: 0 0 15px 0; font-size: 22px; color: #d97706; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; font-weight: 900; z-index: 2; position: relative; }
         
-        .total-trophies { font-size: 16px; background: white; padding: 6px 14px; border-radius: 20px; color: #f59e0b; border: 2px solid #fcd34d; box-shadow: 0 4px 0 #fde68a; display: flex; align-items: center; gap: 5px; }
-        .total-number { font-size: 20px; font-weight: 900; color: #d97706; }
+        .total-trophies { font-size: 14px; background: white; padding: 6px 12px; border-radius: 20px; color: #f59e0b; border: 2px solid #fcd34d; box-shadow: 0 4px 0 #fde68a; display: flex; align-items: center; gap: 5px; }
+        .total-number { font-size: 18px; font-weight: 900; color: #d97706; }
         
         .badges-container { display: flex; flex-direction: column; gap: 20px; position: relative; z-index: 2; }
         .badge-category { width: 100%; }
@@ -90,19 +92,29 @@
         .btn-action { width: 100%; border-radius: 20px; border: none; font-weight: 900; font-size: 18px; cursor: pointer; transition: 0.15s; display: flex; align-items: center; justify-content: center; outline: none; padding: 18px; box-shadow: 0 6px 0 rgba(0,0,0,0.1); background: #f1f5f9; color: #64748b; border: 4px solid #e2e8f0; }
         .btn-action:active { transform: translateY(6px); box-shadow: 0 0 0 transparent; }
 
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
-        .modal-content { background: white; padding: 40px; border-radius: 40px; text-align: center; width: 90%; max-width: 350px; display: flex; flex-direction: column; align-items: center; border: 5px solid #fff; box-shadow: 0 25px 50px rgba(0,0,0,0.2); }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.8); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
+        .modal-content { background: white; padding: 40px; border-radius: 40px; text-align: center; width: 90%; max-width: 380px; display: flex; flex-direction: column; align-items: center; border: 5px solid #fff; box-shadow: 0 25px 50px rgba(0,0,0,0.2); }
         .pin-input-hub { font-size: 36px; font-weight: 900; letter-spacing: 10px; padding: 15px; width: 160px; text-align: center; border: 4px solid #e2e8f0; border-radius: 20px; margin: 20px 0; outline: none; color: #1e293b; transition: 0.2s; background: #f8fafc; }
         .pin-input-hub:focus { border-color: #f59e0b; background: #fffbeb; }
         .error-shake { border-color: #ef4444 !important; animation: shake 0.3s; background-color: #fef2f2 !important; }
 
-        /* 🌟 新增：金库与商店专属 CSS */
-        .vault-card { width: 100%; background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 4px solid #fde68a; border-radius: 30px; padding: 20px; margin-bottom: 20px; text-align: center; box-shadow: inset 0 4px 15px rgba(245, 158, 11, 0.1); }
-        .crystal-card { width: 100%; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 4px solid #bae6fd; border-radius: 30px; padding: 15px; margin-bottom: 25px; text-align: center; display: flex; justify-content: space-around; align-items: center; }
-        .shop-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; margin-bottom: 15px; }
-        .shop-btn { background: white; border: 3px solid #e2e8f0; border-radius: 20px; padding: 15px 5px; display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; font-weight: 900; color: #475569; transition: 0.1s; box-shadow: 0 4px 0 #cbd5e1; }
-        .shop-btn:active { transform: translateY(4px); box-shadow: none; }
-        #secret-code { font-family: monospace; font-size: 26px; background: #fffbeb; padding: 15px; border: 3px dashed #f59e0b; margin: 20px 0; color: #b45309; font-weight: 900; letter-spacing: 2px; }
+        /* 🛒 神秘商店专属样式 */
+        .shop-header { display:flex; gap:15px; width:100%; margin-bottom:25px; }
+        .shop-bal-card { flex:1; border-radius:20px; padding:15px; text-align:center; }
+        .shop-bal-vault { background:#fffbeb; border:3px solid #fde68a; }
+        .shop-bal-crys { background:#f0f9ff; border:3px solid #bae6fd; }
+        
+        .shop-item-grid { display:grid; grid-template-columns:repeat(2, 1fr); gap:15px; width:100%; margin-bottom:25px; }
+        .shop-item { background: white; border: 4px solid #e2e8f0; border-radius: 25px; padding: 15px; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.2s; box-shadow: 0 6px 0 #cbd5e1; }
+        .shop-item:active { transform: translateY(4px); box-shadow: 0 2px 0 #cbd5e1; }
+        .shop-item.active { border-color: #f59e0b; background: #fffbeb; transform: scale(1.05); box-shadow: 0 10px 20px rgba(245,158,11,0.2); }
+        .shop-item .emoji { font-size: 45px; margin-bottom: 5px; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.1)); }
+        .shop-item .name { font-weight: 900; font-size: 16px; color: #475569; margin-bottom: 8px; }
+        .shop-item .price { font-size: 24px; font-weight: 900; border-radius: 15px; padding: 4px 12px; display: inline-flex; align-items: center; gap: 5px; }
+        .shop-item.coin-item .price { background: #fef3c7; color: #d97706; }
+        .shop-item.crys-item .price { background: #e0f2fe; color: #0284c7; }
+
+        #secret-code { font-family: monospace; font-size: 28px; background: #fffbeb; padding: 15px; border: 3px dashed #f59e0b; margin: 20px 0; color: #b45309; font-weight: 900; letter-spacing: 2px; }
 
         @media (min-width: 768px) { 
             .container { padding: 40px 50px; max-width: 750px; } 
@@ -111,6 +123,7 @@
             .badge-icon { width: 56px; height: 56px; font-size: 30px; border-radius: 18px; }
             .badge-name { font-size: 13px; }
             .badge-count { font-size: 12px; padding: 2px 8px; top: -8px; right: -8px; }
+            .shop-item-grid { grid-template-columns: repeat(3, 1fr); }
         }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
     </style>
@@ -134,31 +147,22 @@
 
     <div id="dashboard-screen" class="screen">
         <div class="dashboard-header">
-            <div class="avatar" id="dash-avatar">👱‍♀️</div>
-            <h2 id="dash-name">Welcome!</h2>
-        </div>
-
-        <div class="vault-card">
-            <h3 style="margin:0 0 5px 0; color:#d97706; font-size: 20px;">💰 家庭共享金库</h3>
-            <div id="vault-total" style="font-size:50px; font-weight:900; color:#b45309;">0</div>
-            <div style="font-size:12px; color:#92400e; font-weight:bold;">全家一起努力攒大餐！</div>
-        </div>
-
-        <div class="crystal-card">
-            <div>
-                <div style="font-size:14px; color:#0369a1; font-weight:bold;">💎 我的打卡水晶</div>
-                <div id="user-crys" style="font-size:36px; font-weight:900; color:#0ea5e9;">0</div>
+            <div class="avatar-row">
+                <div class="avatar" id="dash-avatar">👱‍♀️</div>
+                <h2 id="dash-name">Welcome!</h2>
             </div>
-            <div style="width: 2px; height: 40px; background: #bae6fd;"></div>
-            <div>
-                <div style="font-size:14px; color:#0369a1; font-weight:bold;">🔥 当前连续天数</div>
-                <div id="user-streak" style="font-size:36px; font-weight:900; color:#0ea5e9;">0</div>
-            </div>
+            <div class="streak-badge" id="dash-streak">🔥 连续打卡第 0 天</div>
         </div>
 
         <div class="honor-wall">
-            <h3>🏆 My Badges 
-                <div class="total-trophies">Total: <span class="total-number" id="total-badge-count">0</span></div>
+            <h3>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    🏆 My Badges 
+                    <div class="total-trophies">Total: <span class="total-number" id="total-badge-count">0</span></div>
+                </div>
+                <button onclick="openShop()" style="background:#f59e0b; color:white; border:none; padding:10px 18px; border-radius:20px; font-weight:900; font-size:16px; cursor:pointer; box-shadow:0 6px 0 #d97706; display:flex; align-items:center; gap:6px; transition:0.15s;" onactive="this.style.transform='translateY(4px)'; this.style.boxShadow='none';">
+                    🛒 神秘商店
+                </button>
             </h3>
             
             <div class="badges-container" id="badges-container">
@@ -180,19 +184,54 @@
                 <div class="emoji">🌱</div> Science
             </div>
         </div>
-
-        <div class="section-title" style="margin-top: 10px;">🎁 神秘商店</div>
-        <div class="shop-grid">
-            <button class="shop-btn" onclick="confirmRedeem('金币', 67, '🍔 汉堡', 'HB')"><span style="font-size:30px;">🍔</span><span>汉堡<br><span style="font-size:12px;color:#d97706;">67币</span></span></button>
-            <button class="shop-btn" onclick="confirmRedeem('金币', 134, '🍟 套餐', 'TC')"><span style="font-size:30px;">🍟</span><span>套餐<br><span style="font-size:12px;color:#d97706;">134币</span></span></button>
-            <button class="shop-btn" onclick="confirmRedeem('金币', 268, '🍕 披萨', 'PZ')"><span style="font-size:30px;">🍕</span><span>披萨<br><span style="font-size:12px;color:#d97706;">268币</span></span></button>
-        </div>
-        <div class="shop-grid" style="grid-template-columns: repeat(2, 1fr);">
-            <button class="shop-btn" style="border-color:#bae6fd;" onclick="confirmRedeem('水晶', 7, '🍦 甜筒', 'TT')"><span style="font-size:30px;">🍦</span><span>甜筒<br><span style="font-size:12px;color:#0ea5e9;">7水晶</span></span></button>
-            <button class="shop-btn" style="border-color:#bae6fd;" onclick="confirmRedeem('水晶', 14, '🍨 麦旋风', 'XF')"><span style="font-size:30px;">🍨</span><span>麦旋风<br><span style="font-size:12px;color:#0ea5e9;">14水晶</span></span></button>
-        </div>
         
-        <button class="btn-action" style="margin-top:15px;" onclick="showScreen('user-screen')">👤 Switch User</button>
+        <button class="btn-action" style="margin-top:10px;" onclick="showScreen('user-screen')">👤 Switch User</button>
+    </div>
+
+    <div id="shop-screen" class="screen">
+        <h2 style="margin:0 0 20px 0; font-size: 32px; font-weight: 900; color: #b45309; text-shadow: 0 2px 4px rgba(245,158,11,0.2);">🎁 神秘兑换中心</h2>
+        
+        <div class="shop-header">
+            <div class="shop-bal-card shop-bal-vault">
+                <div style="font-size:14px; color:#d97706; font-weight:900;">家庭金币</div>
+                <div style="font-size:36px; font-weight:900; color:#b45309;">💰 <span id="shop-vault-total">0</span></div>
+            </div>
+            <div class="shop-bal-card shop-bal-crys">
+                <div style="font-size:14px; color:#0369a1; font-weight:900;">个人水晶</div>
+                <div style="font-size:36px; font-weight:900; color:#0ea5e9;">💎 <span id="shop-user-crys">0</span></div>
+            </div>
+        </div>
+
+        <div class="shop-item-grid">
+            <div class="shop-item coin-item" onclick="selectPrize(this, '金币', 67, '汉堡', 'HB')">
+                <div class="emoji">🍔</div>
+                <div class="name">单人汉堡</div>
+                <div class="price">💰 67</div>
+            </div>
+            <div class="shop-item coin-item" onclick="selectPrize(this, '金币', 134, '套餐', 'TC')">
+                <div class="emoji">🍔🍟</div>
+                <div class="name">麦当劳套餐</div>
+                <div class="price">💰 134</div>
+            </div>
+            <div class="shop-item coin-item" onclick="selectPrize(this, '金币', 268, '披萨', 'PZ')">
+                <div class="emoji">🍕</div>
+                <div class="name">全家披萨大餐</div>
+                <div class="price">💰 268</div>
+            </div>
+            <div class="shop-item crys-item" onclick="selectPrize(this, '水晶', 7, '甜筒', 'TT')">
+                <div class="emoji">🍦</div>
+                <div class="name">冰淇淋甜筒</div>
+                <div class="price">💎 7</div>
+            </div>
+            <div class="shop-item crys-item" onclick="selectPrize(this, '水晶', 14, '麦旋风', 'XF')">
+                <div class="emoji">🌪️🍦</div>
+                <div class="name">麦旋风</div>
+                <div class="price">💎 14</div>
+            </div>
+        </div>
+
+        <button id="do-redeem-btn" class="btn-action" style="background:#cbd5e1; color:white; border-color:#94a3b8; box-shadow:0 6px 0 #94a3b8; margin-bottom:15px;" disabled onclick="executeRedeem()">✅ 确认兑换</button>
+        <button class="btn-action" onclick="showScreen('dashboard-screen')">← 返回荣誉墙</button>
     </div>
 
     <div id="english-menu" class="screen">
@@ -241,19 +280,19 @@
 
 <div id="redeem-modal" class="modal-overlay">
     <div class="modal-content" style="border-color: #f59e0b;">
-        <div style="font-size: 50px; margin-bottom:10px;">🎉</div>
-        <h2 style="margin:0; color:#0f172a;">兑换成功！</h2>
-        <p style="color:#64748b; font-weight:bold;">请截图保存下方口令，找老爸接头兑现：</p>
+        <div style="font-size: 60px; margin-bottom:10px;">🎉</div>
+        <h2 style="margin:0; color:#0f172a; font-size:28px;">兑换成功！</h2>
+        <p style="color:#64748b; font-weight:800; margin-top:10px;">请截图保存下方口令，找老爸接头兑现：</p>
         <div id="secret-code">CODE-XXXX</div>
-        <button class="btn-action" style="background:#f59e0b; color:white; border-color:#d97706;" onclick="document.getElementById('redeem-modal').style.display='none'">我知道了！</button>
+        <button class="btn-action" style="background:#f59e0b; color:white; border-color:#d97706; box-shadow:0 6px 0 #b45309;" onclick="closeRedeemModal()">我知道了！</button>
     </div>
 </div>
 
 <script>
     let pendingUser = null;
     let currentUser = '';
+    let selectedPrize = null;
     
-    // API URL 补全
     const SYNC_API_URL = "https://script.google.com/macros/s/AKfycbyNi-a8VpHLrIpd0x5Fnb_825ZzFrLp4h2oMKot3xefrLGiLe3Pj-d8L-xWQh5w-Kkd/exec";
 
     function initDate() {
@@ -298,7 +337,6 @@
         document.getElementById('dash-name').innerText = `Hello, ${g === 'P3' ? 'Valerie' : 'Venessa'}!`;
         document.getElementById('cn-label').innerText = g === 'P3' ? '高级华文' : '华文';
         
-        // 更新 UI 数据
         updateEconomyUI();
         renderBadges();
         
@@ -322,51 +360,85 @@
     
     function closePinModal() { document.getElementById('pin-modal').style.display = 'none'; document.getElementById('hub-pin-input').value = ''; }
 
-    // 🌟 新增：更新金币与水晶 UI
+    // --- 💰 经济系统更新 ---
     function updateEconomyUI() {
-        document.getElementById('vault-total').innerText = localStorage.getItem('gold_coins_vault') || "0";
-        document.getElementById('user-crys').innerText = localStorage.getItem(`crystals_${currentUser}`) || "0";
-        document.getElementById('user-streak').innerText = localStorage.getItem(`streak_${currentUser}`) || "0";
+        let streak = localStorage.getItem(`streak_${currentUser}`) || "0";
+        document.getElementById('dash-streak').innerText = `🔥 连续打卡第 ${streak} 天`;
+        
+        document.getElementById('shop-vault-total').innerText = localStorage.getItem('gold_coins_vault') || "0";
+        document.getElementById('shop-user-crys').innerText = localStorage.getItem(`crystals_${currentUser}`) || "0";
     }
 
-    // 🎁 新增：神秘商店兑换逻辑
+    // --- 🛒 神秘商店逻辑 ---
+    function openShop() {
+        updateEconomyUI();
+        selectedPrize = null;
+        document.querySelectorAll('.shop-item').forEach(i => i.classList.remove('active'));
+        
+        const btn = document.getElementById('do-redeem-btn');
+        btn.style.background = '#cbd5e1'; 
+        btn.style.borderColor = '#94a3b8'; 
+        btn.style.boxShadow = '0 6px 0 #94a3b8'; 
+        btn.disabled = true;
+        
+        showScreen('shop-screen');
+    }
+
+    function selectPrize(el, type, price, name, prefix) {
+        document.querySelectorAll('.shop-item').forEach(i => i.classList.remove('active'));
+        el.classList.add('active');
+        selectedPrize = { type, price, name, prefix };
+        
+        const btn = document.getElementById('do-redeem-btn');
+        btn.style.background = '#10b981';
+        btn.style.borderColor = '#059669';
+        btn.style.boxShadow = '0 6px 0 #059669';
+        btn.disabled = false;
+    }
+
+    function executeRedeem() {
+        if (!selectedPrize) return;
+        confirmRedeem(selectedPrize.type, selectedPrize.price, selectedPrize.name, selectedPrize.prefix);
+    }
+
     function confirmRedeem(type, price, name, prefix) {
         let balanceKey = type === '金币' ? 'gold_coins_vault' : `crystals_${currentUser}`;
         let currentBalance = parseInt(localStorage.getItem(balanceKey) || "0");
 
         if (currentBalance < price) {
-            alert(`🚫 余额不足！还差 ${price - currentBalance} 个${type}，继续加油打卡哦！`);
+            alert(`🚫 余额不足！你的${type}还差 ${price - currentBalance} 个，继续努力哦！`);
             return;
         }
 
-        if (confirm(`确定要消耗 ${price} ${type} 兑换 ${name} 吗？`)) {
-            // 扣除余额
+        if (confirm(`确定要消耗 ${price} ${type} 兑换【${name}】吗？`)) {
             localStorage.setItem(balanceKey, currentBalance - price);
             
-            // 生成口令: 前缀 - MMDD - 校验码(日+价格)
             const now = new Date();
             const datePart = (now.getMonth() + 1).toString().padStart(2, '0') + now.getDate().toString().padStart(2, '0');
             const checkSum = (now.getDate() + price).toString().padStart(3, '0'); 
             const code = `${prefix}-${datePart}-${checkSum}`;
 
-            // 后台同步
             try {
                 fetch(SYNC_API_URL, {
                     method: 'POST', mode: 'no-cors',
                     body: JSON.stringify({ type: 'redemption', user: currentUser, rewardName: name, price: price, code: code })
                 });
-            } catch(e) { console.log(e); }
+            } catch(e) {}
 
-            // 弹窗展示
             document.getElementById('secret-code').innerText = code;
             document.getElementById('redeem-modal').style.display = 'flex';
             
-            // 刷新当前金币/水晶显示
-            updateEconomyUI();
+            updateEconomyUI(); // 扣款后立即刷新显示的余额
         }
     }
+    
+    function closeRedeemModal() {
+        document.getElementById('redeem-modal').style.display = 'none';
+        // 兑换完成后，清空选中状态
+        openShop(); 
+    }
 
-    // 🏆 原样保留：荣誉墙徽章渲染逻辑
+    // --- 🏆 荣誉墙渲染逻辑 ---
     function renderBadges() {
         const container = document.getElementById('badges-container');
         container.innerHTML = ''; 
