@@ -30,9 +30,8 @@
         .progress-col { width: 100%; display: flex; flex-direction: column; align-items: center; }
         .quiz-main-col { width: 100%; display: flex; flex-direction: column; align-items: stretch; text-align: left; }
 
-        .milestone-track { display: flex; flex-direction: row; justify-content: space-between; align-items: center; position: relative; padding: 0 5px; width: 100%; height: 32px; margin-bottom: 10px; }
-        .milestone-track::before { content: ''; position: absolute; left: 15px; right: 15px; top: 50%; height: 6px; background: #e2e8f0; z-index: 1; transform: translateY(-50%); border-radius: 3px; }
-        .milestone-fill { position: absolute; left: 15px; top: 50%; height: 6px; background: #10b981; z-index: 1; transform: translateY(-50%); border-radius: 3px; transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); width: var(--pct); }
+        /* 💡 修复1：进度条改为自动折行，去掉强制的连接直线 */
+        .milestone-track { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; width: 100%; margin-bottom: 10px; }
         .milestone { width: 28px; height: 28px; background: #f8fafc; border: 3px solid #cbd5e1; border-radius: 50%; z-index: 2; display: flex; align-items: center; justify-content: center; font-size: 12px; transition: 0.4s; box-sizing: border-box; flex-shrink: 0; }
         .milestone.done { border-color: #10b981; background: #d1fae5; }
         .milestone.active { border-color: #3b82f6; background: #eff6ff; font-size: 16px; transform: scale(1.2); box-shadow: 0 0 10px rgba(59,130,246,0.3); animation: bounceActive 1s infinite alternate; }
@@ -58,8 +57,9 @@
         .draw-panel { display: none; flex-direction: column; align-items: center; margin-top: 15px; background: #f8fafc; padding: 15px; border-radius: 25px; border: 4px dashed #cbd5e1; width: 100%; }
         canvas { background: white; border-radius: 15px; border: 2px solid #e2e8f0; touch-action: none; cursor: crosshair; }
 
+        /* 👑 弹窗专属样式 */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
-        .epic-modal { background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); padding: 40px; border-radius: 40px; text-align: center; width: 90%; max-width: 450px; border: 6px solid #fde68a; box-shadow: inset 0 0 30px rgba(245, 158, 11, 0.2), 0 30px 60px rgba(0,0,0,0.4); display: flex; flex-direction: column; align-items: center; position: relative; animation: epicPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .epic-modal { background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); padding: 40px; border-radius: 40px; text-align: center; width: 90%; max-width: 450px; border: 6px solid #fde68a; box-shadow: inset 0 0 30px rgba(245, 158, 11, 0.2), 0 30px 60px rgba(0,0,0,0.4); display: flex; flex-direction: column; align-items: center; position: relative; transition: 0.2s; }
         @keyframes epicPop { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         
         .epic-icon { font-size: 80px; margin-top: -80px; background: white; width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 6px solid #fde68a; box-shadow: 0 10px 20px rgba(245, 158, 11, 0.3); z-index: 2; animation: float 3s ease-in-out infinite; }
@@ -76,9 +76,7 @@
             .quiz-wrapper { flex-direction: row; gap: 40px; align-items: stretch; }
             .progress-col { flex: 0 0 60px; align-items: center; justify-content: flex-start; }
             .quiz-main-col { flex: 1; }
-            .milestone-track { flex-direction: column; width: 38px; height: 100%; min-height: 500px; padding: 15px 0; margin: 0; }
-            .milestone-track::before { top: 15px; bottom: 15px; left: 50%; width: 8px; height: auto; transform: translateX(-50%); }
-            .milestone-fill { top: 15px; left: 50%; width: 8px; height: var(--pct); transform: translateX(-50%); }
+            .milestone-track { flex-direction: column; flex-wrap: nowrap; width: 38px; height: 100%; min-height: 500px; padding: 15px 0; margin: 0; justify-content: flex-start; }
             .milestone { width: 36px; height: 36px; font-size: 16px; }
             .milestone.active { font-size: 20px; }
         }
@@ -164,7 +162,7 @@
     function saveMistakes(m) { localStorage.setItem('hub_mistakes', JSON.stringify(m)); }
     function getQuestionKey(sub, grade, qText) { return `${grade}_${sub}_${qText.trim()}`; }
 
-    // === 修复后的每日奖励与结算系统 ===
+    // === 每日奖励与成就系统 ===
     function getDailyStats() {
         const today = new Date().toISOString().split('T')[0];
         const key = `practice_stats_${today}_${curUser}_${curSub}`;
@@ -173,10 +171,9 @@
         return { key, stats };
     }
     
-    // 💡 只有在整套做完，且完美的情况下，才调用这个函数给成就 +1
     function applyPerfectSession() {
         let { key, stats } = getDailyStats();
-        stats.perfects += 1; // 仅此一处执行累加
+        stats.perfects += 1; 
         
         let triggerGame = false; let bonusMsg = "";
         
@@ -193,12 +190,16 @@
         return { trigger: triggerGame, msg: bonusMsg };
     }
 
-    // ⚡️ 个人最高纪录 (PB) 追踪器
+    // ⚡️ 个人最高纪录追踪 (并增加突破次数统计)
     function checkAndRecordSpeed(timeTakenSec) {
         const key = `pb_speed_${curUser}_${curSub}`;
+        const breaksKey = `speed_breaks_${curUser}`; // 记录总计打破记录的次数
         let pb = localStorage.getItem(key);
+        
         if (!pb || timeTakenSec < parseInt(pb)) {
             localStorage.setItem(key, timeTakenSec);
+            let breaks = parseInt(localStorage.getItem(breaksKey) || '0');
+            localStorage.setItem(breaksKey, breaks + 1); // 次数 +1
             return { isNewRecord: true, oldRecord: pb ? parseInt(pb) : null };
         }
         return { isNewRecord: false, oldRecord: parseInt(pb) };
@@ -322,10 +323,12 @@
 
     function updateProgress() {
         const bar = document.getElementById('progress-bar');
-        const len = sessionQs.length; const pct = len > 1 ? (curIdx / (len - 1)) * 100 : 100;
+        const len = sessionQs.length;
+        let html = '';
         let activeIcon = curSub === '华文' ? '🐼' : (curSub === 'Science' ? '🌱' : (curSub === 'Math' ? '🔢' : '🚀'));
-        let html = `<div class="milestone-fill" style="--pct: ${pct}%"></div>`;
-        for(let i=0; i<len; i++) html += `<div class="milestone${i < curIdx ? ' done' : (i === curIdx ? ' active' : '')}">${i < curIdx ? '⭐' : (i === curIdx ? activeIcon : '☁️')}</div>`;
+        for(let i=0; i<len; i++) {
+            html += `<div class="milestone${i < curIdx ? ' done' : (i === curIdx ? ' active' : '')}">${i < curIdx ? '⭐' : (i === curIdx ? activeIcon : '☁️')}</div>`;
+        }
         bar.innerHTML = html;
         document.getElementById('progress-text').innerText = `${curIdx + 1} / ${len}`;
     }
@@ -395,7 +398,6 @@
             fb.innerHTML = `<span style="color:#10b981;">${isCN ? "✅ 答对啦！非常棒。" : "✅ Correct! Well done."}</span>`;
             if (qType === 'MCQ') document.querySelectorAll('.mcq-btn').forEach(b => { if(!b.classList.contains('active')) b.style.opacity = '0.5'; }); 
             
-            // 💡 错误逻辑修正：旧错题答对，只提升掌握等级，不在这里错误地去加全局的 perfects
             if (mistakes[key] && !sessionQs[curIdx].isEvaluated) {
                 mistakes[key] += 1;
                 if (mistakes[key] >= 5) delete mistakes[key]; 
@@ -434,7 +436,7 @@
         } 
     }
 
-    // 🏆 修正后的队列引擎
+    // 🏆 弹窗闪屏修复版：保证黑幕常驻，中间卡片做动画
     function finishQuiz() {
         const timeTakenSec = Math.floor((Date.now() - startTime) / 1000);
         const isPerfect = sessionErrors <= 1; 
@@ -443,7 +445,6 @@
         badgeQueue = []; 
 
         if (isPerfect) {
-            // 只有在这，才去给系统全局增加一次满分记录，并判断是否触发游戏
             pendingGameResult = applyPerfectSession();
 
             badgeQueue.push({
@@ -478,9 +479,10 @@
                 });
             }
 
+            document.getElementById('badge-modal').style.display = 'flex'; // 先拉下黑幕
             showNextBadge();
         } else {
-            pendingGameResult = null; // 没达标，就没有游戏结果
+            pendingGameResult = null;
             renderFinalScreen();
         }
     }
@@ -488,22 +490,34 @@
     function showNextBadge() {
         if (badgeQueue.length > 0) {
             let nextBadge = badgeQueue.shift(); 
+            
+            // 重置动画
+            let modal = document.querySelector('.epic-modal');
+            modal.style.transform = ''; 
+            modal.style.opacity = '';
+            modal.style.animation = 'none';
+            void modal.offsetWidth; 
+            modal.style.animation = 'epicPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+
             document.getElementById('badge-icon').innerText = nextBadge.icon;
             document.getElementById('badge-title').innerText = nextBadge.title;
             document.getElementById('badge-desc').innerHTML = nextBadge.desc;
-            document.getElementById('badge-modal').style.display = 'flex';
             
             if (typeof confetti === 'function') confetti({ particleCount: 300, spread: 150, origin: { y: 0.3 }, zIndex: 1001 });
         } else {
+            document.getElementById('badge-modal').style.display = 'none';
             renderFinalScreen();
         }
     }
 
+    // 💡 修复2：只缩小中间的卡片，不关掉黑幕，然后迅速加载下一个
     function closeBadgeModal() {
-        document.getElementById('badge-modal').style.display = 'none';
+        let modal = document.querySelector('.epic-modal');
+        modal.style.transform = 'scale(0.8)';
+        modal.style.opacity = '0';
         setTimeout(() => {
             showNextBadge(); 
-        }, 300);
+        }, 150);
     }
 
     function renderFinalScreen() {
