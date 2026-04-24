@@ -280,7 +280,7 @@
     <div class="modal-content" style="border-color: #f59e0b;">
         <div style="font-size: 60px; margin-bottom:10px;">🎉</div>
         <h2 style="margin:0; color:#0f172a; font-size:28px;">兑换成功！</h2>
-        <p style="color:#64748b; font-weight:800; margin-top:10px;">请截图保存下方口令，找老爸接头兑现：</p>
+        <p style="color:#64748b; font-weight:800; margin-top:10px;">请记下口令，找老爸兑现：</p>
         <div id="secret-code">CODE-XXXX</div>
         <button class="btn-action" style="background:#f59e0b; color:white; border-color:#d97706; box-shadow:0 6px 0 #b45309;" onclick="closeRedeemModal()">我知道了！</button>
     </div>
@@ -527,12 +527,18 @@
                 <div class="badge-grid">${coreBadges.map(renderItemHTML).join('')}</div>
             </div>`;
 
+// 💡 提取拼音高手的数量
+        let pinyinCount = parseInt(localStorage.getItem(`pinyin_badge_count_${currentUser}`) || '0');
+
+        // 🎓 全图鉴：科目大师
         const subBadges = [
             { icon: '🔤', name: '英语达人', count: subPerfects['English'] },
             { icon: '🔢', name: '数学天才', count: subPerfects['Math'] },
             { icon: '🐼', name: '华文小将', count: subPerfects['华文'] },
-            { icon: '🌱', name: '科学博士', count: subPerfects['Science'] }
+            { icon: '🌱', name: '科学博士', count: subPerfects['Science'] },
+            { icon: '🎮', name: '拼音高手', count: pinyinCount } // 🌟 这一行是新加的！
         ];
+
         container.innerHTML += `
             <div class="badge-category">
                 <div class="badge-category-title">🎓 科目大师</div>
