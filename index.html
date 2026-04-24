@@ -23,7 +23,8 @@
         
         @keyframes bounceIn { 0% { opacity: 0; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1); } }
         
-        #school-term-display { margin-bottom: 25px; font-size: 15px; color: #3b82f6; background: rgba(255,255,255,0.7); padding: 10px 20px; border-radius: 50px; font-weight: 900; border: 2px solid #fff; box-shadow: 0 8px 15px rgba(59, 130, 246, 0.1); display: inline-flex; align-items: center; gap: 8px; }
+        /* 📅 修改后的日期模块（上下居中对齐） */
+        #school-term-display { margin-bottom: 25px; background: rgba(255,255,255,0.8); padding: 12px 30px; border-radius: 20px; border: 2px solid #fff; box-shadow: 0 8px 15px rgba(59, 130, 246, 0.1); display: flex; flex-direction: column; align-items: center; gap: 4px; }
 
         .magic-number { display: inline-block; font-size: 1.4em; color: #f59e0b; font-weight: 900; padding: 0 5px; animation: popPulse 1s infinite alternate cubic-bezier(0.4, 0, 0.2, 1); }
         @keyframes popPulse { 0% { transform: scale(1); } 100% { transform: scale(1.15) translateY(-3px); text-shadow: 0 0 15px rgba(234, 179, 8, 0.5); } }
@@ -51,11 +52,13 @@
         .badge-category { width: 100%; }
         .badge-category-title { font-size: 16px; color: #b45309; font-weight: 900; margin-bottom: 12px; border-bottom: 2px dashed #fde68a; padding-bottom: 5px; display: flex; align-items: center; gap: 6px; }
         
-        .badge-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px 6px; width: 100%; justify-items: center; }
+        .badge-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px 6px; width: 100%; justify-items: center; }
         
-        .badge-item { display: flex; flex-direction: column; align-items: center; gap: 6px; opacity: 0.5; filter: grayscale(100%); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; width: 100%; }
+        .badge-item { display: flex; flex-direction: column; align-items: center; gap: 6px; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; width: 100%; }
+        
+        /* 解锁与未解锁（灰色）状态 */
+        .badge-item.locked { opacity: 0.45; filter: grayscale(100%); transform: scale(0.95); }
         .badge-item.unlocked { opacity: 1; filter: grayscale(0%); transform: scale(1.05); }
-        .badge-item.locked-mystery { opacity: 0.8; filter: none; transform: scale(1); }
         
         .badge-icon-wrapper { position: relative; display: flex; justify-content: center; }
         .badge-icon { width: 48px; height: 48px; border-radius: 16px; background: white; border: 3px solid #cbd5e1; display: flex; align-items: center; justify-content: center; font-size: 26px; box-shadow: 0 4px 0 #94a3b8; transition: 0.3s; }
@@ -64,7 +67,9 @@
         .badge-item.unlocked.bronze .badge-icon { border-color: #cd7f32; box-shadow: 0 4px 0 #8b5a2b; background: #fdf5e6; }
         .badge-item.unlocked.silver .badge-icon { border-color: #94a3b8; box-shadow: 0 4px 0 #64748b; background: #f1f5f9; }
         .badge-item.unlocked.gold .badge-icon { border-color: #fbbf24; box-shadow: 0 4px 0 #d97706; background: #fffbeb; }
-        .badge-item.locked-mystery .badge-icon { border: 3px dashed #cbd5e1; background: #f8fafc; box-shadow: none; font-size: 24px; }
+        
+        /* 未解锁时的虚线框样式 */
+        .badge-item.locked .badge-icon { border: 3px dashed #94a3b8; background: #f1f5f9; box-shadow: none; font-size: 24px; }
         
         .badge-count { position: absolute; top: -6px; right: -6px; background: #ef4444; color: white; font-size: 11px; font-weight: 900; padding: 2px 6px; border-radius: 10px; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2); animation: popPulse 2s infinite alternate; z-index: 3; }
 
@@ -98,7 +103,7 @@
         .pin-input-hub:focus { border-color: #f59e0b; background: #fffbeb; }
         .error-shake { border-color: #ef4444 !important; animation: shake 0.3s; background-color: #fef2f2 !important; }
 
-        /* 🛒 神秘商店专属样式 */
+        /* 🎁 神秘商店专属样式 */
         .shop-header { display:flex; gap:15px; width:100%; margin-bottom:25px; }
         .shop-bal-card { flex:1; border-radius:20px; padding:15px; text-align:center; }
         .shop-bal-vault { background:#fffbeb; border:3px solid #fde68a; }
@@ -108,7 +113,10 @@
         .shop-item { background: white; border: 4px solid #e2e8f0; border-radius: 25px; padding: 15px; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.2s; box-shadow: 0 6px 0 #cbd5e1; }
         .shop-item:active { transform: translateY(4px); box-shadow: 0 2px 0 #cbd5e1; }
         .shop-item.active { border-color: #f59e0b; background: #fffbeb; transform: scale(1.05); box-shadow: 0 10px 20px rgba(245,158,11,0.2); }
-        .shop-item .emoji { font-size: 45px; margin-bottom: 5px; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.1)); }
+        
+        /* 新增：商品图片样式 */
+        .shop-icon { width: 64px; height: 64px; object-fit: contain; margin-bottom: 5px; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.1)); }
+        
         .shop-item .name { font-weight: 900; font-size: 16px; color: #475569; margin-bottom: 8px; }
         .shop-item .price { font-size: 24px; font-weight: 900; border-radius: 15px; padding: 4px 12px; display: inline-flex; align-items: center; gap: 5px; }
         .shop-item.coin-item .price { background: #fef3c7; color: #d97706; }
@@ -131,7 +139,8 @@
 <body>
 
 <div class="container">
-    <div id="school-term-display">📅 Loading Date...</div>
+    <div id="school-term-display">
+        </div>
 
     <div id="user-screen" class="screen" style="display: flex;">
         <h2 style="margin:0 0 5px 0; color:#0f172a; font-size: 30px; font-weight: 900;">Who is learning?</h2>
@@ -154,21 +163,6 @@
             <div class="streak-badge" id="dash-streak">🔥 连续打卡第 0 天</div>
         </div>
 
-        <div class="honor-wall">
-            <h3>
-                <div style="display:flex; align-items:center; gap:10px;">
-                    🏆 My Badges 
-                    <div class="total-trophies">Total: <span class="total-number" id="total-badge-count">0</span></div>
-                </div>
-                <button onclick="openShop()" style="background:#f59e0b; color:white; border:none; padding:10px 18px; border-radius:20px; font-weight:900; font-size:16px; cursor:pointer; box-shadow:0 6px 0 #d97706; display:flex; align-items:center; gap:6px; transition:0.15s;" onactive="this.style.transform='translateY(4px)'; this.style.boxShadow='none';">
-                    🛒 神秘商店
-                </button>
-            </h3>
-            
-            <div class="badges-container" id="badges-container">
-                </div>
-        </div>
-
         <div class="section-title">Select Subject</div>
         <div class="grid-cards">
             <div class="card-btn eng" onclick="showSubMenu('english-menu')">
@@ -184,8 +178,23 @@
                 <div class="emoji">🌱</div> Science
             </div>
         </div>
+
+        <div class="honor-wall">
+            <h3>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    🏆 My Badges 
+                    <div class="total-trophies">Total: <span class="total-number" id="total-badge-count">0</span></div>
+                </div>
+                <button onclick="openShop()" style="background:#f59e0b; color:white; border:none; padding:10px 18px; border-radius:20px; font-weight:900; font-size:16px; cursor:pointer; box-shadow:0 6px 0 #d97706; display:flex; align-items:center; gap:6px; transition:0.15s;" onactive="this.style.transform='translateY(4px)'; this.style.boxShadow='none';">
+                    🎁 神秘商店
+                </button>
+            </h3>
+            
+            <div class="badges-container" id="badges-container">
+                </div>
+        </div>
         
-        <button class="btn-action" style="margin-top:10px;" onclick="showScreen('user-screen')">👤 Switch User</button>
+        <button class="btn-action" onclick="showScreen('user-screen')">👤 Switch User</button>
     </div>
 
     <div id="shop-screen" class="screen">
@@ -204,27 +213,27 @@
 
         <div class="shop-item-grid">
             <div class="shop-item coin-item" onclick="selectPrize(this, '金币', 67, '汉堡', 'HB')">
-                <div class="emoji">🍔</div>
-                <div class="name">单人汉堡</div>
+                <img src="hb.png" class="shop-icon" alt="汉堡">
+                <div class="name">汉堡</div>
                 <div class="price">💰 67</div>
             </div>
             <div class="shop-item coin-item" onclick="selectPrize(this, '金币', 134, '套餐', 'TC')">
-                <div class="emoji">🍔🍟</div>
-                <div class="name">麦当劳套餐</div>
+                <img src="tc.png" class="shop-icon" alt="套餐">
+                <div class="name">套餐</div>
                 <div class="price">💰 134</div>
             </div>
-            <div class="shop-item coin-item" onclick="selectPrize(this, '金币', 268, '披萨', 'PZ')">
-                <div class="emoji">🍕</div>
-                <div class="name">全家披萨大餐</div>
+            <div class="shop-item coin-item" onclick="selectPrize(this, '金币', 268, '披萨大餐', 'PZ')">
+                <img src="pz.png" class="shop-icon" alt="披萨大餐">
+                <div class="name">披萨大餐</div>
                 <div class="price">💰 268</div>
             </div>
             <div class="shop-item crys-item" onclick="selectPrize(this, '水晶', 7, '甜筒', 'TT')">
-                <div class="emoji">🍦</div>
-                <div class="name">冰淇淋甜筒</div>
+                <img src="tt.png" class="shop-icon" alt="甜筒">
+                <div class="name">甜筒</div>
                 <div class="price">💎 7</div>
             </div>
             <div class="shop-item crys-item" onclick="selectPrize(this, '水晶', 14, '麦旋风', 'XF')">
-                <div class="emoji">🌪️🍦</div>
+                <img src="xf.png" class="shop-icon" alt="麦旋风">
                 <div class="name">麦旋风</div>
                 <div class="price">💎 14</div>
             </div>
@@ -305,7 +314,11 @@
         else if (now >= t3) { const w = Math.floor(diff(now, t3)/7) + 1; termStr = w <= 10 ? `Term 3 Week ${w}` : "Holiday"; }
         else if (now >= t2) { const w = Math.floor(diff(now, t2)/7) + 1; termStr = w <= 10 ? `Term 2 Week ${w}` : "Holiday"; }
         
-        document.getElementById('school-term-display').innerHTML = `<span>📅 ${now.toLocaleDateString('en-SG', {month:'short', day:'numeric'})}</span><span style="color:#cbd5e1">|</span><span>${termStr}</span>`;
+        // 修改为上下结构的日期展示
+        document.getElementById('school-term-display').innerHTML = `
+            <div style="font-size: 14px; color: #64748b;">📅 ${now.toLocaleDateString('en-SG', {month:'short', day:'numeric'})}</div>
+            <div style="font-size: 18px; color: #3b82f6; font-weight: 900;">${termStr}</div>
+        `;
     }
 
     function showScreen(id) {
@@ -360,7 +373,6 @@
     
     function closePinModal() { document.getElementById('pin-modal').style.display = 'none'; document.getElementById('hub-pin-input').value = ''; }
 
-    // --- 💰 经济系统更新 ---
     function updateEconomyUI() {
         let streak = localStorage.getItem(`streak_${currentUser}`) || "0";
         document.getElementById('dash-streak').innerText = `🔥 连续打卡第 ${streak} 天`;
@@ -369,7 +381,6 @@
         document.getElementById('shop-user-crys').innerText = localStorage.getItem(`crystals_${currentUser}`) || "0";
     }
 
-    // --- 🛒 神秘商店逻辑 ---
     function openShop() {
         updateEconomyUI();
         selectedPrize = null;
@@ -428,17 +439,16 @@
             document.getElementById('secret-code').innerText = code;
             document.getElementById('redeem-modal').style.display = 'flex';
             
-            updateEconomyUI(); // 扣款后立即刷新显示的余额
+            updateEconomyUI(); 
         }
     }
     
     function closeRedeemModal() {
         document.getElementById('redeem-modal').style.display = 'none';
-        // 兑换完成后，清空选中状态
         openShop(); 
     }
 
-    // --- 🏆 荣誉墙渲染逻辑 ---
+    // 🏆 全图鉴荣誉墙逻辑
     function renderBadges() {
         const container = document.getElementById('badges-container');
         container.innerHTML = ''; 
@@ -447,7 +457,6 @@
         let totalGames = 0;
         let activeDates = new Set();
         let subPerfects = { 'English': 0, 'Math': 0, '华文': 0, 'Science': 0 };
-        
         let totalSpeedBreaks = parseInt(localStorage.getItem(`speed_breaks_${currentUser}`) || '0');
         
         for (let i = 0; i < localStorage.length; i++) {
@@ -473,15 +482,18 @@
         let totalTrophies = 0;
 
         const renderItemHTML = (b) => {
-            if (!b.isMystery) totalTrophies += b.count;
+            totalTrophies += b.count;
             
             let classes = ['badge-item'];
-            if (b.count > 0) classes.push('unlocked');
-            if (b.tier) classes.push(b.tier);
-            if (b.isMystery) classes.push('locked-mystery');
+            if (b.count > 0) {
+                classes.push('unlocked');
+                if (b.tier) classes.push(b.tier);
+            } else {
+                classes.push('locked'); // 0个时应用灰色锁定状态
+            }
             
-            let countHtml = (b.count > 1 && !b.isMystery) ? `<div class="badge-count">x${b.count}</div>` : '';
-            let progressHtml = b.isMystery ? `<div class="badge-progress">${b.progress}</div>` : '';
+            let countHtml = (b.count > 1) ? `<div class="badge-count">x${b.count}</div>` : '';
+            let progressHtml = (b.count === 0 && b.targetDays) ? `<div class="badge-progress">${totalDays}/${b.targetDays}</div>` : '';
             
             return `
                 <div class="${classes.join(' ')}">
@@ -495,65 +507,44 @@
             `;
         };
 
+        // 🌟 全图鉴：核心战绩
         const coreBadges = [
             { icon: '🎯', name: '神射手', count: totalPerfects },
             { icon: '⚡️', name: '极速突破', count: totalSpeedBreaks },
             { icon: '🎈', name: '气球猎人', count: totalGames }
         ];
-        let coreHTML = coreBadges.map(renderItemHTML).join('');
         container.innerHTML += `
             <div class="badge-category">
                 <div class="badge-category-title">🌟 核心战绩</div>
-                <div class="badge-grid">${coreHTML}</div>
+                <div class="badge-grid">${coreBadges.map(renderItemHTML).join('')}</div>
             </div>`;
 
-        let subTotalUnlocked = subPerfects['English'] + subPerfects['Math'] + subPerfects['华文'] + subPerfects['Science'];
-        if (subTotalUnlocked > 0) {
-            const subBadges = [
-                { icon: '🔤', name: '英语达人', count: subPerfects['English'] },
-                { icon: '🔢', name: '数学天才', count: subPerfects['Math'] },
-                { icon: '🐼', name: '华文小将', count: subPerfects['华文'] },
-                { icon: '🌱', name: '科学博士', count: subPerfects['Science'] }
-            ];
-            let subHTML = subBadges.map(renderItemHTML).join('');
-            container.innerHTML += `
-                <div class="badge-category">
-                    <div class="badge-category-title">🎓 科目大师</div>
-                    <div class="badge-grid">${subHTML}</div>
-                </div>`;
-        }
+        // 🎓 全图鉴：科目大师
+        const subBadges = [
+            { icon: '🔤', name: '英语达人', count: subPerfects['English'] },
+            { icon: '🔢', name: '数学天才', count: subPerfects['Math'] },
+            { icon: '🐼', name: '华文小将', count: subPerfects['华文'] },
+            { icon: '🌱', name: '科学博士', count: subPerfects['Science'] }
+        ];
+        container.innerHTML += `
+            <div class="badge-category">
+                <div class="badge-category-title">🎓 科目大师</div>
+                <div class="badge-grid">${subBadges.map(renderItemHTML).join('')}</div>
+            </div>`;
 
-        if (totalDays > 0) {
-            let nextStreakGoal = 3;
-            let earnedStreaks = [];
-            
-            if (totalDays >= 30) { earnedStreaks = [3, 5, 10, 15, 30]; nextStreakGoal = null; }
-            else if (totalDays >= 15) { earnedStreaks = [3, 5, 10, 15]; nextStreakGoal = 30; }
-            else if (totalDays >= 10) { earnedStreaks = [3, 5, 10]; nextStreakGoal = 15; }
-            else if (totalDays >= 5) { earnedStreaks = [3, 5]; nextStreakGoal = 10; }
-            else if (totalDays >= 3) { earnedStreaks = [3]; nextStreakGoal = 5; }
+        // 📅 全图鉴：毅力打卡 (固定的5个阶段图鉴)
+        const streakMilestones = [3, 5, 10, 15, 30];
+        let streakBadges = streakMilestones.map(day => {
+            let count = (totalDays >= day) ? 1 : 0;
+            let tier = day >= 15 ? 'gold' : (day >= 10 ? 'silver' : 'bronze');
+            return { icon: '📅', name: `打卡${day}天`, count: count, tier: tier, targetDays: day };
+        });
 
-            let streakBadges = [];
-            
-            earnedStreaks.forEach(day => {
-                let tier = day >= 15 ? 'gold' : (day >= 10 ? 'silver' : 'bronze');
-                streakBadges.push({ icon: '📅', name: `打卡${day}天`, count: 1, tier: tier });
-            });
-
-            if (nextStreakGoal !== null) {
-                streakBadges.push({ 
-                    icon: '🎁', name: `打卡${nextStreakGoal}天解锁`, count: 0, isMystery: true, 
-                    progress: `${totalDays}/${nextStreakGoal}` 
-                });
-            }
-
-            let streakHTML = streakBadges.map(renderItemHTML).join('');
-            container.innerHTML += `
-                <div class="badge-category">
-                    <div class="badge-category-title">📅 毅力打卡</div>
-                    <div class="badge-grid">${streakHTML}</div>
-                </div>`;
-        }
+        container.innerHTML += `
+            <div class="badge-category">
+                <div class="badge-category-title">📅 毅力打卡</div>
+                <div class="badge-grid">${streakBadges.map(renderItemHTML).join('')}</div>
+            </div>`;
 
         document.getElementById('total-badge-count').innerText = totalTrophies;
     }
