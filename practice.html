@@ -58,7 +58,6 @@
         .draw-panel { display: none; flex-direction: column; align-items: center; margin-top: 15px; background: #f8fafc; padding: 15px; border-radius: 25px; border: 4px dashed #cbd5e1; width: 100%; }
         canvas { background: white; border-radius: 15px; border: 2px solid #e2e8f0; touch-action: none; cursor: crosshair; }
 
-        /* 👑 弹窗专属样式 (Epic Reveal) */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
         .epic-modal { background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); padding: 40px; border-radius: 40px; text-align: center; width: 90%; max-width: 450px; border: 6px solid #fde68a; box-shadow: inset 0 0 30px rgba(245, 158, 11, 0.2), 0 30px 60px rgba(0,0,0,0.4); display: flex; flex-direction: column; align-items: center; position: relative; animation: epicPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes epicPop { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
@@ -157,7 +156,6 @@
     let curUser = localStorage.getItem('currentPlayer') || 'P3';
     let curSub = localStorage.getItem('currentSubject') || 'English';
 
-    // 弹窗队列全局变量
     let badgeQueue = [];
     let pendingGameResult = null;
 
@@ -166,7 +164,7 @@
     function saveMistakes(m) { localStorage.setItem('hub_mistakes', JSON.stringify(m)); }
     function getQuestionKey(sub, grade, qText) { return `${grade}_${sub}_${qText.trim()}`; }
 
-    // === 每日奖励追踪系统 ===
+    // === 修复后的每日奖励与结算系统 ===
     function getDailyStats() {
         const today = new Date().toISOString().split('T')[0];
         const key = `practice_stats_${today}_${curUser}_${curSub}`;
@@ -175,22 +173,24 @@
         return { key, stats };
     }
     
-    function recordGameLogic(isPerfect) {
-        if (!isPerfect) return { trigger: false, msg: "" };
+    // 💡 只有在整套做完，且完美的情况下，才调用这个函数给成就 +1
+    function applyPerfectSession() {
         let { key, stats } = getDailyStats();
-        stats.perfects++;
+        stats.perfects += 1; // 仅此一处执行累加
         
         let triggerGame = false; let bonusMsg = "";
+        
         if (stats.perfects % 2 === 0 && stats.gamesPlayed < 3) {
-            triggerGame = true; stats.gamesPlayed++;
+            triggerGame = true; stats.gamesPlayed += 1;
             bonusMsg = "🎉 完美达标！即将进入气球大作战！🎈";
         } else if (stats.gamesPlayed >= 3) {
             bonusMsg = "🌟 太强了！你今天已经赢得了最高次数的游戏奖励！";
         } else {
             bonusMsg = "🔥 再获得一次 6~7 就能解锁打气球游戏啦！加油！";
         }
+        
         localStorage.setItem(key, JSON.stringify(stats));
-        return { trigger: triggerGame, msg: bonusMsg, stats: stats };
+        return { trigger: triggerGame, msg: bonusMsg };
     }
 
     // ⚡️ 个人最高纪录 (PB) 追踪器
@@ -357,7 +357,6 @@
         document.getElementById('sub-btn').style.display = 'flex'; 
         document.getElementById('next-btn').style.display = 'none';
         
-        // ✨ 小优化：如果是最后一题，Next 变成 Finish
         if (curIdx === sessionQs.length - 1) {
             document.getElementById('next-btn').innerText = "Finish ✨";
         } else {
@@ -396,6 +395,7 @@
             fb.innerHTML = `<span style="color:#10b981;">${isCN ? "✅ 答对啦！非常棒。" : "✅ Correct! Well done."}</span>`;
             if (qType === 'MCQ') document.querySelectorAll('.mcq-btn').forEach(b => { if(!b.classList.contains('active')) b.style.opacity = '0.5'; }); 
             
+            // 💡 错误逻辑修正：旧错题答对，只提升掌握等级，不在这里错误地去加全局的 perfects
             if (mistakes[key] && !sessionQs[curIdx].isEvaluated) {
                 mistakes[key] += 1;
                 if (mistakes[key] >= 5) delete mistakes[key]; 
@@ -434,24 +434,24 @@
         } 
     }
 
-    // 🏆 新版队列引擎
+    // 🏆 修正后的队列引擎
     function finishQuiz() {
         const timeTakenSec = Math.floor((Date.now() - startTime) / 1000);
         const isPerfect = sessionErrors <= 1; 
         const isCN = (curSub === '华文');
         
-        pendingGameResult = recordGameLogic(isPerfect);
-        badgeQueue = []; // 清空之前的队列
+        badgeQueue = []; 
 
         if (isPerfect) {
-            // 1. 神射手
+            // 只有在这，才去给系统全局增加一次满分记录，并判断是否触发游戏
+            pendingGameResult = applyPerfectSession();
+
             badgeQueue.push({
                 icon: '🎯',
                 title: isCN ? '神射手！' : 'Sharpshooter!',
                 desc: isCN ? '太准了！错题控制在1道以内，【神射手】徽章 +1！' : 'Great accuracy! You earned a Sharpshooter badge!'
             });
 
-            // 2. 科目专属大师
             let subIcon = curSub === '华文' ? '🐼' : (curSub === 'Science' ? '🌱' : (curSub === 'Math' ? '🔢' : '🔤'));
             let subName = curSub === '华文' ? '华文小将' : (curSub === 'Science' ? '科学博士' : (curSub === 'Math' ? '数学天才' : '英语达人'));
             badgeQueue.push({
@@ -460,7 +460,6 @@
                 desc: isCN ? `在 ${curSub} 练习中表现优异，专属徽章 +1！` : `Excellent performance in ${curSub}! Badge +1!`
             });
 
-            // 3. 极速突破
             let speedStats = checkAndRecordSpeed(timeTakenSec);
             if (speedStats.isNewRecord) {
                 badgeQueue.push({
@@ -471,7 +470,6 @@
                 });
             }
 
-            // 4. 气球猎人
             if (pendingGameResult && pendingGameResult.trigger) {
                 badgeQueue.push({
                     icon: '🎈',
@@ -482,6 +480,7 @@
 
             showNextBadge();
         } else {
+            pendingGameResult = null; // 没达标，就没有游戏结果
             renderFinalScreen();
         }
     }
