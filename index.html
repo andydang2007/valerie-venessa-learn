@@ -32,9 +32,8 @@
         .dashboard-header .avatar { font-size: 50px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15)); }
         .dashboard-header h2 { margin: 0; font-size: 28px; color: #0f172a; font-weight: 900; }
         
-        .streak-info-box { display: flex; flex-direction: column; align-items: center; gap: 5px; }
-        .total-days-badge { font-size: 12px; color: #64748b; font-weight: 800; }
-        .streak-badge { font-size: 15px; color: #d97706; background: #fffbeb; padding: 6px 18px; border-radius: 20px; font-weight: 900; border: 2px solid #fde68a; box-shadow: 0 4px 0 #fde68a; }
+        .streak-info-box { display: flex; flex-direction: column; align-items: center; gap: 5px; margin-top: 5px; }
+        .streak-badge { font-size: 16px; color: #d97706; background: #fffbeb; padding: 8px 20px; border-radius: 20px; font-weight: 900; border: 2.5px solid #fde68a; box-shadow: 0 4px 0 #fde68a; }
 
         .honor-wall { width: 100%; background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 4px solid #fde68a; border-radius: 30px; padding: 20px; margin-bottom: 30px; text-align: left; box-shadow: inset 0 4px 15px rgba(245, 158, 11, 0.1), 0 10px 20px rgba(0,0,0,0.05); position: relative; overflow: hidden; }
         .honor-wall::after { content: '✨'; position: absolute; top: -15px; right: -5px; font-size: 100px; opacity: 0.15; transform: rotate(15deg); pointer-events: none; }
@@ -147,8 +146,7 @@
                 <h2 id="dash-name">Welcome!</h2>
             </div>
             <div class="streak-info-box">
-                <div class="total-days-badge" id="dash-total-days">累计学习 0 天</div>
-                <div class="streak-badge" id="dash-streak">🔥 连续打卡 0 天</div>
+                <div class="streak-badge" id="dash-streak">📅 今天是你第 0 天打卡</div>
             </div>
         </div>
 
@@ -290,7 +288,7 @@
     let currentGrade = '';
     let selectedPrize = null;
     
-    // 🔗 请确保这是你的真实后端地址
+    // 🔗 真实后端地址
     const SYNC_API_URL = "https://script.google.com/macros/s/AKfycbzbNOgg7deW9uVVyfYGTfKGOtVgNs_9ZfUQ9J_9cYpG2Ufow9KLDICHgsinBXrPJlmz/exec";
 
     function initDate() {
@@ -307,7 +305,6 @@
             <div style="font-size: 18px; color: #3b82f6; font-weight: 900;">${termStr}</div>
         `;
     }
-
 
     // ☁️ 云端全量对账
     async function syncFromCloud() {
@@ -392,7 +389,7 @@
 
     function updateEconomyUI() {
         let streak = parseInt(localStorage.getItem(`streak_${currentUser}`) || "0");
-        document.getElementById('dash-streak').innerText = `🔥 连续打卡 ${streak} 天`;
+        document.getElementById('dash-streak').innerText = `📅 今天是你第 ${streak} 天打卡`;
         document.getElementById('shop-vault-total').innerText = localStorage.getItem('gold_coins_vault') || "0";
         document.getElementById('shop-user-crys').innerText = localStorage.getItem(`crystals_${currentUser}`) || "0";
     }
@@ -448,25 +445,20 @@
         const container = document.getElementById('badges-container');
         container.innerHTML = ''; 
 
-        // 收集旧的历史练习天数，用于显示“累计总天数”
+        // 收集旧的历史练习天数用于提取子科目的战绩
         let localPerfects = 0, localGames = 0;
-        let activeDates = new Set();
         let subPerfects = { 'English': 0, 'Math': 0, '华文': 0, 'Science': 0 };
         for (let i = 0; i < localStorage.length; i++) {
             let key = localStorage.key(i);
             if (key.startsWith('practice_stats_') && key.includes(`_${currentUser}_`)) {
                 try {
-                    let date = key.split('_')[2]; let sub = key.split('_')[4];
+                    let sub = key.split('_')[4];
                     let stats = JSON.parse(localStorage.getItem(key));
                     localPerfects += (stats.perfects||0); localGames += (stats.gamesPlayed||0);
-                    if (stats.perfects > 0 || stats.gamesPlayed > 0) activeDates.add(date);
                     if (sub && subPerfects[sub] !== undefined) subPerfects[sub] += (stats.perfects||0);
                 } catch(e) {}
             }
         }
-
-        // 显示累计天数
-        document.getElementById('dash-total-days').innerText = `累计学习 ${activeDates.size} 天`;
 
         let totalTrophies = 0;
         const renderItemHTML = (b) => {
@@ -499,21 +491,18 @@
         ];
         container.innerHTML += `<div class="badge-category"><div class="badge-category-title">🎓 科目大师</div><div class="badge-grid">${subBadges.map(renderItemHTML).join('')}</div></div>`;
 
-        // 📅 毅力打卡 (逻辑修改：现在看的是云端真实的连击 streak)
+        // 📅 毅力打卡 (逻辑修改：达到天数的同时点亮所有已达标的徽章)
         const cloudStreak = parseInt(localStorage.getItem(`streak_${currentUser}`)||'0');
         const streakMilestones = [3, 5, 10, 15, 30];
         let streakBadges = [];
-        // 只给当前达到的最高的一块徽章，不重复发
-        let highestAchieved = 0;
-        for (let i=streakMilestones.length-1; i>=0; i--) { if (cloudStreak >= streakMilestones[i]) { highestAchieved = streakMilestones[i]; break; } }
         
         streakMilestones.forEach(day => {
-            let isAchieved = (day === highestAchieved);
-            let count = isAchieved ? 1 : 0;
+            let isAchieved = (cloudStreak >= day); // 只要云端连击大于等于目标天数，这个徽章就解锁
+            let count = isAchieved ? 1 : 0; // 每个阶段拿一个
             let tier = day >= 15 ? 'gold' : (day >= 10 ? 'silver' : 'bronze');
-            streakBadges.push({ icon: '📅', name: `连击${day}天`, count: count, tier: tier, targetStreak: day, currentStreak: cloudStreak });
+            streakBadges.push({ icon: '📅', name: `打卡${day}天`, count: count, tier: tier, targetStreak: day, currentStreak: cloudStreak });
         });
-        container.innerHTML += `<div class="badge-category"><div class="badge-category-title">📅 毅力打卡 (当前连击: ${cloudStreak})</div><div class="badge-grid">${streakBadges.map(renderItemHTML).join('')}</div></div>`;
+        container.innerHTML += `<div class="badge-category"><div class="badge-category-title">📅 毅力打卡 (已连续 ${cloudStreak} 天)</div><div class="badge-grid">${streakBadges.map(renderItemHTML).join('')}</div></div>`;
 
         // 🎁 隐藏彩蛋 (特别徽章逻辑)
         const easterBadgesData = [
