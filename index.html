@@ -23,7 +23,9 @@
         
         @keyframes bounceIn { 0% { opacity: 0; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1); } }
         
-        #school-term-display { margin-bottom: 25px; background: rgba(255,255,255,0.8); padding: 12px 30px; border-radius: 20px; border: 2px solid #fff; box-shadow: 0 8px 15px rgba(59, 130, 246, 0.1); display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        /* 💡 增加了指针样式，暗示这是可以点击的区域 */
+        #school-term-display { margin-bottom: 25px; background: rgba(255,255,255,0.8); padding: 12px 30px; border-radius: 20px; border: 2px solid #fff; box-shadow: 0 8px 15px rgba(59, 130, 246, 0.1); display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; transition: 0.1s; }
+        #school-term-display:active { transform: scale(0.95); }
 
         .magic-number { display: inline-block; font-size: 1.4em; color: #f59e0b; font-weight: 900; padding: 0 5px; animation: popPulse 1s infinite alternate cubic-bezier(0.4, 0, 0.2, 1); }
         @keyframes popPulse { 0% { transform: scale(1); } 100% { transform: scale(1.15) translateY(-3px); text-shadow: 0 0 15px rgba(234, 179, 8, 0.5); } }
@@ -115,6 +117,11 @@
 
         #secret-code { font-family: monospace; font-size: 28px; background: #fffbeb; padding: 15px; border: 3px dashed #f59e0b; margin: 20px 0; color: #b45309; font-weight: 900; letter-spacing: 2px; }
 
+        /* 🤫 老爸隐藏后台样式 */
+        #admin-panel { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 20px; z-index: 9999; border: 5px solid #ef4444; width: 90%; max-width: 350px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); text-align: left; }
+        .admin-input { width: 100%; padding: 10px; margin: 10px 0; font-size: 16px; border: 2px solid #cbd5e1; border-radius: 10px; }
+        .admin-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding: 8px 0; font-weight: 800; color: #334155; }
+
         @media (min-width: 768px) { 
             .container { padding: 40px 50px; max-width: 750px; } 
             .grid-cards { grid-template-columns: repeat(4, 1fr); }
@@ -131,7 +138,7 @@
 <body>
 
 <div class="container">
-    <div id="school-term-display"></div>
+    <div id="school-term-display" onclick="triggerAdmin()"></div>
 
     <div id="user-screen" class="screen" style="display: flex;">
         <h2 style="margin:0 0 5px 0; color:#0f172a; font-size: 30px; font-weight: 900;">Who is learning?</h2>
@@ -286,6 +293,23 @@
     </div>
 </div>
 
+<div id="admin-panel">
+    <h2 style="margin:0 0 15px 0; color:#ef4444;">🔧 老爸控制台 (<span id="admin-user-label"></span>)</h2>
+    
+    <div class="admin-row"><span>💰 共享金币:</span> <input type="number" id="admin-vault" class="admin-input" style="width:100px;"></div>
+    <div class="admin-row"><span>💎 个人水晶:</span> <input type="number" id="admin-crys" class="admin-input" style="width:100px;"></div>
+    <div class="admin-row"><span>🔥 连续打卡:</span> <input type="number" id="admin-streak" class="admin-input" style="width:100px;"></div>
+    <div class="admin-row"><span>🎮 拼音徽章数:</span> <input type="number" id="admin-pinyin" class="admin-input" style="width:100px;"></div>
+    <div class="admin-row"><span>⚡️ 极速突破数:</span> <input type="number" id="admin-speed" class="admin-input" style="width:100px;"></div>
+    
+    <div style="display:flex; gap:10px; margin-top:20px;">
+        <button class="btn-action" style="padding:10px; font-size:16px;" onclick="document.getElementById('admin-panel').style.display='none'">关闭</button>
+        <button class="btn-action" style="padding:10px; font-size:16px; background:#ef4444; color:white; border-color:#b91c1c; box-shadow:0 4px 0 #991b1b;" onclick="saveAdminData()">保存</button>
+    </div>
+    
+    <button class="btn-action" style="padding:10px; font-size:16px; background:#0f172a; color:white; border-color:#000; box-shadow:0 4px 0 #000; margin-top: 15px;" onclick="clearAllData()">☢️ 清空所有测试数据</button>
+</div>
+
 <script>
     let pendingUser = { name: null, grade: null };
     let currentUser = '';
@@ -294,20 +318,7 @@
     
     const SYNC_API_URL = "https://script.google.com/macros/s/AKfycbyNi-a8VpHLrIpd0x5Fnb_825ZzFrLp4h2oMKot3xefrLGiLe3Pj-d8L-xWQh5w-Kkd/exec";
 
-    // 💡 核心逻辑：数据无损迁移 (把旧的 P1/P3 资产过户到名字名下)
-    function migrateOldData() {
-        const mappings = { 'P3': 'Valerie', 'P1': 'Venessa' };
-        ['crystals', 'streak', 'last_date', 'speed_breaks'].forEach(prefix => {
-            for (let oldId in mappings) {
-                let newName = mappings[oldId];
-                let oldVal = localStorage.getItem(`${prefix}_${oldId}`);
-                if (oldVal !== null && localStorage.getItem(`${prefix}_${newName}`) === null) {
-                    localStorage.setItem(`${prefix}_${newName}`, oldVal);
-                }
-            }
-        });
-    }
-    migrateOldData(); // 页面加载时自动执行
+    // 💡 已删除资产过户逻辑，彻底断绝测试数据干扰
 
     function initDate() {
         const now = new Date();
@@ -351,7 +362,6 @@
         currentUser = name;
         currentGrade = grade;
         
-        // 💡 存下解耦后的身份和年级
         localStorage.setItem('currentPlayer', currentUser);
         localStorage.setItem('currentGrade', currentGrade);
         
@@ -469,7 +479,6 @@
         
         for (let i = 0; i < localStorage.length; i++) {
             let key = localStorage.key(i);
-            // 💡 现在读取的是基于 currentUser (名字) 的战绩
             if (key.startsWith('practice_stats_') && key.includes(`_${currentUser}_`)) {
                 try {
                     let parts = key.split('_');
@@ -527,15 +536,11 @@
                 <div class="badge-grid">${coreBadges.map(renderItemHTML).join('')}</div>
             </div>`;
 
-        // 🎓 全图鉴：科目大师
-        
-        // 统计听写大王数量
         let tingxieKingCount = 0;
         for (let i = 0; i < localStorage.length; i++) {
             if (localStorage.key(i).startsWith(`tingxie_badge_${currentUser}_`)) tingxieKingCount++;
         }
         
-        // 统计拼音高手数量
         let pinyinCount = parseInt(localStorage.getItem(`pinyin_badge_count_${currentUser}`) || '0');
 
         const subBadges = [
@@ -544,7 +549,7 @@
             { icon: '🐼', name: '华文小将', count: subPerfects['华文'] },
             { icon: '🌱', name: '科学博士', count: subPerfects['Science'] },
             { icon: '🎮', name: '拼音高手', count: pinyinCount },
-            { icon: '👑', name: '听写大王', count: tingxieKingCount } // 🌟 成功移到这里！
+            { icon: '👑', name: '听写大王', count: tingxieKingCount } 
         ];
         container.innerHTML += `
             <div class="badge-category">
@@ -568,13 +573,58 @@
         document.getElementById('total-badge-count').innerText = totalTrophies;
     }
 
+    // 🤫 老爸控制台逻辑
+    let clickCount = 0;
+    let clickTimer = null;
+
+    function triggerAdmin() {
+        clickCount++;
+        if (clickTimer) clearTimeout(clickTimer);
+        clickTimer = setTimeout(() => { clickCount = 0; }, 2000); // 2秒内连点才有效
+
+        if (clickCount >= 5) { 
+            clickCount = 0;
+            document.getElementById('admin-user-label').innerText = currentUser;
+            
+            document.getElementById('admin-vault').value = localStorage.getItem('gold_coins_vault') || 0;
+            document.getElementById('admin-crys').value = localStorage.getItem(`crystals_${currentUser}`) || 0;
+            document.getElementById('admin-streak').value = localStorage.getItem(`streak_${currentUser}`) || 0;
+            document.getElementById('admin-pinyin').value = localStorage.getItem(`pinyin_badge_count_${currentUser}`) || 0;
+            document.getElementById('admin-speed').value = localStorage.getItem(`speed_breaks_${currentUser}`) || 0;
+            
+            document.getElementById('admin-panel').style.display = 'block';
+        }
+    }
+
+    function saveAdminData() {
+        localStorage.setItem('gold_coins_vault', document.getElementById('admin-vault').value);
+        localStorage.setItem(`crystals_${currentUser}`, document.getElementById('admin-crys').value);
+        localStorage.setItem(`streak_${currentUser}`, document.getElementById('admin-streak').value);
+        localStorage.setItem(`pinyin_badge_count_${currentUser}`, document.getElementById('admin-pinyin').value);
+        localStorage.setItem(`speed_breaks_${currentUser}`, document.getElementById('admin-speed').value);
+        
+        document.getElementById('admin-panel').style.display = 'none';
+        alert('✅ 数据已手动校准！');
+        updateEconomyUI();
+        renderBadges();
+    }
+
+    // ☢️ 核心毁灭按钮：清空所有测试遗留数据
+    function clearAllData() {
+        if(confirm("☢️ 警告：此操作将清空本地所有测试数据、错题本、金币和徽章！\n（题库缓存也会被清空）\n\n确定要执行吗？")) {
+            localStorage.clear();
+            sessionStorage.clear();
+            alert("🧹 所有本地数据已清零。系统即将重新加载。");
+            window.location.reload();
+        }
+    }
+
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && document.getElementById('pin-modal').style.display === 'flex') { verifyHubPin(); }
     });
 
     initDate();
     
-    // 自动加载上次用户
     let lastUser = localStorage.getItem('currentPlayer');
     let lastGrade = localStorage.getItem('currentGrade') || (lastUser === 'Valerie' ? 'P3' : 'P1');
     if(lastUser === 'Valerie' || lastUser === 'Venessa') {
