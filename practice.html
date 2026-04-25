@@ -134,7 +134,7 @@
 </div>
 
 <script>
-    const SYNC_API_URL = "https://script.google.com/macros/s/AKfycbyNi-a8VpHLrIpd0x5Fnb_825ZzFrLp4h2oMKot3xefrLGiLe3Pj-d8L-xWQh5w-Kkd/exec";
+    const SYNC_API_URL = "https://script.google.com/macros/s/AKfycbzbNOgg7deW9uVVyfYGTfKGOtVgNs_9ZfUQ9J_9cYpG2Ufow9KLDICHgsinBXrPJlmz/exec";
     const SHEET_ID = "1vQlpdRHnR9ybEHHgX6fouRI-vXOh8KQNLSjsbt0TYh9R3No_9i7QNv_4ELwJZJGQpTe3oZVXaZijaW4";
     const GIDS = { "English": "1893311738", "Math": "59294467", "Science": "1581471994", "华文": "2020673087" };
     
@@ -142,7 +142,6 @@
     let canvas, ctx, drawing = false;
     let currentTermNum = 1, startTime = 0; 
     
-    // 💡 核心：使用真实的 Name，配合解耦后的 Grade
     let curUser = localStorage.getItem('currentPlayer') || 'Valerie';
     let curGrade = localStorage.getItem('currentGrade') || 'P3';
     let curSub = localStorage.getItem('currentSubject') || 'English';
@@ -157,8 +156,6 @@
 
     function getMistakes() { return JSON.parse(localStorage.getItem('hub_mistakes') || '{}'); }
     function saveMistakes(m) { localStorage.setItem('hub_mistakes', JSON.stringify(m)); }
-    
-    // 💡 错题本现在使用真实名字做防碰撞 Key
     function getQuestionKey(sub, user, qText) { return `${user}_${sub}_${qText.trim()}`; }
 
     function applyBalloonLogic(errors) {
@@ -172,7 +169,6 @@
 
         if (errors <= 1) {
             stats.goodCount += 1; 
-
             if (errors === 0) {
                 trigger = true;
                 msg = "🎉 满分达成！直接奖励气球大作战！🎈";
@@ -183,7 +179,6 @@
                 msg = "🔥 表现不错！再获得一次 6~7 就能玩气球啦！";
             }
         }
-
         localStorage.setItem(key, JSON.stringify(stats));
         return { trigger, msg };
     }
@@ -236,7 +231,6 @@
     }
 
     function startQuiz() {
-        // 💡 抽题时使用的是解耦后的 curGrade
         let mainPool = (db[curGrade][curSub] || []).filter(q => (q.Type || "").toString().trim().toUpperCase() !== 'SPELLING');
         mainPool = mainPool.filter(q => {
             let t = q.Term || q.TERM; if (!t) return true; 
@@ -263,8 +257,9 @@
             let key = getQuestionKey(curSub, curUser, q.Question);
             let mData = mistakes[key];
             if (mData) {
-                let lvl = typeof mData === 'object' ? mData.level : mData;
-                eligibleMistakes.push({ q: q, level: lvl }); 
+                let w = typeof mData === 'object' ? (mData.weight || 0) : mData;
+                if (w > 0) eligibleMistakes.push({ q: q, weight: w });
+                else freshNewPool.push(q);
             } else {
                 freshNewPool.push(q);
             }
@@ -273,7 +268,8 @@
         let mistakesPicked = [];
         if (eligibleMistakes.length > 0) {
             let weightedList = [];
-            eligibleMistakes.forEach(item => { let w = Math.max(1, 5 - item.level); for(let i=0; i<w; i++) weightedList.push(item.q); });
+            // 💡 错得越多（weight越大），放进池子里的签越多，被抽中的概率越大
+            eligibleMistakes.forEach(item => { let w = Math.max(1, item.weight); for(let i=0; i<w; i++) weightedList.push(item.q); });
             let targetMistakes = Math.min(5, eligibleMistakes.length);
             while (mistakesPicked.length < targetMistakes && weightedList.length > 0) {
                 let idx = Math.floor(Math.random() * weightedList.length); let selectedQ = weightedList[idx];
@@ -311,7 +307,6 @@
         q.isEvaluated = false; 
 
         let hintHtml = "";
-        // 💡 针对 Venessa 开启拼写下划线 Hint
         if (curUser === 'Venessa' && qType !== 'MCQ') {
             const correctRaw = (q['Correct Answer'] || q['ANSWER'] || "").toString().trim();
             const hintStr = correctRaw.split('').map(c => /[a-zA-Z0-9\u4e00-\u9fa5]/.test(c) ? '_' : c).join(' ');
@@ -341,6 +336,7 @@
         btn.classList.add('active'); document.getElementById('ans-in').value = val;
     }
 
+    // 💡 修复：艾宾浩斯权重算法注入 (本地防丢，云端计算)
     function checkAns() {
         const input = document.getElementById('ans-in'), user = input.value.trim(); 
         const userLower = user.toLowerCase();
@@ -357,34 +353,43 @@
             return; 
         }
 
-        let mData = mistakes[key] || { level: 3, wrongs: [] };
-        if (typeof mData === 'number') mData = { level: mData, wrongs: [] };
+        let mData = mistakes[key] || { weight: 0, wrongs: [] };
+        if (typeof mData === 'number') mData = { weight: mData, wrongs: [] };
 
         if(isCorrect) {
             input.disabled = true; document.getElementById('sub-btn').style.display = 'none'; document.getElementById('next-btn').style.display = 'flex';
             fb.innerHTML = `<span style="color:#10b981;">${isCN ? "✅ 答对啦！" : "✅ Correct!"}</span>`;
             
+            // 🌟 错题复习做对了：本地权重 -1，并发送 isCorrect 给云端
             if (mistakes[key] && !sessionQs[curIdx].isEvaluated) {
-                mData.level += 1; 
-                if (mData.level >= 5) delete mistakes[key]; 
+                mData.weight = Math.max(0, mData.weight - 1); 
+                if (mData.weight <= 0) delete mistakes[key]; 
                 else mistakes[key] = mData;
                 saveMistakes(mistakes); 
-                syncToCloud({type: 'mistake_update', user: curUser, grade: curGrade, subject: curSub, questionKey: key, level: mData.level});
+                syncToCloud({type: 'mistake_update', user: curUser, grade: curGrade, subject: curSub, questionKey: key, isCorrect: true});
             }
         } else {
             if (!sessionQs[curIdx].isEvaluated) sessionErrors++; 
             fb.innerHTML = `<span style="color:#ef4444;">❌ 不对哦！</span><br><span style="font-size:16px; color:#64748b;">答案：<b style="color:#0f172a;">${correctRaw}</b></span>`;
             input.classList.add('error-shake'); setTimeout(()=> input.classList.remove('error-shake'), 400);
             
+            // 🌟 做错了：首错+3，续错+1，并发送完整题目
             if (!sessionQs[curIdx].isEvaluated) {
-                mData.level = Math.max(1, mData.level - 1);
+                if (!mistakes[key]) mData.weight = 3; 
+                else mData.weight += 1; 
+                
                 if (mData.wrongs[mData.wrongs.length - 1] !== user) {
                     mData.wrongs.push(user);
                 }
                 mistakes[key] = mData;
                 saveMistakes(mistakes); 
-                // 💡 传输时带上了 grade，方便老爸的表格记录
-                syncToCloud({type: 'mistake_update', user: curUser, grade: curGrade, subject: curSub, questionKey: key, level: mData.level, wrongAns: user});
+                
+                syncToCloud({
+                    type: 'mistake_update', user: curUser, grade: curGrade, subject: curSub, 
+                    questionKey: key, 
+                    questionText: sessionQs[curIdx].Question, 
+                    wrongAns: user
+                });
             }
         }
         sessionQs[curIdx].isEvaluated = true; 
@@ -392,7 +397,7 @@
 
     function nextQ() { if (curIdx < sessionQs.length - 1) { curIdx++; renderQ(); } else { finishQuiz(); } }
 
-
+    // 💡 修复：补全了本地核心战绩的存储，神射手和核心徽章才能正常显示
     function finishQuiz() {
         const timeTakenSec = Math.floor((Date.now() - startTime) / 1000);
         const isPerfect = sessionErrors <= 1;
@@ -401,50 +406,48 @@
 
         badgeQueue = [];
         let earnedBadgesForCoin = 0;
+        
+        const today = new Date().toISOString().split('T')[0];
+        const statsKey = `practice_stats_${today.replace(/-/g, '')}_${curUser}_${curSub}`;
+        let localStats = JSON.parse(localStorage.getItem(statsKey) || '{"perfects":0, "gamesPlayed":0}');
+        if (isPerfect) localStats.perfects += 1;
+        localStorage.setItem(statsKey, JSON.stringify(localStats));
 
-        // 1. 科目徽章
         if (sessionErrors <= 3) {
             earnedBadgesForCoin++;
             let subIcon = curSub === '华文' ? '🐼' : (curSub === 'Science' ? '🌱' : (curSub === 'Math' ? '🔢' : '🔤'));
             let subName = curSub === '华文' ? '华文小将' : (curSub === 'Science' ? '科学博士' : (curSub === 'Math' ? '数学天才' : '英语达人'));
             badgeQueue.push({ icon: subIcon, title: subName, desc: isCN ? `完成高质量练习，专属徽章 +1！` : `Good job! Badge +1!` });
-            
-            // 💡 修复：补回徽章同步
             syncToCloud({ type: 'badge', user: curUser, grade: curGrade, subject: curSub, icon: subIcon, title: subName, desc: '高质量练习' });
         }
 
-        // 2. 神射手 & 极速 & 气球
         if (isPerfect) {
             earnedBadgesForCoin++;
             badgeQueue.push({ icon: '🎯', title: isCN ? '神射手！' : 'Sharpshooter!', desc: isCN ? '错题在1道以内，神射手徽章 +1！' : 'Great accuracy! Sharpshooter badge +1!' });
-            
-            // 💡 修复：补回徽章同步
             syncToCloud({ type: 'badge', user: curUser, grade: curGrade, subject: curSub, icon: '🎯', title: '神射手', desc: '错题<=1' });
 
             if (timeTakenSec <= speedLimit) {
                 earnedBadgesForCoin++;
-                
-                // 💡 修复：正确累加并保存极速突破的次数，彻底消灭幽灵数据
                 let currentBreaks = parseInt(localStorage.getItem(`speed_breaks_${curUser}`) || '0');
                 localStorage.setItem(`speed_breaks_${curUser}`, currentBreaks + 1);
 
                 badgeQueue.push({ icon: '⚡️', title: isCN ? '极速突破！' : 'Speed Record!', desc: isCN ? `仅用 <span class="epic-highlight">${timeTakenSec}秒</span>！闪电般的速度！` : `Finished in <span class="epic-highlight">${timeTakenSec}s</span>! Lightning fast!` });
-                
-                // 💡 修复：补回徽章同步
                 syncToCloud({ type: 'badge', user: curUser, grade: curGrade, subject: curSub, icon: '⚡️', title: '极速突破', desc: `耗时: ${timeTakenSec}秒` });
             }
 
             pendingGameResult = applyBalloonLogic(sessionErrors);
             if (pendingGameResult && pendingGameResult.trigger) {
                 badgeQueue.push({ icon: '🎈', title: isCN ? '气球猎人！' : 'Balloon Hunter!', desc: pendingGameResult.msg });
-                // 💡 修复：补回徽章同步
+                
+                localStats.gamesPlayed += 1;
+                localStorage.setItem(statsKey, JSON.stringify(localStats));
+
                 syncToCloud({ type: 'badge', user: curUser, grade: curGrade, subject: curSub, icon: '🎈', title: '气球猎人', desc: '解锁气球游戏' });
             }
         } else {
             pendingGameResult = null; 
         }
 
-        // 3. 计算共享金库
         if (earnedBadgesForCoin > 0) {
             let coinMultiplier = curUser === 'Venessa' ? 2 : 1; 
             let coinGain = earnedBadgesForCoin * coinMultiplier;
@@ -453,8 +456,6 @@
             syncToCloud({ type: 'coin_update', user: curUser, amount: coinGain, total: vaultCoins + coinGain });
         }
 
-        // 4. 计算个人打卡水晶
-        let today = new Date().toISOString().split('T')[0];
         let lastDate = localStorage.getItem(`last_date_${curUser}`);
         let streak = parseInt(localStorage.getItem(`streak_${curUser}`) || "0");
 
@@ -471,8 +472,13 @@
                 let crys = parseInt(localStorage.getItem(`crystals_${curUser}`) || "0");
                 localStorage.setItem(`crystals_${curUser}`, crys + 1);
                 badgeQueue.push({ icon: '💎', title: isCN ? '毅力水晶' : 'Crystal', desc: isCN ? `连续打卡 ${streak} 天，水晶 +1！` : `Streak ${streak} days! Crystal +1!` });
-                syncToCloud({ type: 'crystal_update', user: curUser, amount: 1 });
+                syncToCloud({ type: 'crystal_update', user: curUser, amount: 1, streak: streak });
             }
+        }
+
+        const dayOfWeek = new Date().getDay();
+        if (earnedBadgesForCoin > 0 && (dayOfWeek === 0 || dayOfWeek === 6)) {
+            syncToCloud({ type: 'badge', user: curUser, grade: curGrade, subject: curSub, title: '周末狂人' });
         }
 
         if (badgeQueue.length > 0) {
