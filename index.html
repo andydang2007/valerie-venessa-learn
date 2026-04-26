@@ -94,13 +94,16 @@
         .shop-bal-vault { background: #fffbeb; border: 3px solid #fde68a; }
         .shop-bal-crys { background: #f0f9ff; border: 3px solid #bae6fd; }
         
-        /* 商店物品网格 (优化自适应宽度) */
-        .shop-item-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; width: 100%; margin-bottom: 25px; overflow-x: auto; padding-bottom: 10px; }
-        .shop-item { background: white; border: 3px solid #e2e8f0; border-radius: 15px; padding: 10px 5px; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 0 #cbd5e1; }
+        /* 💡 修复放大被切断的 Bug：四周增加充裕的 padding */
+        .shop-item-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; width: 100%; margin-bottom: 10px; overflow-x: auto; padding: 15px 5px 20px 5px; }
+        /* 💡 增加 relative 以便角标依附 */
+        .shop-item { background: white; border: 3px solid #e2e8f0; border-radius: 15px; padding: 10px 5px; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 0 #cbd5e1; position: relative; }
         .shop-item:active { transform: translateY(4px); box-shadow: 0 0 0 transparent; }
-        .shop-item.active { border-color: #f59e0b; background: #fffbeb; transform: scale(1.05); box-shadow: 0 6px 15px rgba(245,158,11,0.2); }
+        .shop-item.active { border-color: #f59e0b; background: #fffbeb; transform: scale(1.05); box-shadow: 0 6px 15px rgba(245,158,11,0.2); z-index: 10; }
         
-        /* 💡 终极图片放大逻辑：横向填满卡片极限，宽高比 1:1 绝对不留白 */
+        /* 💡 新增商店专属的兑换次数角标 */
+        .shop-badge { position: absolute; top: -10px; right: -8px; background: #ef4444; color: white; font-size: 11px; font-weight: 900; padding: 3px 6px; border-radius: 10px; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3); z-index: 20; display: none; white-space: nowrap;}
+        
         .shop-icon { width: 100%; max-width: 90px; aspect-ratio: 1/1; object-fit: contain; margin-bottom: 8px; mix-blend-mode: multiply; }
         
         .shop-item .name { font-weight: 900; font-size: 11px; color: #475569; margin-bottom: 6px; text-align: center; line-height: 1.1; width: 100%; }
@@ -117,7 +120,6 @@
             .badge-icon { width: 56px; height: 56px; font-size: 30px; border-radius: 18px; }
             .badge-name { font-size: 13px; }
             .badge-count { font-size: 12px; padding: 2px 8px; top: -8px; right: -8px; }
-            /* iPad/电脑上，彻底放飞尺寸，达到惊人的 110px */
             .shop-icon { max-width: 110px; }
             .shop-item .name { font-size: 14px; }
             .shop-item .price { font-size: 14px; }
@@ -201,27 +203,32 @@
         </div>
 
         <div class="shop-item-grid">
-            <div class="shop-item coin-item" onclick="selectPrize(this, '团队金币', 67, '汉堡', 'hb')">
+            <div class="shop-item coin-item" onclick="selectPrize(this, '团队金币', 67, '汉堡', 'HB')">
+                <div class="shop-badge" id="badge-HB"></div>
                 <img src="hb.png" class="shop-icon" alt="汉堡">
                 <div class="name">汉堡</div>
                 <div class="price">💰 67</div>
             </div>
-            <div class="shop-item coin-item" onclick="selectPrize(this, '团队金币', 134, '套餐', 'tc')">
+            <div class="shop-item coin-item" onclick="selectPrize(this, '团队金币', 134, '套餐', 'TC')">
+                <div class="shop-badge" id="badge-TC"></div>
                 <img src="tc.png" class="shop-icon" alt="套餐">
                 <div class="name">套餐</div>
                 <div class="price">💰 134</div>
             </div>
-            <div class="shop-item coin-item" onclick="selectPrize(this, '团队金币', 268, '披萨大餐', 'pz')">
+            <div class="shop-item coin-item" onclick="selectPrize(this, '团队金币', 268, '披萨大餐', 'PZ')">
+                <div class="shop-badge" id="badge-PZ"></div>
                 <img src="pz.png" class="shop-icon" alt="披萨大餐">
                 <div class="name">披萨大餐</div>
                 <div class="price">💰 268</div>
             </div>
-            <div class="shop-item crys-item" onclick="selectPrize(this, '个人水晶', 7, '甜筒', 'tt')">
+            <div class="shop-item crys-item" onclick="selectPrize(this, '个人水晶', 7, '甜筒', 'TT')">
+                <div class="shop-badge" id="badge-TT"></div>
                 <img src="tt.png" class="shop-icon" alt="甜筒">
                 <div class="name">甜筒</div>
                 <div class="price">💎 7</div>
             </div>
-            <div class="shop-item crys-item" onclick="selectPrize(this, '个人水晶', 14, '麦旋风', 'xf')">
+            <div class="shop-item crys-item" onclick="selectPrize(this, '个人水晶', 14, '麦旋风', 'XF')">
+                <div class="shop-badge" id="badge-XF"></div>
                 <img src="xf.png" class="shop-icon" alt="麦旋风">
                 <div class="name">麦旋风</div>
                 <div class="price">💎 14</div>
@@ -407,8 +414,26 @@
         document.getElementById('shop-user-crys').innerText = localStorage.getItem(`crystals_${currentUser}`) || "0";
     }
 
+    // 💡 渲染兑换角标的专属函数
+    function updateShopBadges() {
+        const items = ['HB', 'TC', 'PZ', 'TT', 'XF'];
+        items.forEach(prefix => {
+            let count = parseInt(localStorage.getItem(`redeemed_${prefix}`) || "0");
+            let badge = document.getElementById(`badge-${prefix}`);
+            if (badge) {
+                if (count > 0) {
+                    badge.innerText = `已兑 ${count}`;
+                    badge.style.display = 'block';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+        });
+    }
+
     function openShop() {
         updateEconomyUI();
+        updateShopBadges(); // 💡 打开商店时刷新角标
         selectedPrize = null; document.querySelectorAll('.shop-item').forEach(i => i.classList.remove('active'));
         const btn = document.getElementById('do-redeem-btn'); btn.style.background = '#cbd5e1'; btn.style.borderColor = '#94a3b8'; btn.style.boxShadow = '0 6px 0 #94a3b8'; btn.disabled = true;
         showScreen('shop-screen');
@@ -433,6 +458,11 @@
 
         if (confirm(`确定要消耗 ${price} ${type} 兑换【${name}】吗？`)) {
             localStorage.setItem(balanceKey, currentBalance - price);
+            
+            // 💡 记录本地兑换次数（角标读取用）
+            let currentRedeemed = parseInt(localStorage.getItem(`redeemed_${prefix}`) || "0");
+            localStorage.setItem(`redeemed_${prefix}`, currentRedeemed + 1);
+
             const now = new Date();
             const datePart = (now.getMonth() + 1).toString().padStart(2, '0') + now.getDate().toString().padStart(2, '0');
             const checkSum = (now.getDate() + price).toString().padStart(3, '0'); 
@@ -448,7 +478,9 @@
                 });
             } catch(e) {}
             document.getElementById('secret-code').innerText = code; document.getElementById('redeem-modal').style.display = 'flex';
+            
             updateEconomyUI(); 
+            updateShopBadges(); // 💡 刷新角标显示
         }
     }
     function closeRedeemModal() { document.getElementById('redeem-modal').style.display = 'none'; openShop(); }
