@@ -8,11 +8,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-M04YCD1PQK"></script>
     <script>
-        // 💡 适配主页的变量名
         let currentPlayer = localStorage.getItem('currentPlayer') || 'Valerie'; 
         let currentGrade = localStorage.getItem('currentGrade') || 'P3';
-        let currentSubject = '听写'; // 固定为听写模块
-
+        
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
@@ -75,7 +73,7 @@
 
 <div class="container">
     <div id="loading" class="screen" style="display:flex; justify-content:center; align-items:center; padding: 60px 0; font-size: 24px; font-weight: 900; color: #3b82f6;">
-        🌟 魔法书正在加载... 
+        🌟 题库载入中... 
     </div>
 
     <div id="topic-screen" class="screen">
@@ -87,8 +85,8 @@
                 <span style="font-size: 40px;">🏠</span>
             </button>
             <div class="btn-stacked-col">
-                <button class="btn-stacked btn-review-stacked" onclick="startReview(this)">🔥 挑战 (10题)</button>
-                <button class="btn-stacked btn-practice-stacked" onclick="startPractice()">🚀 练习 (全练)</button>
+                <button class="btn-stacked btn-review-stacked" onclick="startReview(this)">🔥 挑战 (考试测验)</button>
+                <button class="btn-stacked btn-practice-stacked" onclick="startPractice()">🚀 练习 (可偷看)</button>
             </div>
         </div>
     </div>
@@ -103,7 +101,7 @@
                 <div id="draw-target"></div>
                 <div class="helper-row">
                     <button id="peek-btn" class="btn-helper">👀 看一下 (按住)</button>
-                    <button id="skip-char-btn" class="btn-helper" onclick="skipCurrentChar()">太简单，跳过 ⏭️</button>
+                    <button id="skip-char-btn" class="btn-helper" onclick="skipCurrentChar()">不会写，跳过 ⏭️</button>
                 </div>
             </div>
             <div class="controls-row">
@@ -118,12 +116,12 @@
 </div>
 
 <script>
-    // 💡 换成了老爸要求的 gid=266851979
+    // 💡 题库地址
     const SHEET_URL = "https://docs.google.com/spreadsheets/d/1MJHkk7HaKRJgY3LQ-Y3IeHemC-keJJWtH7zh-5K_eec/export?format=csv&gid=266851979";
     const SYNC_API_URL = "https://script.google.com/macros/s/AKfycbzbNOgg7deW9uVVyfYGTfKGOtVgNs_9ZfUQ9J_9cYpG2Ufow9KLDICHgsinBXrPJlmz/exec";
     const LIMIT = 5; 
 
-    let db = {}, curUser = currentGrade, curSub = '华文', practiceList = [], curIdx = 0;
+    let db = {}, curUser = currentGrade, practiceList = [], curIdx = 0;
     let hzWriter = null, practiceChars = [];
     let totalCorrectCount = 0, sessionErrors = 0;
     let currentMode = 'practice';
@@ -133,6 +131,7 @@
         try { fetch(SYNC_API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }); } catch (e) {}
     }
 
+    // 防沉迷限制
     function checkAndIncrementLimit(lessons, mode) {
         const today = new Date().toISOString().split('T')[0];
         const storageKey = `spelling_usage_${today}`;
@@ -149,20 +148,55 @@
         return true;
     }
 
+    // 💡 拼音游戏无缝解锁逻辑（点击立刻解锁）
+    function unlockPinyinLessons(selArray) {
+        const cnNum = {'一':1,'二':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9,'十':10,'十一':11,'十二':12,'十三':13,'十四':14,'十五':15,'十六':16,'十七':17,'十八':18,'十九':19,'二十':20};
+        // 默认保底解锁 1-8 课
+        let savedMax = parseInt(localStorage.getItem(`max_lesson_${currentPlayer}`) || "8"); 
+        let updated = false;
+
+        selArray.forEach(lessonName => {
+            let num = NaN;
+            let match = lessonName.match(/第(.+)课/);
+            if (match && cnNum[match[1]]) {
+                num = cnNum[match[1]];
+            } else {
+                let numMatch = lessonName.match(/\d+/);
+                if (numMatch) num = parseInt(numMatch[0]);
+            }
+            
+            if (!isNaN(num) && num > savedMax) {
+                savedMax = num;
+                updated = true;
+            }
+        });
+
+        if (updated) {
+            localStorage.setItem(`max_lesson_${currentPlayer}`, savedMax);
+            console.log(`✅ 已前置解锁拼音游戏至第 ${savedMax} 课`);
+        }
+    }
+
     function init() {
         Papa.parse(SHEET_URL + "&t=" + Date.now(), {
             download: true, header: true, skipEmptyLines: 'greedy',
+            // 💡 完全恢复你原来的读取逻辑！转成大写，精确匹配表头！
             transformHeader: h => h.replace(/^\uFEFF/, '').trim().toUpperCase(),
             complete: function(results) {
                 results.data.forEach((row, index) => { 
-                    let g = (row['GRADE'] || "").toUpperCase(), sub = (row['SUBJECT'] || "").trim();
-                    if(!g || !sub) return;
-                    if(!db[g]) db[g] = {}; 
-                    if(!db[g][sub]) db[g][sub] = []; 
-                    db[g][sub].push({
-                        Topic: row['TOPIC'] || row['LESSON'] || "Default",
-                        Hint: row['QUESTION'] || row['HINT'] || "",
-                        Answer: row['CORRECT ANSWER'] || row['ANSWER'] || "",
+                    let g = (row['GRADE'] || "").toString().toUpperCase();
+                    let topic = (row['TOPIC'] || row['LESSON'] || "").toString().trim();
+                    let hint = (row['QUESTION'] || row['HINT'] || "").toString().trim();
+                    let ans = (row['CORRECT ANSWER'] || row['ANSWER'] || "").toString().trim();
+
+                    if(!g || (!hint && !ans)) return;
+
+                    if(!db[g]) db[g] = []; 
+                    
+                    db[g].push({
+                        Topic: topic || "Default",
+                        Hint: hint,
+                        Answer: ans,
                         isWrong: false,
                         originalIndex: index 
                     });
@@ -174,18 +208,28 @@
     }
 
     function loadTopics() {
-        let childName = currentPlayer;
-        document.getElementById('topic-header').innerText = `🎈 ${childName} 的听写 🎈`;
-        let pool = db[curUser]['华文'] || [];
+        document.getElementById('topic-header').innerText = `🎈 ${currentPlayer} 的听写 🎈`;
+        
+        let pool = db[curUser] || [];
+        
+        if (pool.length === 0) {
+            document.getElementById('topic-list').innerHTML = `<p style="color:#ef4444; font-weight:900;">⚠️ 找不到 ${curUser} 的课文数据，请检查表格。</p>`;
+            showScreen('topic-screen');
+            return;
+        }
+
         let topics = [...new Set(pool.map(q => q.Topic))].sort((a,b) => getWeight(a) - getWeight(b));
         const gradeMap = {'P1': '一', 'P2': '二', 'P3': '三', 'P4': '四', 'P5': '五', 'P6': '六'};
         let gradeStr = gradeMap[curUser] || curUser;
+        
         let semGroup = document.getElementById('semester-group');
         semGroup.innerHTML = `
             <button class="btn-choice" onclick="selectSemester('A', this)">📖 ${gradeStr}上</button>
             <button class="btn-choice" onclick="selectSemester('B', this)">📘 ${gradeStr}下</button>
         `;
-        const list = document.getElementById('topic-list'); list.innerHTML = '';
+        
+        const list = document.getElementById('topic-list'); 
+        list.innerHTML = '';
         topics.forEach(t => {
             const lbl = document.createElement('label');
             lbl.className = 'checkbox-label';
@@ -215,19 +259,33 @@
         let sel = [...document.querySelectorAll('#topic-list input:checked')].map(i => i.value);
         if(sel.length === 0) return;
         if (!checkAndIncrementLimit(sel, 'practice')) return;
+        
+        unlockPinyinLessons(sel); // 💡 点击开始立即解锁拼音进度
+
         currentMode = 'practice'; 
-        let pool = db[curUser]['华文'].filter(q => sel.includes(q.Topic));
-        practiceList = pool.sort((a,b) => a.originalIndex - b.originalIndex);
+        let pool = db[curUser] || [];
+        practiceList = pool.filter(q => sel.includes(q.Topic)).sort((a,b) => a.originalIndex - b.originalIndex);
+        
         curIdx = 0; sessionErrors = 0; showScreen('practice-screen'); renderQuestion();
     }
 
     function startReview(btn) {
         let sel = [...document.querySelectorAll('#topic-list input:checked')].map(i => i.value);
-        if(sel.length < 2) return;
+        if(sel.length === 0) {
+            const ot = btn.innerText; btn.innerText = "请先选择课文哦🐣"; btn.style.background = "#f43f5e";
+            setTimeout(() => { btn.innerText = ot; btn.style.background = "#f59e0b"; }, 2000);
+            return;
+        }
         if (!checkAndIncrementLimit(sel, 'challenge')) return;
+
+        unlockPinyinLessons(sel); // 💡 点击开始立即解锁拼音进度
+
         currentMode = 'challenge'; 
-        let pool = db[curUser]['华文'].filter(q => sel.includes(q.Topic));
-        practiceList = pool.sort(() => 0.5 - Math.random()).slice(0, 10);
+        let pool = db[curUser] || [];
+        // 挑战模式打乱顺序
+        let filtered = pool.filter(q => sel.includes(q.Topic)).sort(() => 0.5 - Math.random());
+        practiceList = filtered.slice(0, Math.min(15, filtered.length));
+        
         curIdx = 0; sessionErrors = 0; showScreen('practice-screen'); renderQuestion();
     }
 
@@ -242,13 +300,13 @@
         document.getElementById('prog-bar').style.width = `${((curIdx + 1) / practiceList.length) * 100}%`;
         document.getElementById('prog-text').innerText = `${curIdx + 1} / ${practiceList.length}`;
         document.getElementById('prev-btn').style.visibility = (curIdx === 0) ? 'hidden' : 'visible';
-        document.getElementById('next-btn').innerText = (curIdx === practiceList.length - 1) ? "完成 ✨" : "下一个 ➡️";
+        document.getElementById('next-btn').innerText = (curIdx === practiceList.length - 1) ? "交卷 ✨" : "下一个 ➡️";
         
         document.getElementById('draw-target').innerHTML = '';
         const skb = document.getElementById('skip-char-btn');
         const pkb = document.getElementById('peek-btn');
         skb.style.display = 'block'; 
-        pkb.style.display = currentMode === 'challenge' ? 'none' : 'block';
+        pkb.style.display = currentMode === 'challenge' ? 'none' : 'block'; // 考试不能偷看
 
         const word = q.Answer.trim(); const pinyins = q.Hint.trim().split(/\s+/);
         q.charsData = []; let pIdx = 0;
@@ -288,7 +346,12 @@
 
     function skipCurrentChar() {
         let idx = practiceChars.findIndex(i => !i.done);
-        if(idx !== -1) { practiceChars[idx].done = true; document.getElementById(`py-${idx}`).classList.add('done'); autoJump(); }
+        if(idx !== -1) { 
+            sessionErrors++; // 跳过就算错
+            practiceChars[idx].done = true; 
+            document.getElementById(`py-${idx}`).classList.add('done'); 
+            autoJump(); 
+        }
     }
 
     function autoJump() { let next = practiceChars.findIndex(i => !i.done); if(next !== -1) jumpTo(next); }
@@ -298,18 +361,30 @@
         const isPerfect = sessionErrors === 0;
         let earnedCoins = 0;
         let badgeEarned = false;
+        let newBadgedTopics = [];
 
-        // 💰 结算奖励（仅挑战模式）
+        // 💰 结算奖励（仅挑战模式 且 全对）
         if (currentMode === 'challenge' && isPerfect) {
-            earnedCoins = (currentPlayer === 'Venessa' || currentGrade === 'P1') ? 4 : 2;
-            let vault = parseInt(localStorage.getItem('gold_coins_vault') || "0");
-            localStorage.setItem('gold_coins_vault', vault + earnedCoins);
-            badgeEarned = true;
+            let involvedTopics = [...new Set(practiceList.map(q => q.Topic))];
+            
+            involvedTopics.forEach(topic => {
+                let badgeKey = `tingxie_badge_${currentPlayer}_${topic}`;
+                // 💡 确保这节课以前从来没拿过徽章
+                if (!localStorage.getItem(badgeKey)) {
+                    localStorage.setItem(badgeKey, "true");
+                    badgeEarned = true;
+                    earnedCoins += 1; // 统一：每征服一个新课，给 1 个金币
+                    newBadgedTopics.push(topic);
+                    
+                    syncToCloud({ type: 'badge', user: currentPlayer, subject: '听写', icon: '👑', title: '听写大王', desc: `完美攻克《${topic}》` });
+                }
+            });
 
-            // 同步金币
-            syncToCloud({ type: 'coin_update', user: currentPlayer, amount: earnedCoins, total: vault + earnedCoins });
-            // 同步徽章
-            syncToCloud({ type: 'badge', user: currentPlayer, subject: '听写', icon: '👑', title: '听写大王', desc: '完美完成挑战' });
+            if (earnedCoins > 0) {
+                let vault = parseInt(localStorage.getItem('gold_coins_vault') || "0");
+                localStorage.setItem('gold_coins_vault', vault + earnedCoins);
+                syncToCloud({ type: 'coin_update', user: currentPlayer, amount: earnedCoins, total: vault + earnedCoins });
+            }
         }
 
         if (isPerfect) {
@@ -318,7 +393,18 @@
         }
 
         let html = `<div style="padding:40px 0;"><h1>${isPerfect?'🏆':'💪'}</h1><h2 style="font-size:36px;">${isPerfect?'太厉害了！':'继续加油！'}</h2>`;
-        if (badgeEarned) html += `<div style="background:#fffbeb; padding:15px; border-radius:20px; border:3px solid #fde68a; margin:20px 0;"><div style="font-size:40px;">👑</div><div style="font-weight:900; color:#d97706;">获得【听写大王】徽章</div><div style="font-size:20px; color:#b45309;">💰 +${earnedCoins} 金币已存入金库</div></div>`;
+        
+        if (badgeEarned) {
+            html += `<div style="background:#fffbeb; padding:15px; border-radius:20px; border:3px solid #fde68a; margin:20px 0;">
+                        <div style="font-size:40px;">👑</div>
+                        <div style="font-weight:900; color:#d97706;">获得【听写大王】徽章</div>
+                        <div style="font-size:16px; color:#92400e; margin: 5px 0;">(${newBadgedTopics.join(', ')})</div>
+                        <div style="font-size:20px; color:#b45309; margin-top:10px;">💰 +${earnedCoins} 金币已存入金库</div>
+                     </div>`;
+        } else if (currentMode === 'challenge' && isPerfect) {
+            html += `<div style="color:#94a3b8; margin:20px 0; font-weight:800;">(这几课的【听写大王】你已经拿过啦，金币不再重复发放哦~ 去挑战新课文吧！)</div>`;
+        }
+        
         html += `<button class="btn-action btn-quit" style="width:200px; margin:30px auto;" onclick="window.location.href='index.html'">返回主页 🏠</button></div>`;
         document.getElementById('finish-screen').innerHTML = html; showScreen('finish-screen');
         
