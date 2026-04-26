@@ -476,11 +476,38 @@
             }
         }
 
+        // 5. 触发隐藏彩蛋（周末狂人：单周末累计狂揽 10 个基础徽章）
         const dayOfWeek = new Date().getDay();
-        if (earnedBadgesForCoin > 0 && (dayOfWeek === 0 || dayOfWeek === 6)) {
-            syncToCloud({ type: 'badge', user: curUser, grade: curGrade, subject: curSub, title: '周末狂人' });
+        if (dayOfWeek === 0 || dayOfWeek === 6) { // 必须是星期六或星期天
+            if (earnedBadgesForCoin > 0) {
+                // 算法：获取本周六的日期作为这个周末的“唯一ID”，保证下周末会自动重置
+                let d = new Date();
+                d.setDate(d.getDate() - (d.getDay() === 0 ? 7 : d.getDay()) + 6); 
+                let weekendId = d.toISOString().split('T')[0];
+                
+                // 设置本地存储的 Key
+                let wkKey = `wk_count_${curUser}_${weekendId}`;
+                let wkAwardedKey = `wk_awarded_${curUser}_${weekendId}`;
+                
+                // 读取本周末已攒的徽章数，加上刚才这把获得的
+                let currentWkCount = parseInt(localStorage.getItem(wkKey) || "0");
+                currentWkCount += earnedBadgesForCoin;
+                localStorage.setItem(wkKey, currentWkCount);
+
+                // 如果本周末累计达到或超过 10 个，并且这个周末还没发过这个彩蛋
+                if (currentWkCount >= 10 && !localStorage.getItem(wkAwardedKey)) {
+                    localStorage.setItem(wkAwardedKey, "1"); // 标记为已发放，防止重复发
+                    badgeQueue.push({ 
+                        icon: '🎉', 
+                        title: isCN ? '周末狂人！' : 'Weekend Maniac!', 
+                        desc: isCN ? `本周末狂揽 10 个徽章！太肝了！` : `10 badges this weekend! Amazing!` 
+                    });
+                    syncToCloud({ type: 'badge', user: curUser, grade: curGrade, subject: curSub, title: '周末狂人' });
+                }
+            }
         }
 
+        // 下面是原有的结尾代码，保持不变
         if (badgeQueue.length > 0) {
             document.getElementById('badge-modal').style.display = 'flex';
             showNextBadge();
