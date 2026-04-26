@@ -179,6 +179,9 @@
         .ship-option.selected { border-color: var(--accent-glow); box-shadow: 0 0 15px var(--accent-glow); transform: scale(1.15); }
         .start-btn { padding: 18px 50px; border: 2px solid var(--accent-glow); background: rgba(0, 240, 255, 0.05); color: var(--accent-glow); font-size: 26px; font-weight: 900; cursor: pointer; box-shadow: 0 0 15px rgba(0, 240, 255, 0.3), inset 0 0 15px rgba(0, 240, 255, 0.2); letter-spacing: 3px; clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%); transition: all 0.2s; display: none; margin-top: 15px;}
         .start-btn:active { transform: scale(0.95); }
+        
+        .back-btn { margin-top: 20px; padding: 10px 30px; border: 2px solid #64748b; background: rgba(0,0,0,0.5); color: #94a3b8; font-size: 18px; font-weight: 900; cursor: pointer; border-radius: 15px; transition: all 0.2s; }
+        .back-btn:hover { background: #334155; color: white; border-color: #94a3b8;}
 
         .reward-box { margin-top: 20px; background: rgba(255,255,255,0.1); padding: 15px 25px; border-radius: 20px; border: 2px solid #fde68a; display: inline-block; animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-align: center; }
 
@@ -243,6 +246,7 @@
         </div>
 
         <button class="start-btn sci-fi-text" id="btn-start" onclick="startGame()">MISSION START</button>
+        <button class="back-btn sci-fi-text" id="btn-back" onclick="window.location.href='index.html'" style="display:none;">RETURN TO HUB</button>
     </div>
 
 <script>
@@ -316,7 +320,6 @@
         return { i: initial, f: final, t: tone };
     }
 
-    // 💡 全新升级的 PapaParse 引擎
     async function loadDB() {
         try {
             let ALL_WORDS = [];
@@ -334,21 +337,18 @@
                         ALL_WORDS = results.data.map(row => {
                             let keys = Object.keys(row);
                             
-                            // 💡 智能寻找列名，无惧插列
                             let kGrade = keys.find(k => /grade|年级/i.test(k)) || keys[0];
                             let kTopic = keys.find(k => /topic|lesson|课/i.test(k)) || keys[2];
                             let kType = keys.find(k => /type|类型/i.test(k)) || keys[3]; 
                             let kChar = keys.find(k => /chinese|char|word|question|汉字|词|题目/i.test(k)) || keys[4];
                             let kPy = keys.find(k => /pinyin|correct|answer|拼音|答案/i.test(k)) || keys[6];
                             
-                            // 💡 过滤掉不是 PINYIN 的题型（防止听写题混进来）
                             let typeVal = (row[kType] || "").toString().trim().toUpperCase();
                             if (typeVal && typeVal !== 'PINYIN') return null;
 
                             let grade = (row[kGrade] || "").trim().toUpperCase();
                             let topic = (row[kTopic] || "").trim();
                             
-                            // 💡 智能分离 "衣yī"：用正则只保留纯汉字
                             let charRaw = (row[kChar] || "").trim();
                             let char = charRaw.replace(/[^\u4e00-\u9fa5]/g, '') || charRaw[0]; 
                             
@@ -358,7 +358,6 @@
                             
                             let py = pyStr.split('/')[0].trim();
                             let lesson = lessonMap[topic] || 99;
-                            // 兼容直接写数字的课
                             if (lesson === 99 && topic) {
                                 let match = topic.match(/\d+/);
                                 if (match) lesson = parseInt(match[0]);
@@ -378,9 +377,7 @@
         } catch (e) { document.getElementById('loading-ui').innerText = "DB CONNECTION FAILED"; }
     }
 
-    // 💡 过滤与动态解锁接口
     function filterAndStart(ALL_WORDS) {
-        // 读取本地存储的最大解锁课数（默认为8）。以后在 tingxie 过关时更新这个值即可！
         let maxLesson = parseInt(localStorage.getItem(`max_lesson_${currentUser}`) || "8");
 
         if (isSister) {
@@ -394,8 +391,10 @@
             document.getElementById('selector-title').style.display = 'block';
             document.getElementById('ship-selector').style.display = 'flex';
             document.getElementById('btn-start').style.display = 'block';
+            document.getElementById('btn-back').style.display = 'block'; 
         } else {
             document.getElementById('loading-ui').innerText = "NO WORDS FOUND FOR THIS PROFILE";
+            document.getElementById('btn-back').style.display = 'block'; 
         }
     }
 
@@ -438,7 +437,8 @@
         state.isPlaying = false;
         document.getElementById('overlay').style.display = 'flex';
         
-        const threshold = isSister ? 3000 : 7000;
+        // 💡 分数门槛已修改：妹妹 2000，姐姐 6000
+        const threshold = isSister ? 2000 : 6000;
         const today = new Date().toISOString().split('T')[0];
         const badgeDateKey = `pinyin_badge_date_${currentUser}`;
         const badgeCountKey = `pinyin_badge_count_${currentUser}`;
@@ -447,6 +447,7 @@
         let resultHTML = "";
 
         if (state.score >= threshold) {
+            // 💡 防刷机制：每天只发一次徽章
             if (lastBadgeDate !== today) {
                 localStorage.setItem(badgeDateKey, today);
                 let currentCount = parseInt(localStorage.getItem(badgeCountKey) || "0");
@@ -492,6 +493,13 @@
         startBtn.innerText = "PLAY AGAIN";
         startBtn.style.display = "block";
         startBtn.onclick = () => { window.location.reload(); }; 
+        
+        // 💡 游戏结束后展示返回主页按钮
+        let backBtn = document.getElementById('btn-back');
+        backBtn.style.display = 'block'; 
+        backBtn.innerText = 'RETURN TO HUB';
+        // 💡 结束后的逻辑改为直接跳转首页
+        backBtn.onclick = () => { window.location.href = "index.html"; };
     }
 
     function getFixedOpts(correct, allArr) {
