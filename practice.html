@@ -205,12 +205,10 @@
             return;
         }
 
-        // 🌟 核心升级：组卷前先从云端“找回错题记忆”
         try {
             const resp = await fetch(`${SYNC_API_URL}?type=fetch_mistakes&user=${curUser}`);
             const cloudMistakes = await resp.json();
             if (cloudMistakes && Object.keys(cloudMistakes).length > 0) {
-                // 覆盖本地错题本
                 localStorage.setItem('hub_mistakes', JSON.stringify(cloudMistakes));
                 console.log("✅ 已从云端找回错题记忆");
             }
@@ -329,7 +327,8 @@
         if (qType === 'OPEN') {
             container.innerHTML = hintHtml + `<textarea id="ans-in" class="ans-input" rows="4" placeholder="${isCN ? '输入你的完整答案...' : 'Type full answer...'}"></textarea>`;
         } else if (qType === 'MCQ') {
-            const opts = (q.Options || q.options || "").toString().split('/').map(o => o.trim()).filter(o => o);
+            // 🌟 分数防冲突：已将 split('/') 修改为 split('|')
+            const opts = (q.Options || q.options || "").toString().split('|').map(o => o.trim()).filter(o => o);
             let html = `<div class="mcq-list">`;
             opts.forEach(opt => html += `<button class="mcq-btn" onclick="selectMCQ(this, '${opt.replace(/'/g, "\\'").replace(/"/g, "&quot;")}')">${opt}</button>`);
             container.innerHTML = html + `</div><input type="hidden" id="ans-in" value="">`;
@@ -357,7 +356,6 @@
         
         if(userLower === "") { if(qType === 'MCQ') alert(isCN ? "请选择一个选项！" : "Please select!"); return; }
         
-        // 保留本地的 key 用于本地权重逻辑
         let isCorrect = (userLower === correctRaw.toLowerCase()), key = getQuestionKey(curSub, curUser, sessionQs[curIdx].Question), mistakes = getMistakes();
         
         if (qType === 'OPEN') {
@@ -379,15 +377,11 @@
                 else mistakes[key] = mData;
                 saveMistakes(mistakes); 
                 
-                // 💡 传给云端时，包含完整题目和正确答案
                 syncToCloud({
                     type: 'mistake_update', 
-                    user: curUser, 
-                    grade: curGrade, 
-                    subject: curSub, 
+                    user: curUser, grade: curGrade, subject: curSub, 
                     questionText: sessionQs[curIdx].Question, 
-                    correctAns: correctRaw,
-                    isCorrect: true
+                    correctAns: correctRaw, isCorrect: true
                 });
             }
         } else {
@@ -402,18 +396,13 @@
                 if (mData.wrongs[mData.wrongs.length - 1] !== user) {
                     mData.wrongs.push(user);
                 }
-                mistakes[key] = mData;
-                saveMistakes(mistakes); 
+                mistakes[key] = mData; saveMistakes(mistakes); 
                 
-                // 💡 做错了：发送完整题目、正确答案、错误答案给云端
                 syncToCloud({
                     type: 'mistake_update', 
-                    user: curUser, 
-                    grade: curGrade, 
-                    subject: curSub, 
+                    user: curUser, grade: curGrade, subject: curSub, 
                     questionText: sessionQs[curIdx].Question, 
-                    correctAns: correctRaw,
-                    wrongAns: user
+                    correctAns: correctRaw, wrongAns: user
                 });
             }
         }
@@ -426,7 +415,10 @@
         const timeTakenSec = Math.floor((Date.now() - startTime) / 1000);
         const isPerfect = sessionErrors <= 1;
         const isCN = (curSub === '华文');
-        const speedLimit = curUser === 'Valerie' ? 180 : 360; 
+        
+        // 🌟 读取 God Mode 后台动态设置的时间限制
+        let config = JSON.parse(localStorage.getItem('hub_config') || "{}");
+        const speedLimit = (curGrade === 'P1' || curUser === 'Venessa') ? (config.speed_limit_p1 || 360) : (config.speed_limit_p3 || 180);
 
         badgeQueue = [];
         let earnedBadgesForCoin = 0;
@@ -473,14 +465,13 @@
         }
 
         if (earnedBadgesForCoin > 0) {
-            let coinMultiplier = curUser === 'Venessa' ? 2 : 1; 
-            let coinGain = earnedBadgesForCoin * coinMultiplier;
+            // 🌟 移除两倍判定，保证姐姐妹妹都是1个徽章=1个金币
+            let coinGain = earnedBadgesForCoin;
             let vaultCoins = parseInt(localStorage.getItem('gold_coins_vault') || "0");
             localStorage.setItem('gold_coins_vault', vaultCoins + coinGain);
             syncToCloud({ type: 'coin_update', user: curUser, total: vaultCoins + coinGain });
         }
 
-        // 💡 双轨打卡逻辑
         let lastDate = localStorage.getItem(`last_date_${curUser}`);
         let currentStreak = parseInt(localStorage.getItem(`current_streak_${curUser}`) || "0");
         let totalDays = parseInt(localStorage.getItem(`total_days_${curUser}`) || "0");
@@ -493,7 +484,7 @@
         }
 
         if (lastDate !== today) {
-            totalDays++; // 累计打卡永远 +1
+            totalDays++; 
             localStorage.setItem(`last_date_${curUser}`, today);
             localStorage.setItem(`current_streak_${curUser}`, currentStreak);
             localStorage.setItem(`total_days_${curUser}`, totalDays);
@@ -506,17 +497,12 @@
                 badgeQueue.push({ icon: '💎', title: isCN ? '毅力水晶' : 'Crystal', desc: isCN ? `连续打卡 ${currentStreak} 天，水晶 +1！` : `Streak ${currentStreak} days! Crystal +1!` });
             }
             
-            // 🌟 一并发送给云端 Dashboard
             syncToCloud({ 
-                type: 'crystal_update', 
-                user: curUser, 
-                crystalsTotal: crys, 
-                totalDays: totalDays, 
-                streak: currentStreak 
+                type: 'crystal_update', user: curUser, 
+                crystalsTotal: crys, totalDays: totalDays, streak: currentStreak 
             });
         }
 
-        // 周末狂人彩蛋逻辑
         const dayOfWeek = new Date().getDay();
         if (dayOfWeek === 0 || dayOfWeek === 6) { 
             if (earnedBadgesForCoin > 0) {
@@ -534,8 +520,7 @@
                 if (currentWkCount >= 10 && !localStorage.getItem(wkAwardedKey)) {
                     localStorage.setItem(wkAwardedKey, "1"); 
                     badgeQueue.push({ 
-                        icon: '🎉', 
-                        title: isCN ? '周末狂人！' : 'Weekend Maniac!', 
+                        icon: '🎉', title: isCN ? '周末狂人！' : 'Weekend Maniac!', 
                         desc: isCN ? `本周末狂揽 10 个徽章！太肝了！` : `10 badges this weekend! Amazing!` 
                     });
                     syncToCloud({ type: 'badge', user: curUser, grade: curGrade, subject: curSub, title: '周末狂人' });
@@ -573,7 +558,9 @@
         if (sessionErrors > 0) html += `<p style="color:#ef4444; font-weight:800; margin-top:20px; font-size: 14px;">🐞 已将 ${sessionErrors} 道错题关进捉虫日记。</p>`;
         html += `<button class="btn-action" style="background:#f1f5f9; color:#64748b; width:100%; max-width: 250px; margin: 30px auto 0 auto; border: 3px solid #e2e8f0;" onclick="window.location.href='index.html'">🏠 返回主页</button></div>`;
         document.getElementById('finish-screen').innerHTML = html; showScreen('finish-screen');
-        if (isPerfect && pendingGameResult && pendingGameResult.trigger) setTimeout(() => { window.location.href = "https://andydang2007.github.io/game/popballoons.html?ticket=" + Date.now(); }, 2500);
+        
+        // 🌟 已加上带回家地址的回城车票！
+        if (isPerfect && pendingGameResult && pendingGameResult.trigger) setTimeout(() => { window.location.href = "https://andydang2007.github.io/game/popballoons.html?ticket=" + Date.now() + "&returnUrl=index.html"; }, 2500);
     }
 
     function initDrawPad() {
