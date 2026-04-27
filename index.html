@@ -16,11 +16,15 @@
         
         .container { width: 100%; max-width: 700px; background: rgba(255,255,255,0.95); padding: 30px 15px 40px 15px; border-radius: 40px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); text-align: center; position: relative; border: 4px solid #ffffff; backdrop-filter: blur(12px); display: flex; flex-direction: column; align-items: center; margin-top: 5vh; margin-bottom: auto; }
         
+        .refresh-btn { position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.8); border: 2px solid #e2e8f0; border-radius: 50%; width: 45px; height: 45px; font-size: 22px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer; z-index: 100; backdrop-filter: blur(4px); transition: 0.2s; outline: none; }
+        .refresh-btn:active { transform: rotate(180deg) scale(0.9); }
+
         .screen { display: none; width: 100%; animation: bounceIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); flex-direction: column; align-items: center; }
         @keyframes bounceIn { 0% { opacity: 0; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1); } }
         
-        /* 💡 日期模块，现在兼职刷新与后台入口 */
-        #school-term-display { margin-bottom: 25px; background: rgba(255,255,255,0.8); padding: 12px 30px; border-radius: 20px; border: 2px solid #fff; box-shadow: 0 8px 15px rgba(59, 130, 246, 0.1); display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; transition: 0.2s; user-select: none; -webkit-user-select: none; }
+        /* 💡 日期模块，去除了边框和背景，完美隐形 */
+        #school-term-display { margin-bottom: 20px; background: transparent; padding: 10px; border: none; box-shadow: none; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; transition: 0.2s; user-select: none; -webkit-user-select: none; }
+        #school-term-display:active { transform: scale(0.95); opacity: 0.7; }
         
         #cloud-sync-indicator { font-size: 13px; color: #3b82f6; font-weight: 900; margin-top: -15px; margin-bottom: 15px; display: none; align-items: center; justify-content: center; gap: 4px; animation: popPulse 1s infinite alternate; }
         
@@ -111,7 +115,6 @@
         .shop-item.coin-item .price { background: #fef3c7; color: #d97706; border: 1.5px solid #fde68a; }
         .shop-item.crys-item .price { background: #e0f2fe; color: #0284c7; border: 1.5px solid #bae6fd; }
 
-        /* 💡 后台控制台输入框样式 */
         .config-row { display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px 20px; border-radius: 15px; border: 2px solid #e2e8f0; width: 100%; box-shadow: 0 2px 0 #cbd5e1;}
         .config-row label { font-weight: 900; color: #475569; font-size: 16px; }
         .config-row input { width: 90px; font-weight: 900; font-size: 18px; padding: 6px; text-align: center; border: 2px solid #cbd5e1; border-radius: 10px; color: #1e293b; outline: none; transition: 0.2s; }
@@ -136,6 +139,8 @@
 <body>
 
 <div class="container">
+    <button class="refresh-btn" onclick="window.location.reload(true)">🔄</button>
+
     <div id="school-term-display"></div>
     <div id="cloud-sync-indicator">☁️ 刷新中...</div>
 
@@ -352,12 +357,11 @@
         else if (now >= t2) { const w = Math.floor(diff(now, t2)/7) + 1; termStr = w <= 10 ? `Term 2 Week ${w}` : "Holiday"; }
         
         document.getElementById('school-term-display').innerHTML = `
-            <div style="font-size: 14px; color: #64748b;">📅 ${now.toLocaleDateString('en-SG', {month:'short', day:'numeric'})}</div>
+            <div style="font-size: 14px; color: #64748b; font-weight: 800;">📅 ${now.toLocaleDateString('en-SG', {month:'short', day:'numeric'})}</div>
             <div style="font-size: 18px; color: #3b82f6; font-weight: 900;">${termStr}</div>
         `;
     }
 
-    // 💡 全新的触控监听：短按刷新，长按 1.2 秒进后台，滑动直接取消
     let pressTimer = null;
     let isLongPress = false;
     let startY = 0;
@@ -402,7 +406,6 @@
     termEl.addEventListener('mouseup', cancelPress);
     termEl.addEventListener('mouseleave', cancelPress);
 
-    // 💡 God Mode 逻辑
     function verifyAdminPin() {
         const input = document.getElementById('admin-pin-input').value;
         if (input === '0426') {
@@ -460,11 +463,10 @@
         btn.innerText = "✅ 保存成功！";
         setTimeout(() => { 
             btn.innerText = "💾 保存并推送云端"; btn.disabled = false; 
-            fetchGlobalConfig(); // 保存后刷新本地配置
+            fetchGlobalConfig(); 
         }, 2000);
     }
     
-    // 💡 启动时获取配置并刷新商店 UI
     async function fetchGlobalConfig() {
         try {
             let res = await fetch(`${SYNC_API_URL}?type=fetch_config`);
@@ -732,7 +734,6 @@
     let lastUser = localStorage.getItem('currentPlayer');
     let lastGrade = localStorage.getItem('currentGrade') || (lastUser === 'Valerie' ? 'P3' : 'P1');
     
-    // 💡 启动时尝试静默拉取全局配置，确保商店价格是最新的
     fetchGlobalConfig();
     
     if(lastUser === 'Valerie' || lastUser === 'Venessa') { executeSwitchUser(lastUser, lastGrade); } 
