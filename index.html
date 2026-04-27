@@ -12,17 +12,17 @@
     <style>
         :root { --primary: #10b981; --bg: #f8fafc; --text-main: #1e293b; --text-muted: #64748b; }
         * { box-sizing: border-box; font-family: 'Nunito', 'Microsoft YaHei', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); margin: 0; padding: 20px; color: var(--text-main); display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 100vh; overflow-x: hidden; }
-        .container { width: 100%; max-width: 700px; background: rgba(255,255,255,0.95); padding: 30px 25px 40px 25px; border-radius: 40px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); text-align: center; position: relative; border: 4px solid #ffffff; backdrop-filter: blur(12px); display: flex; flex-direction: column; align-items: center; margin-top: 5vh; margin-bottom: auto; }
+        body { background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); margin: 0; padding: 15px; color: var(--text-main); display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 100vh; overflow-x: hidden; }
         
-        /* 💡 悬浮刷新按钮 */
-        .refresh-btn { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.8); border: 2px solid #e2e8f0; border-radius: 50%; width: 45px; height: 45px; font-size: 22px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer; z-index: 100; backdrop-filter: blur(4px); transition: 0.2s; outline: none; }
+        /* 💡 移动端减小左右 Padding，释放更多屏幕空间 */
+        .container { width: 100%; max-width: 700px; background: rgba(255,255,255,0.95); padding: 30px 15px 40px 15px; border-radius: 40px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); text-align: center; position: relative; border: 4px solid #ffffff; backdrop-filter: blur(12px); display: flex; flex-direction: column; align-items: center; margin-top: 5vh; margin-bottom: auto; }
+        
+        .refresh-btn { position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.8); border: 2px solid #e2e8f0; border-radius: 50%; width: 45px; height: 45px; font-size: 22px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer; z-index: 100; backdrop-filter: blur(4px); transition: 0.2s; outline: none; }
         .refresh-btn:active { transform: rotate(180deg) scale(0.9); }
 
         .screen { display: none; width: 100%; animation: bounceIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); flex-direction: column; align-items: center; }
         @keyframes bounceIn { 0% { opacity: 0; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1); } }
         
-        /* 去掉了 onclick，改为在 JS 里监听长按 */
         #school-term-display { margin-bottom: 25px; background: rgba(255,255,255,0.8); padding: 12px 30px; border-radius: 20px; border: 2px solid #fff; box-shadow: 0 8px 15px rgba(59, 130, 246, 0.1); display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; transition: 0.1s; user-select: none; -webkit-user-select: none; }
         #school-term-display:active { transform: scale(0.95); }
         
@@ -42,7 +42,7 @@
         .streak-info-box { display: flex; flex-direction: column; align-items: center; gap: 5px; margin-top: 5px; }
         .streak-badge { font-size: 16px; color: #d97706; background: #fffbeb; padding: 8px 20px; border-radius: 20px; font-weight: 900; border: 2.5px solid #fde68a; box-shadow: 0 4px 0 #fde68a; }
 
-        .honor-wall { width: 100%; background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 4px solid #fde68a; border-radius: 30px; padding: 20px; margin-bottom: 30px; text-align: left; box-shadow: inset 0 4px 15px rgba(245, 158, 11, 0.1), 0 10px 20px rgba(0,0,0,0.05); position: relative; overflow: hidden; }
+        .honor-wall { width: 100%; background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 4px solid #fde68a; border-radius: 30px; padding: 15px; margin-bottom: 30px; text-align: left; box-shadow: inset 0 4px 15px rgba(245, 158, 11, 0.1), 0 10px 20px rgba(0,0,0,0.05); position: relative; overflow: hidden; }
         .honor-wall::after { content: '✨'; position: absolute; top: -15px; right: -5px; font-size: 100px; opacity: 0.15; transform: rotate(15deg); pointer-events: none; }
         .honor-wall h3 { margin: 0 0 15px 0; font-size: 22px; color: #d97706; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; font-weight: 900; z-index: 2; position: relative; }
         
@@ -51,10 +51,13 @@
         
         .badges-container { display: flex; flex-direction: column; gap: 20px; position: relative; z-index: 2; }
         .badge-category { width: 100%; }
-        .badge-category-title { font-size: 16px; color: #b45309; font-weight: 900; margin-bottom: 12px; border-bottom: 2px dashed #fde68a; padding-bottom: 5px; display: flex; align-items: center; gap: 6px; }
-        .badge-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px 6px; width: 100%; justify-items: center; }
+        .badge-category-title { font-size: 15px; color: #b45309; font-weight: 900; margin-bottom: 12px; border-bottom: 2px dashed #fde68a; padding-bottom: 5px; display: flex; align-items: center; gap: 6px; }
         
-        .badge-item { display: flex; flex-direction: column; align-items: center; gap: 6px; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; width: 100%; }
+        /* 💡 修复徽章区：改用 Flex Wrap 自适应居中，防止小屏幕切割 */
+        .badge-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px 8px; width: 100%; }
+        
+        /* 每个徽章固定宽度防止挤压 */
+        .badge-item { display: flex; flex-direction: column; align-items: center; gap: 6px; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; width: 75px; flex-shrink: 0; }
         .badge-item.locked { opacity: 0.45; filter: grayscale(100%); transform: scale(0.95); }
         .badge-item.unlocked { opacity: 1; filter: grayscale(0%); transform: scale(1.05); }
         
@@ -66,8 +69,8 @@
         .badge-item.unlocked.gold .badge-icon { border-color: #fbbf24; box-shadow: 0 4px 0 #d97706; background: #fffbeb; }
         .badge-item.locked .badge-icon { border: 3px dashed #94a3b8; background: #f1f5f9; box-shadow: none; font-size: 24px; }
         
-        .badge-count { position: absolute; top: -6px; right: -6px; background: #ef4444; color: white; font-size: 11px; font-weight: 900; padding: 2px 6px; border-radius: 10px; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2); animation: popPulse 2s infinite alternate; z-index: 3; }
-        .badge-name { font-size: 11px; font-weight: 900; color: #64748b; text-align: center; line-height: 1.1; width: 100%; word-wrap: break-word; }
+        .badge-count { position: absolute; top: -6px; right: -6px; background: #ef4444; color: white; font-size: 11px; font-weight: 900; padding: 2px 6px; border-radius: 10px; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2); animation: popPulse 2s infinite alternate; z-index: 3; white-space: nowrap; }
+        .badge-name { font-size: 11px; font-weight: 900; color: #64748b; text-align: center; line-height: 1.2; width: 100%; word-break: keep-all; }
         .badge-item.unlocked .badge-name { color: #d97706; }
         .badge-progress { font-size: 10px; color: #94a3b8; font-weight: 800; margin-top: 2px; }
 
@@ -101,13 +104,18 @@
         .shop-bal-vault { background: #fffbeb; border: 3px solid #fde68a; }
         .shop-bal-crys { background: #f0f9ff; border: 3px solid #bae6fd; }
         
-        .shop-item-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; width: 100%; margin-bottom: 10px; overflow-x: auto; padding: 15px 5px 20px 5px; }
-        .shop-item { background: white; border: 3px solid #e2e8f0; border-radius: 15px; padding: 10px 5px; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 0 #cbd5e1; position: relative; }
+        /* 💡 修复商店区：改用弹性轮播图，流畅滑动不切断 */
+        .shop-item-grid { display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 12px; width: 100%; margin-bottom: 10px; padding: 15px 5px 25px 5px; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
+        /* 隐藏底部丑陋的滚动条 */
+        .shop-item-grid::-webkit-scrollbar { display: none; }
+        
+        /* 固定卡片宽度，保证不被挤压缩 */
+        .shop-item { flex: 0 0 95px; background: white; border: 3px solid #e2e8f0; border-radius: 15px; padding: 10px 5px; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 0 #cbd5e1; position: relative; }
         .shop-item:active { transform: translateY(4px); box-shadow: 0 0 0 transparent; }
         .shop-item.active { border-color: #f59e0b; background: #fffbeb; transform: scale(1.05); box-shadow: 0 6px 15px rgba(245,158,11,0.2); z-index: 10; }
         
         .shop-badge { position: absolute; top: -10px; right: -8px; background: #ef4444; color: white; font-size: 11px; font-weight: 900; padding: 3px 6px; border-radius: 10px; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3); z-index: 20; display: none; white-space: nowrap;}
-        .shop-icon { width: 100%; max-width: 90px; aspect-ratio: 1/1; object-fit: contain; margin-bottom: 8px; mix-blend-mode: multiply; }
+        .shop-icon { width: 100%; max-width: 90px; aspect-ratio: 1/1; object-fit: contain; margin-bottom: 8px; mix-blend-mode: multiply; pointer-events: none; }
         .shop-item .name { font-weight: 900; font-size: 11px; color: #475569; margin-bottom: 6px; text-align: center; line-height: 1.1; width: 100%; }
         .shop-item .price { font-size: 12px; font-weight: 900; border-radius: 10px; padding: 3px 6px; display: inline-flex; align-items: center; justify-content: center; gap: 2px; width: 100%; }
         .shop-item.coin-item .price { background: #fef3c7; color: #d97706; border: 1.5px solid #fde68a; }
@@ -122,7 +130,7 @@
             .badge-icon { width: 56px; height: 56px; font-size: 30px; border-radius: 18px; }
             .badge-name { font-size: 13px; }
             .badge-count { font-size: 12px; padding: 2px 8px; top: -8px; right: -8px; }
-            .shop-icon { max-width: 110px; }
+            .shop-item { flex: 0 0 110px; }
             .shop-item .name { font-size: 14px; }
             .shop-item .price { font-size: 14px; }
         }
@@ -147,7 +155,7 @@
                 <li>各商品价格及名称</li>
                 <li>每次听写的金币奖励数量</li>
             </ul>
-            <p style="color: #f59e0b; font-weight: 900; text-align: center; margin-top: 20px;">(待下一步接入云端 API 后开启)</p>
+            <p style="color: #f59e0b; font-weight: 900; text-align: center; margin-top: 20px;">(上帝模式已开启，数据直连 Dashboard)</p>
         </div>
         
         <button class="btn-action" style="background:#ef4444; color:white; border-color:#dc2626; box-shadow:0 6px 0 #b91c1c; margin-bottom: 15px;" onclick="executeNuclearReset()">☢️ 危险：清空所有本地数据</button>
@@ -173,7 +181,7 @@
                 <h2 id="dash-name">Welcome!</h2>
             </div>
             <div class="streak-info-box">
-                <div class="streak-badge" id="dash-streak">📅 今天是你第 1 天打卡</div>
+                <div class="streak-badge" id="dash-streak">📅 开启你的第 1 天打卡吧！</div>
             </div>
         </div>
 
@@ -350,7 +358,6 @@
         `;
     }
 
-    // 💡 长按监听逻辑：监听 school-term-display
     let pressTimer;
     const termEl = document.getElementById('school-term-display');
     
@@ -359,7 +366,7 @@
             document.getElementById('admin-pin-modal').style.display = 'flex';
             document.getElementById('admin-pin-input').value = '';
             setTimeout(() => document.getElementById('admin-pin-input').focus(), 100);
-        }, 1500); // 长按 1.5 秒触发
+        }, 1500);
     };
     const cancelPress = () => { clearTimeout(pressTimer); };
     
@@ -370,7 +377,6 @@
     termEl.addEventListener('mouseup', cancelPress);
     termEl.addEventListener('mouseleave', cancelPress);
 
-    // 💡 God Mode 密码锁验证
     function verifyAdminPin() {
         const input = document.getElementById('admin-pin-input').value;
         if (input === '0426') {
@@ -394,9 +400,13 @@
             const cloudData = await resp.json();
             
             if (cloudData && Object.keys(cloudData).length > 0) {
+                // 💡 更新资产
                 if (cloudData.vaultCoins !== undefined) localStorage.setItem('gold_coins_vault', cloudData.vaultCoins);
                 if (cloudData.userCrystals !== undefined) localStorage.setItem(`crystals_${currentUser}`, cloudData.userCrystals);
-                if (cloudData.userStreak !== undefined) localStorage.setItem(`streak_${currentUser}`, cloudData.userStreak);
+                
+                // 💡 双轨打卡数据读取
+                if (cloudData.userTotalDays !== undefined) localStorage.setItem(`total_days_${currentUser}`, cloudData.userTotalDays);
+                if (cloudData.userStreak !== undefined) localStorage.setItem(`current_streak_${currentUser}`, cloudData.userStreak);
                 
                 if (cloudData.pinyin !== undefined) localStorage.setItem(`pinyin_badge_count_${currentUser}`, cloudData.pinyin);
                 if (cloudData.speed !== undefined) localStorage.setItem(`speed_breaks_${currentUser}`, cloudData.speed);
@@ -459,9 +469,14 @@
     function closePinModal() { document.getElementById('pin-modal').style.display = 'none'; document.getElementById('hub-pin-input').value = ''; }
 
     function updateEconomyUI() {
-        let streak = parseInt(localStorage.getItem(`streak_${currentUser}`) || "0");
-        if (streak === 0) { document.getElementById('dash-streak').innerText = `📅 开启你的第 1 天打卡吧！`; } 
-        else { document.getElementById('dash-streak').innerText = `📅 今天是你第 ${streak} 天打卡`; }
+        // 💡 顶部横幅读取 total_days（累计打卡）
+        let totalDays = parseInt(localStorage.getItem(`total_days_${currentUser}`) || "0");
+        if (totalDays === 0) { 
+            document.getElementById('dash-streak').innerText = `📅 开启你的第 1 天打卡吧！`; 
+        } else { 
+            document.getElementById('dash-streak').innerText = `📅 你已累计打卡 ${totalDays} 天`; 
+        }
+        
         document.getElementById('shop-vault-total').innerText = localStorage.getItem('gold_coins_vault') || "0";
         document.getElementById('shop-user-crys').innerText = localStorage.getItem(`crystals_${currentUser}`) || "0";
     }
@@ -574,16 +589,17 @@
         ];
         container.innerHTML += `<div class="badge-category"><div class="badge-category-title">🎓 科目大师</div><div class="badge-grid">${subBadges.map(renderItemHTML).join('')}</div></div>`;
 
-        const cloudStreak = parseInt(localStorage.getItem(`streak_${currentUser}`)||'0');
+        // 💡 底部毅力徽章读取 current_streak（当前连击）
+        const currentStreak = parseInt(localStorage.getItem(`current_streak_${currentUser}`) || '0');
         const streakMilestones = [3, 5, 10, 15, 30];
         let streakBadges = [];
         streakMilestones.forEach(day => {
-            let isAchieved = (cloudStreak >= day);
+            let isAchieved = (currentStreak >= day);
             let count = isAchieved ? 1 : 0;
             let tier = day >= 15 ? 'gold' : (day >= 10 ? 'silver' : 'bronze');
-            streakBadges.push({ icon: '📅', name: `打卡${day}天`, count: count, tier: tier, targetStreak: day, currentStreak: cloudStreak });
+            streakBadges.push({ icon: '🔥', name: `连击${day}天`, count: count, tier: tier, targetStreak: day, currentStreak: currentStreak });
         });
-        container.innerHTML += `<div class="badge-category"><div class="badge-category-title">📅 毅力打卡 (已连续 ${cloudStreak} 天)</div><div class="badge-grid">${streakBadges.map(renderItemHTML).join('')}</div></div>`;
+        container.innerHTML += `<div class="badge-category"><div class="badge-category-title">📅 毅力连击 (当前已连续 ${currentStreak} 天)</div><div class="badge-grid">${streakBadges.map(renderItemHTML).join('')}</div></div>`;
 
         const easterBadgesData = [
             { icon: '🌅', name: '早起鸟儿', count: parseInt(localStorage.getItem(`easter_earlybird_${currentUser}`) || '0'), tier: 'gold' },
@@ -600,7 +616,6 @@
         document.getElementById('total-badge-count').innerText = totalTrophies;
     }
 
-    // 💡 清空数据的核弹按钮 (现在被转移到了密码锁内)
     function executeNuclearReset() {
         if(confirm("☢️ 警告：此操作将清空本地所有测试数据（Ticket将重置）！\n\n确定要执行吗？")) {
             localStorage.clear(); sessionStorage.clear(); alert("🧹 所有本地数据已清零。"); window.location.reload();
