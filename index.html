@@ -164,6 +164,10 @@
         <div id="admin-config-container" style="display:none; width: 100%; flex-direction: column; gap: 12px; margin-bottom: 25px;">
             <div class="config-row"><label>P1 拼音要求</label><input type="number" id="cfg-pinyin_threshold_p1"></div>
             <div class="config-row"><label>P3 拼音要求</label><input type="number" id="cfg-pinyin_threshold_p3"></div>
+            
+            <div class="config-row"><label>P1 极速时间(秒)</label><input type="number" id="cfg-speed_limit_p1"></div>
+            <div class="config-row"><label>P3 极速时间(秒)</label><input type="number" id="cfg-speed_limit_p3"></div>
+            
             <div class="config-row"><label>听写全对奖励</label><input type="number" id="cfg-tingxie_reward_coin"></div>
             <div class="config-row"><label>汉堡价格 (金币)</label><input type="number" id="cfg-shop_hb_price"></div>
             <div class="config-row"><label>套餐价格 (金币)</label><input type="number" id="cfg-shop_tc_price"></div>
@@ -489,7 +493,8 @@
         const btn = document.getElementById('admin-save-btn');
         btn.innerText = "上传中..."; btn.disabled = true;
 
-        const keys = ['pinyin_threshold_p1', 'pinyin_threshold_p3', 'tingxie_reward_coin', 'shop_hb_price', 'shop_tc_price', 'shop_pz_price', 'shop_tt_price', 'shop_xf_price'];
+        // 🌟 已加上这极速时间的 Key！
+        const keys = ['pinyin_threshold_p1', 'pinyin_threshold_p3', 'speed_limit_p1', 'speed_limit_p3', 'tingxie_reward_coin', 'shop_hb_price', 'shop_tc_price', 'shop_pz_price', 'shop_tt_price', 'shop_xf_price'];
         let promises = [];
         
         keys.forEach(k => {
