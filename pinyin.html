@@ -250,7 +250,7 @@
     </div>
 
 <script>
-    const SYNC_API_URL = "https://script.google.com/macros/s/AKfycbyNi-a8VpHLrIpd0x5Fnb_825ZzFrLp4h2oMKot3xefrLGiLe3Pj-d8L-xWQh5w-Kkd/exec";
+    const SYNC_API_URL = "https://script.google.com/macros/s/AKfycbzbNOgg7deW9uVVyfYGTfKGOtVgNs_9ZfUQ9J_9cYpG2Ufow9KLDICHgsinBXrPJlmz/exec";
     const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQlpdRHnR9ybEHHgX6fouRI-vXOh8KQNLSjsbt0TYh9R3No_9i7QNv_4ELwJZJGQpTe3oZVXaZijaW4/pub?gid=573238154&single=true&output=csv";
     
     async function syncToCloud(payload) {
@@ -433,21 +433,60 @@
         gameLoop();
     }
 
+    // 💡 全新的双轨打卡与上帝模式核心函数
     function endGame() {
         state.isPlaying = false;
         document.getElementById('overlay').style.display = 'flex';
         
-        // 💡 分数门槛已修改：妹妹 2000，姐姐 6000
-        const threshold = isSister ? 2000 : 6000;
+        // 🌟 读取 God Mode 后台配置
+        let config = JSON.parse(localStorage.getItem('hub_config') || "{}");
+        const threshold = isSister ? (config.pinyin_threshold_p1 || 2000) : (config.pinyin_threshold_p3 || 6000);
+        
         const today = new Date().toISOString().split('T')[0];
         const badgeDateKey = `pinyin_badge_date_${currentUser}`;
         const badgeCountKey = `pinyin_badge_count_${currentUser}`;
         const lastBadgeDate = localStorage.getItem(badgeDateKey);
 
         let resultHTML = "";
+        let crystalEarned = false;
 
+        // 🌟 双轨打卡结算逻辑 (只要打完就累计)
+        let lastDate = localStorage.getItem(`last_date_${currentUser}`);
+        let currentStreak = parseInt(localStorage.getItem(`current_streak_${currentUser}`) || "0");
+        let totalDays = parseInt(localStorage.getItem(`total_days_${currentUser}`) || "0");
+
+        if (lastDate) {
+            let diff = Math.floor((new Date(today) - new Date(lastDate)) / 864e5);
+            if (diff === 1) currentStreak++; else if (diff > 1) currentStreak = 1; 
+        } else {
+            currentStreak = 1;
+        }
+
+        if (lastDate !== today) {
+            totalDays++; // 累计天数永远 +1
+            localStorage.setItem(`last_date_${currentUser}`, today);
+            localStorage.setItem(`current_streak_${currentUser}`, currentStreak);
+            localStorage.setItem(`total_days_${currentUser}`, totalDays);
+
+            let crys = parseInt(localStorage.getItem(`crystals_${currentUser}`) || "0");
+            if (currentStreak >= 3) {
+                crys += 1;
+                localStorage.setItem(`crystals_${currentUser}`, crys);
+                crystalEarned = true;
+            }
+            
+            // 一并推给 Dashboard
+            syncToCloud({ 
+                type: 'crystal_update', 
+                user: currentUser, 
+                crystalsTotal: crys, 
+                totalDays: totalDays, 
+                streak: currentStreak 
+            });
+        }
+
+        // 🌟 分数门槛判断
         if (state.score >= threshold) {
-            // 💡 防刷机制：每天只发一次徽章
             if (lastBadgeDate !== today) {
                 localStorage.setItem(badgeDateKey, today);
                 let currentCount = parseInt(localStorage.getItem(badgeCountKey) || "0");
@@ -458,7 +497,7 @@
                 localStorage.setItem('gold_coins_vault', vaultCoins + coinGain);
 
                 syncToCloud({ type: 'badge', user: currentUser, subject: '拼音', icon: '🎮', title: '拼音高手', desc: `镭射射击达到 ${state.score} 分！` });
-                syncToCloud({ type: 'coin_update', user: currentUser, amount: coinGain, total: vaultCoins + coinGain });
+                syncToCloud({ type: 'coin_update', user: currentUser, total: vaultCoins + coinGain });
 
                 resultHTML = `
                     <div style="font-size: 48px; color: #39ff14; text-shadow: 0 0 20px #39ff14;">MISSION ACCOMPLISHED</div>
@@ -467,6 +506,7 @@
                         <div style="font-size: 45px; margin-bottom: 5px;">🎮</div>
                         <div style="font-size: 22px; color: #fde68a; font-weight: 900;">【拼音高手】徽章 +1！</div>
                         <div style="font-size: 16px; color: #f59e0b; margin-top: 5px;">💰 金币 +${coinGain} 已存入家庭金库</div>
+                        ${crystalEarned ? `<div style="font-size: 16px; color: #38bdf8; margin-top: 5px;">💎 连续打卡${currentStreak}天，水晶 +1！</div>` : ''}
                     </div>
                 `;
                 confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
@@ -475,6 +515,7 @@
                     <div style="font-size: 48px; color: #39ff14; text-shadow: 0 0 20px #39ff14;">MISSION ACCOMPLISHED</div>
                     <div style="font-size: 24px; color: #fff; margin-top: 10px;">FINAL SCORE: ${state.score}</div>
                     <div style="font-size: 16px; color: #94a3b8; margin-top: 25px; max-width: 300px; margin-left:auto; margin-right:auto; line-height: 1.5;">(你太棒了！但【拼音高手】每天只发 1 枚，明天再来赚金币吧！)</div>
+                    ${crystalEarned ? `<div style="font-size: 16px; color: #38bdf8; margin-top: 15px;">💎 连续打卡${currentStreak}天，水晶 +1！</div>` : ''}
                 `;
             }
         } else {
@@ -482,6 +523,7 @@
                 <div style="font-size: 48px; color: #ff003c; text-shadow: 0 0 20px #ff003c;">TIME'S UP</div>
                 <div style="font-size: 24px; color: #fff; margin-top: 10px;">FINAL SCORE: ${state.score}</div>
                 <div style="font-size: 16px; color: #94a3b8; margin-top: 25px;">(目标：${threshold} 分。继续努力！)</div>
+                ${crystalEarned ? `<div style="font-size: 16px; color: #38bdf8; margin-top: 15px;">💎 连续打卡${currentStreak}天，水晶 +1！</div>` : ''}
             `;
         }
 
@@ -494,11 +536,9 @@
         startBtn.style.display = "block";
         startBtn.onclick = () => { window.location.reload(); }; 
         
-        // 💡 游戏结束后展示返回主页按钮
         let backBtn = document.getElementById('btn-back');
         backBtn.style.display = 'block'; 
         backBtn.innerText = 'RETURN TO HUB';
-        // 💡 结束后的逻辑改为直接跳转首页
         backBtn.onclick = () => { window.location.href = "index.html"; };
     }
 
