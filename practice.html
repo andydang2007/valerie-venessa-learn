@@ -205,6 +205,19 @@
             return;
         }
 
+        // 🌟 核心升级：组卷前先从云端“找回错题记忆”
+        try {
+            const resp = await fetch(`${SYNC_API_URL}?type=fetch_mistakes&user=${curUser}`);
+            const cloudMistakes = await resp.json();
+            if (cloudMistakes && Object.keys(cloudMistakes).length > 0) {
+                // 覆盖本地错题本
+                localStorage.setItem('hub_mistakes', JSON.stringify(cloudMistakes));
+                console.log("✅ 已从云端找回错题记忆");
+            }
+        } catch (e) {
+            console.log("❌ 云端记忆检索失败:", e);
+        }
+
         const now = new Date();
         const t2 = new Date(2026, 2, 23), t3 = new Date(2026, 5, 29), t4 = new Date(2026, 8, 14);
         if (now >= t4) currentTermNum = 4; else if (now >= t3) currentTermNum = 3; else if (now >= t2) currentTermNum = 2; else currentTermNum = 1;
@@ -230,6 +243,7 @@
         else { document.getElementById('loading').innerText = "⚠️ Data error."; }
     }
 
+    
     function startQuiz() {
         let mainPool = (db[curGrade][curSub] || []).filter(q => (q.Type || "").toString().trim().toUpperCase() !== 'SPELLING');
         mainPool = mainPool.filter(q => {
