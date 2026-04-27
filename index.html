@@ -19,11 +19,9 @@
         .screen { display: none; width: 100%; animation: bounceIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); flex-direction: column; align-items: center; }
         @keyframes bounceIn { 0% { opacity: 0; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1); } }
         
-        /* 💡 日期暗门：无边框无背景，只有字 */
         #school-term-display { margin-bottom: 20px; padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; transition: 0.2s; user-select: none; -webkit-user-select: none; }
         #school-term-display:active { transform: scale(0.95); opacity: 0.7; }
         
-        /* 💡 统一的提示灯样式 */
         #cloud-sync-indicator { font-size: 13px; color: #3b82f6; font-weight: 900; margin-top: -15px; margin-bottom: 15px; display: none; align-items: center; justify-content: center; gap: 4px; animation: popPulse 1s infinite alternate; }
         
         .magic-number { display: inline-block; font-size: 1.4em; color: #f59e0b; font-weight: 900; padding: 0 5px; animation: popPulse 1s infinite alternate cubic-bezier(0.4, 0, 0.2, 1); }
@@ -132,11 +130,28 @@
             .shop-item .price { font-size: 14px; }
         }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+
+        /* 💡 全局主密码锁 UI 样式 */
+        #master-lock-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; }
+        .master-input { font-size: 36px; letter-spacing: 12px; text-align: center; width: 220px; padding: 15px; border-radius: 25px; border: 4px solid #334155; background: rgba(0,0,0,0.3); color: #38bdf8; outline: none; margin: 20px 0 30px 0; transition: 0.2s; font-family: monospace; font-weight: 900; box-shadow: inset 0 4px 10px rgba(0,0,0,0.5); }
+        .master-input:focus { border-color: #3b82f6; box-shadow: 0 0 20px rgba(59, 130, 246, 0.4), inset 0 4px 10px rgba(0,0,0,0.5); }
+        .master-btn { padding: 18px 50px; font-size: 20px; font-weight: 900; background: #3b82f6; color: white; border: none; border-radius: 25px; cursor: pointer; box-shadow: 0 6px 0 #2563eb; transition: 0.1s; letter-spacing: 2px; }
+        .master-btn:active { transform: translateY(6px); box-shadow: 0 0 0 transparent; }
     </style>
 </head>
 <body>
 
-<div class="container">
+<div id="master-lock-screen">
+    <div style="font-size: 80px; margin-bottom: 10px; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.5));">🛡️</div>
+    <h2 style="font-size: 32px; margin: 0 0 10px 0; color: #f8fafc;">Family Hub Secured</h2>
+    <p style="color: #94a3b8; font-size: 16px; margin: 0; font-weight: 800;">Please verify to proceed.</p>
+    
+    <input type="password" id="master-pwd" class="master-input" maxlength="4" placeholder="****" inputmode="numeric" pattern="[0-9]*">
+    
+    <button class="master-btn" onclick="verifyMasterLock()">ENTER</button>
+</div>
+
+<div class="container" id="main-app-container" style="display: none;">
     
     <div id="school-term-display"></div>
     <div id="cloud-sync-indicator"></div>
@@ -167,7 +182,7 @@
         <button class="btn-action" onclick="showScreen('dashboard-screen')">← 返回主页</button>
     </div>
 
-    <div id="user-screen" class="screen" style="display: flex;">
+    <div id="user-screen" class="screen">
         <h2 style="margin:0 0 5px 0; color:#0f172a; font-size: 30px; font-weight: 900;">Who is learning?</h2>
         <div style="font-size: 16px; color: #64748b; margin-top: 5px; font-weight: 800; margin-bottom: 25px;">Aim for <span class="magic-number" style="font-size:1.1em;">6~7</span> today!</div>
 
@@ -347,6 +362,33 @@
     let selectedPrize = null;
     
     const SYNC_API_URL = "https://script.google.com/macros/s/AKfycbzbNOgg7deW9uVVyfYGTfKGOtVgNs_9ZfUQ9J_9cYpG2Ufow9KLDICHgsinBXrPJlmz/exec";
+
+    // 💡 核心防御：全局主密码锁逻辑
+    function checkMasterLock() {
+        if (localStorage.getItem('family_hub_unlocked') === 'true') {
+            document.getElementById('master-lock-screen').style.display = 'none';
+            document.getElementById('main-app-container').style.display = 'flex';
+            initializeHub();
+        } else {
+            document.getElementById('master-pwd').focus();
+        }
+    }
+
+    function verifyMasterLock() {
+        const input = document.getElementById('master-pwd').value;
+        if (input === '0426') { 
+            localStorage.setItem('family_hub_unlocked', 'true');
+            checkMasterLock();
+        } else {
+            const el = document.getElementById('master-pwd');
+            el.classList.add('error-shake');
+            setTimeout(() => { el.classList.remove('error-shake'); el.value = ''; el.focus(); }, 400);
+        }
+    }
+
+    document.getElementById('master-pwd').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') verifyMasterLock();
+    });
 
     function initDate() {
         const now = new Date();
@@ -727,19 +769,26 @@
 
     document.addEventListener('keydown', (e) => { 
         if (e.key === 'Enter') {
-            if (document.getElementById('pin-modal').style.display === 'flex') verifyHubPin();
-            if (document.getElementById('admin-pin-modal').style.display === 'flex') verifyAdminPin();
+            if (document.getElementById('master-lock-screen').style.display === 'flex') verifyMasterLock();
+            else if (document.getElementById('pin-modal').style.display === 'flex') verifyHubPin();
+            else if (document.getElementById('admin-pin-modal').style.display === 'flex') verifyAdminPin();
         } 
     });
     
-    initDate();
-    let lastUser = localStorage.getItem('currentPlayer');
-    let lastGrade = localStorage.getItem('currentGrade') || (lastUser === 'Valerie' ? 'P3' : 'P1');
-    
-    fetchGlobalConfig();
-    
-    if(lastUser === 'Valerie' || lastUser === 'Venessa') { executeSwitchUser(lastUser, lastGrade); } 
-    else { showScreen('user-screen'); }
+    // 💡 系统启动入口
+    function initializeHub() {
+        initDate();
+        let lastUser = localStorage.getItem('currentPlayer');
+        let lastGrade = localStorage.getItem('currentGrade') || (lastUser === 'Valerie' ? 'P3' : 'P1');
+        
+        fetchGlobalConfig();
+        
+        if(lastUser === 'Valerie' || lastUser === 'Venessa') { executeSwitchUser(lastUser, lastGrade); } 
+        else { showScreen('user-screen'); }
+    }
+
+    // 页面加载完成后，拦截并优先检查主密码锁
+    window.onload = checkMasterLock;
 </script>
 
 </body>
