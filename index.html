@@ -131,7 +131,7 @@
         }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
 
-        /* 💡 全局主密码锁 UI 样式 */
+        /* 全局主密码锁 UI 样式 */
         #master-lock-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; }
         .master-input { font-size: 36px; letter-spacing: 12px; text-align: center; width: 220px; padding: 15px; border-radius: 25px; border: 4px solid #334155; background: rgba(0,0,0,0.3); color: #38bdf8; outline: none; margin: 20px 0 30px 0; transition: 0.2s; font-family: monospace; font-weight: 900; box-shadow: inset 0 4px 10px rgba(0,0,0,0.5); }
         .master-input:focus { border-color: #3b82f6; box-shadow: 0 0 20px rgba(59, 130, 246, 0.4), inset 0 4px 10px rgba(0,0,0,0.5); }
@@ -314,8 +314,11 @@
             <div class="menu-btn" style="border-color:#fde68a; color:#b45309; flex: 1 1 40%;" onclick="window.location.href='tingxie.html'">
                 <div class="emoji">✍️</div> 听写
             </div>
-            <div class="menu-btn" style="border-color:#fbcfe8; color:#be185d; flex: 1 1 100%; flex-direction: row; justify-content: center;" onclick="window.location.href='pinyin.html'">
+            <div class="menu-btn" style="border-color:#fbcfe8; color:#be185d; flex: 1 1 40%;" onclick="window.location.href='pinyin.html'">
                 <div class="emoji">🎮</div> 拼音游戏
+            </div>
+            <div class="menu-btn" style="border-color:#a7f3d0; color:#047857; flex: 1 1 40%;" onclick="window.location.href='https://andydang2007.github.io/reading/'">
+                <div class="emoji">📚</div> 图书馆
             </div>
         </div>
         <button class="btn-action" onclick="showScreen('dashboard-screen')">← 返回主页</button>
@@ -367,7 +370,13 @@
     
     const SYNC_API_URL = "https://script.google.com/macros/s/AKfycbzbNOgg7deW9uVVyfYGTfKGOtVgNs_9ZfUQ9J_9cYpG2Ufow9KLDICHgsinBXrPJlmz/exec";
 
-    // 💡 核心防御：全局主密码锁逻辑
+    // 🌟 核心升级：强行锁定新加坡时间 (UTC+8)，彻底解决跨时区早起打卡的 Bug
+    function getSGTDate() {
+        const d = new Date();
+        const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+        return new Date(utc + (3600000 * 8));
+    }
+
     function checkMasterLock() {
         if (localStorage.getItem('family_hub_unlocked') === 'true') {
             document.getElementById('master-lock-screen').style.display = 'none';
@@ -395,7 +404,8 @@
     });
 
     function initDate() {
-        const now = new Date();
+        // 🌟 替换为新加坡时间
+        const now = getSGTDate();
         const t2 = new Date(2026, 2, 23), t3 = new Date(2026, 5, 29), t4 = new Date(2026, 8, 14);
         const diff = (d1, d2) => Math.floor((d1 - d2) / 864e5);
         let termStr = "Term 1";
@@ -493,7 +503,6 @@
         const btn = document.getElementById('admin-save-btn');
         btn.innerText = "上传中..."; btn.disabled = true;
 
-        // 🌟 已加上这极速时间的 Key！
         const keys = ['pinyin_threshold_p1', 'pinyin_threshold_p3', 'speed_limit_p1', 'speed_limit_p3', 'tingxie_reward_coin', 'shop_hb_price', 'shop_tc_price', 'shop_pz_price', 'shop_tt_price', 'shop_xf_price'];
         let promises = [];
         
@@ -609,7 +618,8 @@
 
     function verifyHubPin() {
         const input = document.getElementById('hub-pin-input').value;
-        const now = new Date();
+        // 🌟 替换为新加坡时间
+        const now = getSGTDate();
         const mmdd = (now.getMonth() + 1) * 100 + now.getDate();
         const day = now.getDay() === 0 ? 7 : now.getDay();
         if (input === (mmdd + day).toString()) { closePinModal(); executeSwitchUser(pendingUser.name, pendingUser.grade); } 
@@ -673,7 +683,8 @@
             let currentRedeemed = parseInt(localStorage.getItem(`redeemed_${prefix}`) || "0");
             localStorage.setItem(`redeemed_${prefix}`, currentRedeemed + 1);
 
-            const now = new Date();
+            // 🌟 替换为新加坡时间生成兑换口令
+            const now = getSGTDate();
             const datePart = (now.getMonth() + 1).toString().padStart(2, '0') + now.getDate().toString().padStart(2, '0');
             const checkSum = (now.getDate() + price).toString().padStart(3, '0'); 
             const code = `${prefix}-${datePart}-${checkSum}`;
@@ -780,7 +791,6 @@
         } 
     });
     
-    // 💡 系统启动入口
     function initializeHub() {
         initDate();
         let lastUser = localStorage.getItem('currentPlayer');
@@ -792,7 +802,6 @@
         else { showScreen('user-screen'); }
     }
 
-    // 页面加载完成后，拦截并优先检查主密码锁
     window.onload = checkMasterLock;
 </script>
 
