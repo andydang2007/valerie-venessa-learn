@@ -30,7 +30,7 @@
         #preview-img { max-width: 100%; max-height: 250px; border-radius: 10px; cursor: pointer; border: 3px solid #3b82f6; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
         .click-hint { font-size: 13px; color: #3b82f6; font-weight: bold; margin-top: 8px; animation: pulse 1.5s infinite; }
 
-        /* 裁剪模态层优化，防止手机端错位或无法滚动 */
+        /* 裁剪模态层 */
         #crop-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 999; padding: 20px; flex-direction: column; box-sizing: border-box; }
         .cropper-wrapper { flex: 1; overflow: hidden; background: #111; display: flex; align-items: center; justify-content: center; border-radius: 10px; margin-bottom: 15px; }
         #image-to-crop { max-width: 100%; max-height: 100%; }
@@ -71,7 +71,7 @@
 
         <div class="preview-container" id="preview-container">
             <img id="preview-img" onclick="startCropping()" title="点我裁剪图片">
-            <div class="click-hint">☝️ 如果有其他题目干扰，请点击图片裁剪</div>
+            <div class="click-hint">☝️ 如果有干扰项，可点击图片进行局部裁剪</div>
         </div>
 
         <div id="error-msg"></div>
@@ -92,7 +92,8 @@
             
             <div class="form-group">
                 <label>📝 题目内容</label>
-                <textarea id="f-question" rows="3"></textarea>
+                <!-- 🌟 升级：扩大输入框并允许自由拉伸 -->
+                <textarea id="f-question" rows="5" placeholder="题目内容（如题目太长，可按住右下角往下拖拽拉伸）" style="resize: vertical; min-height: 100px;"></textarea>
             </div>
             <div class="form-group">
                 <label>✅ 正确答案</label>
@@ -104,7 +105,7 @@
             </div>
             
             <button class="btn-action btn-save" id="btn-save" onclick="saveToCloud()" style="margin-top: 15px;">💾 确认无误，写入云端</button>
-            <button class="btn-action" style="background:#cbd5e1; box-shadow: 0 5px 0 #94a3b8; color:#334155; margin-top: 15px;" onclick="resetScanner()">🔄 换下一道题</button>
+            <button class="btn-action" style="background:#cbd5e1; box-shadow: 0 5px 0 #94a3b8; color:#334155; margin-top: 15px;" onclick="resetScanner()">🔄 放弃当前，换下一道</button>
         </div>
     </div>
 </div>
@@ -125,7 +126,7 @@
     const SYNC_API_URL = "https://script.google.com/macros/s/AKfycbzbNOgg7deW9uVVyfYGTfKGOtVgNs_9ZfUQ9J_9cYpG2Ufow9KLDICHgsinBXrPJlmz/exec";
     let base64Image = "";
     let cropper = null;
-    let originalImageSrc = ""; // 保存未裁剪的高清原图数据
+    let originalImageSrc = ""; 
 
     window.onload = function() {
         const savedKey = localStorage.getItem('my_gemini_key');
@@ -151,7 +152,6 @@
         el.style.display = 'block';
     }
 
-    // 🌟 1. 核心修复：选择图片时立即压缩，防止不裁剪时原图过大导致崩溃
     document.getElementById('file-input').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -160,7 +160,6 @@
         reader.onload = function(event) {
             const img = new Image();
             img.onload = function() {
-                // 强制压缩，限制最大宽度
                 const canvas = document.createElement('canvas');
                 let width = img.width;
                 let height = img.height;
@@ -178,7 +177,6 @@
                 originalImageSrc = canvas.toDataURL('image/jpeg', 0.8);
                 base64Image = originalImageSrc.split(',')[1];
                 
-                // UI 更新
                 document.getElementById('preview-img').src = originalImageSrc;
                 document.getElementById('preview-container').style.display = 'block';
                 document.getElementById('upload-area').style.display = 'none';
@@ -190,14 +188,12 @@
         reader.readAsDataURL(file);
     });
 
-    // 🌟 2. 点击图片触发裁剪
     function startCropping() {
         document.getElementById('crop-modal').style.display = 'flex';
         const image = document.getElementById('image-to-crop');
         image.src = originalImageSrc;
         if(cropper) cropper.destroy();
         
-        // 延迟初始化确保 UI 渲染完毕，避免手机端坐标计算错误
         setTimeout(() => {
             cropper = new Cropper(image, { 
                 viewMode: 1, 
@@ -221,11 +217,10 @@
         const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
         
         document.getElementById('preview-img').src = dataUrl;
-        base64Image = dataUrl.split(',')[1]; // 更新待发送的 base64 为已裁剪的图
+        base64Image = dataUrl.split(',')[1]; 
         closeCropModal();
     }
 
-    // 🌟 3. 发送给 Gemini 2.5 Flash
     async function processImage() {
         if (!base64Image) return;
         const apiKey = localStorage.getItem('my_gemini_key');
@@ -234,7 +229,6 @@
         document.getElementById('ai-loading').style.display = 'block';
         document.getElementById('error-msg').style.display = 'none';
 
-        // 恢复完整的 Prompt，保证对各种题型的超高提取率
         const prompt = `你是一个严谨的OCR和教育数据提取专家。
 请提取图片中的题目。
 规则：
@@ -255,7 +249,7 @@
                 ]
             }],
             generationConfig: {
-                responseMimeType: "application/json" // 核心：强制 JSON 格式
+                responseMimeType: "application/json" 
             }
         };
 
@@ -289,19 +283,20 @@
             
             document.getElementById('ai-loading').style.display = 'none';
             document.getElementById('editor-area').style.display = 'block';
-            document.getElementById('btn-analyze').style.display = 'flex';
-            document.getElementById('btn-analyze').innerText = "🔄 重新识别";
+            
+            // 🌟 升级：识别成功后直接把这颗紫色的识别按钮隐藏，保持界面极度清爽
+            document.getElementById('btn-analyze').style.display = 'none';
 
         } catch (error) {
             console.error(error);
             document.getElementById('ai-loading').style.display = 'none';
+            // 如果报错了，还是把重试按钮露出来给你点
             document.getElementById('btn-analyze').style.display = 'flex';
-            document.getElementById('btn-analyze').innerText = "🔄 重新识别";
+            document.getElementById('btn-analyze').innerText = "🔄 遇到错误，点击重试";
             showError("❌ " + error.message);
         }
     }
 
-    // 🌟 4. 保存到后端
     async function saveToCloud() {
         const btn = document.getElementById('btn-save');
         const originalText = btn.innerText;
