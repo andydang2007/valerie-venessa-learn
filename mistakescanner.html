@@ -5,63 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scanner - Family Hub</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
-    <!-- 🌟 引入 Cropper.js 裁剪工具的样式 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
     
     <style>
         :root { --text-main: #1e293b; --bg: #f8fafc; }
         * { box-sizing: border-box; font-family: 'Nunito', 'Microsoft YaHei', sans-serif; }
-        body { background: linear-gradient(135deg, #e0e7ff 0%, #bae6fd 100%); margin: 0; padding: 20px; color: var(--text-main); display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        body { background: linear-gradient(135deg, #e0e7ff 0%, #bae6fd 100%); margin: 0; padding: 15px; color: var(--text-main); display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         
-        .container { width: 100%; max-width: 600px; background: rgba(255,255,255,0.95); padding: 30px; border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); border: 4px solid #ffffff; position: relative; }
+        .container { width: 100%; max-width: 600px; background: rgba(255,255,255,0.95); padding: 20px; border-radius: 25px; box-shadow: 0 15px 40px rgba(0,0,0,0.1); border: 4px solid #ffffff; position: relative; }
         
-        h1 { color: #3b82f6; text-align: center; margin-top: 0; font-size: 28px; font-weight: 900; }
+        h1 { color: #3b82f6; text-align: center; margin: 0 0 15px 0; font-size: 24px; font-weight: 900; }
 
-        .settings-btn { position: absolute; top: 30px; right: 30px; font-size: 20px; cursor: pointer; opacity: 0.5; transition: 0.2s; background: none; border: none; outline: none; }
-        .settings-btn:hover { opacity: 1; transform: rotate(90deg); }
+        .settings-btn { position: absolute; top: 20px; right: 20px; font-size: 18px; cursor: pointer; opacity: 0.4; background: none; border: none; }
 
-        #key-setup-area { background: #fffbeb; border: 3px dashed #f59e0b; padding: 20px; border-radius: 20px; margin-bottom: 20px; }
-        #key-setup-area input { width: 100%; padding: 12px; border: 2px solid #fcd34d; border-radius: 10px; margin: 10px 0; font-family: monospace; }
+        #key-setup-area { background: #fffbeb; border: 3px dashed #f59e0b; padding: 15px; border-radius: 15px; margin-bottom: 15px; }
+        #key-setup-area input { width: 100%; padding: 12px; border: 2px solid #fcd34d; border-radius: 10px; margin: 10px 0; outline: none;}
         
-        /* 📸 上传区 */
-        .upload-area { border: 4px dashed #cbd5e1; border-radius: 20px; padding: 30px 20px; text-align: center; cursor: pointer; transition: 0.2s; background: #f1f5f9; position: relative; margin-bottom: 20px; }
+        .upload-area { border: 4px dashed #cbd5e1; border-radius: 20px; padding: 30px 20px; text-align: center; cursor: pointer; background: #f1f5f9; position: relative; margin-bottom: 15px; transition: 0.2s; }
         .upload-area:hover { border-color: #3b82f6; background: #eff6ff; }
         .upload-area input[type="file"] { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
-        .upload-text { font-size: 18px; font-weight: 800; color: #64748b; pointer-events: none; }
+        .upload-text { font-size: 16px; font-weight: 800; color: #64748b; }
         
-        /* ✂️ 裁剪区样式 */
-        #crop-container { display: none; width: 100%; margin-bottom: 20px; }
-        .img-container { width: 100%; max-height: 50vh; background: #000; border-radius: 10px; overflow: hidden; margin-bottom: 15px; }
-        .img-container img { max-width: 100%; display: block; }
-        
-        #preview-img { max-width: 100%; max-height: 300px; border-radius: 10px; display: none; margin: 15px auto 0; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border: 2px solid #e2e8f0; }
+        .preview-container { text-align: center; display: none; margin-bottom: 15px; }
+        #preview-img { max-width: 100%; max-height: 250px; border-radius: 10px; cursor: pointer; border: 3px solid #3b82f6; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .click-hint { font-size: 13px; color: #3b82f6; font-weight: bold; margin-top: 8px; animation: pulse 1.5s infinite; }
 
-        /* 📝 表单区 */
-        .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
-        label { font-weight: 900; color: #475569; font-size: 14px; }
-        input[type="text"], select, textarea { padding: 12px; border-radius: 12px; border: 3px solid #e2e8f0; font-size: 16px; font-weight: 700; outline: none; transition: 0.2s; background: #f8fafc; width: 100%; box-sizing: border-box;}
+        /* 裁剪模态层优化，防止手机端错位或无法滚动 */
+        #crop-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 999; padding: 20px; flex-direction: column; box-sizing: border-box; }
+        .cropper-wrapper { flex: 1; overflow: hidden; background: #111; display: flex; align-items: center; justify-content: center; border-radius: 10px; margin-bottom: 15px; }
+        #image-to-crop { max-width: 100%; max-height: 100%; }
+        
+        .form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+        label { font-weight: 900; color: #475569; font-size: 13px; }
+        input[type="text"], select, textarea { padding: 12px; border-radius: 10px; border: 2px solid #e2e8f0; font-size: 15px; font-weight: 700; background: #f8fafc; width: 100%; outline: none; }
         input:focus, select:focus, textarea:focus { border-color: #3b82f6; background: #fff; }
         
-        .row { display: flex; gap: 15px; }
-        .row > div { flex: 1; }
+        .btn-action { width: 100%; border-radius: 15px; border: none; font-weight: 900; font-size: 16px; cursor: pointer; padding: 15px; color: white; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.1s; }
+        .btn-action:active { transform: translateY(2px); }
+        .btn-ai { background: #8b5cf6; box-shadow: 0 5px 0 #7e22ce; }
+        .btn-save { background: #10b981; box-shadow: 0 5px 0 #059669; }
+        .btn-crop-confirm { background: #3b82f6; box-shadow: 0 5px 0 #2563eb; }
 
-        /* 🔘 按钮 */
-        .btn-action { width: 100%; border-radius: 20px; border: none; font-weight: 900; font-size: 18px; cursor: pointer; transition: 0.15s; padding: 18px; color: white; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-action:active { transform: translateY(4px); box-shadow: 0 0 0 transparent !important; }
-        
-        .btn-ai { background: #8b5cf6; box-shadow: 0 6px 0 #7e22ce; margin-bottom: 20px; }
-        .btn-save { background: #10b981; box-shadow: 0 6px 0 #059669; }
-        .btn-key { background: #f59e0b; box-shadow: 0 6px 0 #d97706; padding: 12px; }
-        
-        /* 裁剪控制按钮 */
-        .crop-controls { display: flex; gap: 10px; }
-        .btn-crop-cancel { background: #94a3b8; box-shadow: 0 6px 0 #64748b; flex: 1; padding: 14px; }
-        .btn-crop-confirm { background: #3b82f6; box-shadow: 0 6px 0 #2563eb; flex: 2; padding: 14px; }
+        #ai-loading { display: none; color: #8b5cf6; font-weight: 900; text-align: center; margin: 15px 0; font-size: 15px; }
+        #error-msg { color: #ef4444; background: #fef2f2; padding: 10px; border-radius: 10px; margin-bottom: 15px; font-size: 13px; display: none; border: 2px solid #fecaca; }
 
-        #ai-loading { display: none; color: #8b5cf6; font-weight: 900; text-align: center; margin-bottom: 20px; font-size: 16px; animation: pulse 1s infinite alternate; }
-        @keyframes pulse { from { opacity: 0.5; } to { opacity: 1; } }
-        
-        #error-msg { color: #ef4444; background: #fef2f2; padding: 10px; border-radius: 10px; margin-bottom: 15px; font-size: 14px; font-weight: bold; border: 2px solid #fecaca; display: none; word-wrap: break-word;}
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
     </style>
 </head>
 <body>
@@ -70,231 +58,183 @@
     <button class="settings-btn" onclick="resetApiKey()" title="重置API Key">⚙️</button>
     <h1>🤖 智能错题录入台</h1>
 
-    <!-- 🔑 密钥输入区 -->
     <div id="key-setup-area" style="display: none;">
-        <label style="color: #b45309; font-size: 16px;">🔑 请输入 Gemini API Key：</label>
-        <input type="text" id="api-key-input" placeholder="AIzaSy...">
-        <button class="btn-action btn-key" onclick="saveApiKey()">保存到本设备</button>
+        <input type="text" id="api-key-input" placeholder="输入 Gemini API Key...">
+        <button class="btn-action" style="background:#f59e0b; box-shadow: 0 5px 0 #d97706; margin-top: 10px;" onclick="saveApiKey()">保存密钥到本地</button>
     </div>
     
     <div id="main-scanner-area" style="display: none;">
-        
-        <!-- 📸 上传区 -->
         <div class="upload-area" id="upload-area">
-            <div class="upload-text">📸 点击拍照 或 选择错题截图</div>
+            <div class="upload-text">📸 点击拍照 或 选择错题</div>
             <input type="file" id="file-input" accept="image/*">
         </div>
 
-        <!-- ✂️ 裁剪区 (选完图片后显示) -->
-        <div id="crop-container">
-            <div class="img-container">
-                <img id="image-to-crop" src="">
-            </div>
-            <div class="crop-controls">
-                <button class="btn-action btn-crop-cancel" onclick="cancelCrop()">❌ 取消</button>
-                <button class="btn-action btn-crop-confirm" onclick="confirmCrop()">✂️ 确认截取</button>
-            </div>
+        <div class="preview-container" id="preview-container">
+            <img id="preview-img" onclick="startCropping()" title="点我裁剪图片">
+            <div class="click-hint">☝️ 如果有其他题目干扰，请点击图片裁剪</div>
         </div>
 
-        <!-- 预览和 AI 召唤区 -->
-        <img id="preview-img" src="" alt="最终裁剪预览">
-        <div id="error-msg" style="margin-top:15px;"></div>
-        <button class="btn-action btn-ai" id="btn-analyze" style="display: none; margin-top: 15px;" onclick="processImage()">✨ AI 识别题目</button>
-        <div id="ai-loading">🧠 Gemini 2.5 正在施展读图魔法...</div>
+        <div id="error-msg"></div>
+        <button class="btn-action btn-ai" id="btn-analyze" style="display: none;" onclick="processImage()">✨ AI 识别并解析</button>
+        <div id="ai-loading">🧠 Gemini 2.5 正在读图中...</div>
 
-        <!-- 📝 编辑区 -->
         <div id="editor-area" style="display: none; margin-top: 20px;">
-            <div class="row">
-                <div class="form-group">
+            <div style="display:flex; gap:10px; margin-bottom:10px;">
+                <div class="form-group" style="flex:1;">
                     <label>👤 谁的错题？</label>
-                    <select id="f-user">
-                        <option value="Valerie">Valerie (姐姐)</option>
-                        <option value="Venessa">Venessa (妹妹)</option>
-                    </select>
+                    <select id="f-user"><option value="Valerie">Valerie (姐姐)</option><option value="Venessa">Venessa (妹妹)</option></select>
                 </div>
-                <div class="form-group">
+                <div class="form-group" style="flex:1;">
                     <label>📚 科目</label>
-                    <select id="f-subject">
-                        <option value="English">English</option>
-                        <option value="Math">Math</option>
-                        <option value="华文">华文</option>
-                        <option value="Science">Science</option>
-                    </select>
+                    <select id="f-subject"><option value="English">English</option><option value="Math">Math</option><option value="华文">华文</option><option value="Science">Science</option></select>
                 </div>
             </div>
             
             <div class="form-group">
                 <label>📝 题目内容</label>
-                <textarea id="f-question" rows="4"></textarea>
+                <textarea id="f-question" rows="3"></textarea>
             </div>
-
             <div class="form-group">
                 <label>✅ 正确答案</label>
                 <input type="text" id="f-correct">
             </div>
-
             <div class="form-group">
                 <label>❌ 她的错误答案 (选填)</label>
                 <input type="text" id="f-wrong">
             </div>
-
-            <button class="btn-action btn-save" id="btn-save" onclick="saveToCloud()">💾 确认无误，写入云端</button>
-            <button class="btn-action" style="background:#f1f5f9; color:#64748b; border: 3px solid #e2e8f0; box-shadow: 0 4px 0 #cbd5e1; margin-top: 15px;" onclick="resetScanner()">🔄 换一道题</button>
+            
+            <button class="btn-action btn-save" id="btn-save" onclick="saveToCloud()" style="margin-top: 15px;">💾 确认无误，写入云端</button>
+            <button class="btn-action" style="background:#cbd5e1; box-shadow: 0 5px 0 #94a3b8; color:#334155; margin-top: 15px;" onclick="resetScanner()">🔄 换下一道题</button>
         </div>
     </div>
 </div>
 
-<!-- 🌟 引入 Cropper.js 的核心代码 -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+<!-- 裁剪模态层 -->
+<div id="crop-modal">
+    <div class="cropper-wrapper">
+        <img id="image-to-crop">
+    </div>
+    <div style="display: flex; gap: 10px; width: 100%; max-width: 600px; margin: 0 auto;">
+        <button class="btn-action" style="background:#64748b; box-shadow: 0 5px 0 #475569; flex: 1;" onclick="closeCropModal()">取消</button>
+        <button class="btn-action btn-crop-confirm" style="flex: 2;" onclick="confirmCrop()">✂️ 确认截取</button>
+    </div>
+</div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <script>
     const SYNC_API_URL = "https://script.google.com/macros/s/AKfycbzbNOgg7deW9uVVyfYGTfKGOtVgNs_9ZfUQ9J_9cYpG2Ufow9KLDICHgsinBXrPJlmz/exec";
-
     let base64Image = "";
-    let imageMimeType = "image/jpeg";
-    let cropper = null; // 裁剪器实例
+    let cropper = null;
+    let originalImageSrc = ""; // 保存未裁剪的高清原图数据
 
     window.onload = function() {
         const savedKey = localStorage.getItem('my_gemini_key');
-        if (!savedKey) {
-            document.getElementById('key-setup-area').style.display = 'block';
-        } else {
-            document.getElementById('main-scanner-area').style.display = 'block';
-        }
-
-        if(localStorage.getItem('scanner_last_user')) {
-            document.getElementById('f-user').value = localStorage.getItem('scanner_last_user');
-        }
-        if(localStorage.getItem('scanner_last_subject')) {
-            document.getElementById('f-subject').value = localStorage.getItem('scanner_last_subject');
-        }
+        if (!savedKey) document.getElementById('key-setup-area').style.display = 'block';
+        else document.getElementById('main-scanner-area').style.display = 'block';
+        
+        if(localStorage.getItem('scanner_last_user')) document.getElementById('f-user').value = localStorage.getItem('scanner_last_user');
+        if(localStorage.getItem('scanner_last_subject')) document.getElementById('f-subject').value = localStorage.getItem('scanner_last_subject');
     };
 
     function saveApiKey() {
         const key = document.getElementById('api-key-input').value.trim();
-        if (key) {
-            localStorage.setItem('my_gemini_key', key);
-            document.getElementById('key-setup-area').style.display = 'none';
-            document.getElementById('main-scanner-area').style.display = 'block';
-            hideError();
-        } else {
-            alert("请先输入API Key");
-        }
+        if (key) { localStorage.setItem('my_gemini_key', key); location.reload(); }
     }
 
-    function resetApiKey() {
-        if(confirm("确定要清除本地保存的 API Key 吗？")) {
-            localStorage.removeItem('my_gemini_key');
-            location.reload();
-        }
-    }
+    function resetApiKey() { if(confirm("确定要清除本地保存的 API Key 吗？")) { localStorage.removeItem('my_gemini_key'); location.reload(); } }
+
+    function resetScanner() { location.reload(); }
 
     function showError(msg) {
-        const errEl = document.getElementById('error-msg');
-        errEl.innerText = msg;
-        errEl.style.display = 'block';
+        const el = document.getElementById('error-msg');
+        el.innerText = msg;
+        el.style.display = 'block';
     }
 
-    function hideError() {
-        document.getElementById('error-msg').style.display = 'none';
-    }
-
-    function resetScanner() {
-        document.getElementById('file-input').value = "";
-        document.getElementById('preview-img').style.display = "none";
-        document.getElementById('upload-area').style.display = "block";
-        document.getElementById('crop-container').style.display = "none";
-        document.getElementById('editor-area').style.display = "none";
-        document.getElementById('btn-analyze').style.display = "none";
-        hideError();
-        base64Image = "";
-        if(cropper) { cropper.destroy(); cropper = null; }
-    }
-
-    function cancelCrop() {
-        resetScanner();
-    }
-
-    // 🌟 1. 用户选择图片后，启动裁剪器
+    // 🌟 1. 核心修复：选择图片时立即压缩，防止不裁剪时原图过大导致崩溃
     document.getElementById('file-input').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
-
+        
         const reader = new FileReader();
         reader.onload = function(event) {
-            const image = document.getElementById('image-to-crop');
-            image.src = event.target.result;
-            
-            // 隐藏上传按钮，显示裁剪区域
-            document.getElementById('upload-area').style.display = 'none';
-            document.getElementById('crop-container').style.display = 'block';
-            hideError();
+            const img = new Image();
+            img.onload = function() {
+                // 强制压缩，限制最大宽度
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+                const MAX_WIDTH = 1200;
 
-            // 如果有旧的裁剪器，先销毁
-            if(cropper) { cropper.destroy(); }
-            
-            // 初始化强大的 Cropper.js
-            cropper = new Cropper(image, {
-                viewMode: 1, // 限制裁剪框不能超出图片范围
-                dragMode: 'move', // 允许拖动图片
-                autoCropArea: 0.8, // 初始裁剪框大小
-                restore: false,
-                guides: true,
-                center: true,
-                highlight: false,
-                cropBoxMovable: true,
-                cropBoxResizable: true,
-                toggleDragModeOnDblclick: false,
-            });
+                if (width > MAX_WIDTH) {
+                    height = Math.round((height * MAX_WIDTH) / width);
+                    width = MAX_WIDTH;
+                }
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                originalImageSrc = canvas.toDataURL('image/jpeg', 0.8);
+                base64Image = originalImageSrc.split(',')[1];
+                
+                // UI 更新
+                document.getElementById('preview-img').src = originalImageSrc;
+                document.getElementById('preview-container').style.display = 'block';
+                document.getElementById('upload-area').style.display = 'none';
+                document.getElementById('btn-analyze').style.display = 'flex';
+                document.getElementById('error-msg').style.display = 'none';
+            }
+            img.src = event.target.result;
         };
         reader.readAsDataURL(file);
     });
 
-    // 🌟 2. 确认裁剪，并自动压缩
-    function confirmCrop() {
-        if (!cropper) return;
+    // 🌟 2. 点击图片触发裁剪
+    function startCropping() {
+        document.getElementById('crop-modal').style.display = 'flex';
+        const image = document.getElementById('image-to-crop');
+        image.src = originalImageSrc;
+        if(cropper) cropper.destroy();
         
-        // getCroppedCanvas 直接在提取时限制了最大宽度 1200，完美融合了我们之前的压缩逻辑！
-        const canvas = cropper.getCroppedCanvas({
-            maxWidth: 1200,
-            imageSmoothingEnabled: true,
-            imageSmoothingQuality: 'high',
-        });
-
-        // 转成高质量 jpeg
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-        
-        // 显示最终裁剪好的小图
-        const imgEl = document.getElementById('preview-img');
-        imgEl.src = dataUrl;
-        imgEl.style.display = 'block';
-        
-        base64Image = dataUrl.split(',')[1]; 
-        
-        // 清理 UI
-        document.getElementById('crop-container').style.display = 'none';
-        document.getElementById('btn-analyze').style.display = 'flex';
-        document.getElementById('btn-analyze').innerText = "✨ AI 识别此题";
-        
-        // 销毁裁剪器释放内存
-        cropper.destroy();
-        cropper = null;
+        // 延迟初始化确保 UI 渲染完毕，避免手机端坐标计算错误
+        setTimeout(() => {
+            cropper = new Cropper(image, { 
+                viewMode: 1, 
+                autoCropArea: 0.8, 
+                checkOrientation: false,
+                background: false,
+                modal: true,
+                guides: true
+            });
+        }, 50);
     }
 
-    // 3. 召唤 Gemini 2.5 Flash
+    function closeCropModal() { 
+        document.getElementById('crop-modal').style.display = 'none'; 
+        if(cropper) { cropper.destroy(); cropper = null; }
+    }
+
+    function confirmCrop() {
+        if(!cropper) return;
+        const canvas = cropper.getCroppedCanvas({ maxWidth: 1200, fillColor: '#fff' });
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        
+        document.getElementById('preview-img').src = dataUrl;
+        base64Image = dataUrl.split(',')[1]; // 更新待发送的 base64 为已裁剪的图
+        closeCropModal();
+    }
+
+    // 🌟 3. 发送给 Gemini 2.5 Flash
     async function processImage() {
         if (!base64Image) return;
-        
         const apiKey = localStorage.getItem('my_gemini_key');
-        if (!apiKey) {
-            alert("找不到 API Key，请刷新页面重新输入。");
-            return;
-        }
-
-        hideError();
+        
         document.getElementById('btn-analyze').style.display = 'none';
         document.getElementById('ai-loading').style.display = 'block';
+        document.getElementById('error-msg').style.display = 'none';
 
+        // 恢复完整的 Prompt，保证对各种题型的超高提取率
         const prompt = `你是一个严谨的OCR和教育数据提取专家。
 请提取图片中的题目。
 规则：
@@ -307,16 +247,15 @@
   "wrongAns": "学生写错的答案"
 }`;
 
-        // 🌟 带有强制 JSON 格式的请求体
         const requestBody = {
             contents: [{
                 parts: [
                     { text: prompt },
-                    { inlineData: { mimeType: imageMimeType, data: base64Image } }
+                    { inlineData: { mimeType: "image/jpeg", data: base64Image } }
                 ]
             }],
             generationConfig: {
-                responseMimeType: "application/json"
+                responseMimeType: "application/json" // 核心：强制 JSON 格式
             }
         };
 
@@ -330,43 +269,43 @@
             if (!response.ok) {
                 if (response.status === 400 || response.status === 403) {
                     localStorage.removeItem('my_gemini_key');
-                    throw new Error(`API 密钥无效或被拒绝 (代码: ${response.status})。已重置，请刷新页面重新输入。`);
+                    throw new Error(`API 密钥无效或被拒绝 (代码: ${response.status})。请刷新页面重试。`);
                 }
                 const errorData = await response.text();
-                throw new Error(`Google 服务器报错 (代码: ${response.status}) -> ${errorData}`);
+                throw new Error(`识别失败 (代码: ${response.status})`);
             }
 
             const data = await response.json();
             
             if (!data.candidates || data.candidates.length === 0) {
-                throw new Error("模型没有返回任何内容，请检查图片是否清晰。");
+                throw new Error("未能识别到内容，请截取清晰的部分重试。");
             }
 
-            // 直接解析干净的 JSON
-            let rawText = data.candidates[0].content.parts[0].text;
-            const parsed = JSON.parse(rawText);
-
+            const parsed = JSON.parse(data.candidates[0].content.parts[0].text);
+            
             document.getElementById('f-question').value = parsed.question || "";
             document.getElementById('f-correct').value = parsed.correctAns || "";
             document.getElementById('f-wrong').value = parsed.wrongAns || "";
-
+            
             document.getElementById('ai-loading').style.display = 'none';
             document.getElementById('editor-area').style.display = 'block';
             document.getElementById('btn-analyze').style.display = 'flex';
             document.getElementById('btn-analyze').innerText = "🔄 重新识别";
 
         } catch (error) {
-            console.error("详细错误:", error);
-            showError("❌ " + error.message);
+            console.error(error);
             document.getElementById('ai-loading').style.display = 'none';
             document.getElementById('btn-analyze').style.display = 'flex';
-            document.getElementById('btn-analyze').innerText = "🔄 尝试重新识别";
+            document.getElementById('btn-analyze').innerText = "🔄 重新识别";
+            showError("❌ " + error.message);
         }
     }
 
+    // 🌟 4. 保存到后端
     async function saveToCloud() {
         const btn = document.getElementById('btn-save');
-        btn.innerText = "上传中...";
+        const originalText = btn.innerText;
+        btn.innerText = "⏳ 上传中...";
         btn.disabled = true;
 
         const user = document.getElementById('f-user').value;
@@ -378,7 +317,7 @@
 
         if (!question || !correctAns) {
             alert("⚠️ 题目和正确答案不能为空！");
-            btn.innerText = "💾 确认无误，写入云端";
+            btn.innerText = originalText;
             btn.disabled = false;
             return;
         }
@@ -406,19 +345,13 @@
 
             btn.innerText = "✅ 成功录入！";
             btn.style.background = "#3b82f6";
-            btn.style.boxShadow = "0 6px 0 #2563eb";
+            btn.style.boxShadow = "0 5px 0 #2563eb";
             
-            setTimeout(() => {
-                resetScanner();
-                btn.innerText = "💾 确认无误，写入云端";
-                btn.style.background = "#10b981";
-                btn.style.boxShadow = "0 6px 0 #059669";
-                btn.disabled = false;
-            }, 1500);
+            setTimeout(() => resetScanner(), 1500);
 
         } catch (error) {
             showError("❌ 上传云端失败，请检查网络！");
-            btn.innerText = "💾 确认无误，写入云端";
+            btn.innerText = originalText;
             btn.disabled = false;
         }
     }
