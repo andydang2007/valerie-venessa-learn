@@ -200,7 +200,33 @@
         }
     }
 
+    // 🌟🌟 核心：开局从云端同步连击数据
+    async function syncUserDataFromCloud() {
+        try {
+            const statsResp = await fetch(`${SYNC_API_URL}?type=fetch_user_data&user=${currentPlayer}`);
+            const cloudStats = await statsResp.json();
+            if (cloudStats && Object.keys(cloudStats).length > 0) {
+                localStorage.setItem(`total_days_${currentPlayer}`, cloudStats.userTotalDays);
+                localStorage.setItem(`current_streak_${currentPlayer}`, cloudStats.userStreak);
+                localStorage.setItem(`crystals_${currentPlayer}`, cloudStats.userCrystals);
+                localStorage.setItem(`gold_coins_vault`, cloudStats.vaultCoins); // 同步最新金币
+                
+                if (cloudStats.lastCheckinDate) {
+                    let d = new Date(cloudStats.lastCheckinDate);
+                    let sgtStr = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+                    localStorage.setItem(`last_date_${currentPlayer}`, sgtStr);
+                }
+                console.log("✅ 成功从云端同步玩家数据！云端连击数：", cloudStats.userStreak);
+            }
+        } catch (e) {
+            console.log("❌ 云端数据同步失败，将使用本地缓存:", e);
+        }
+    }
+
     function init() {
+        // 先偷偷启动云端同步
+        syncUserDataFromCloud();
+
         Papa.parse(SHEET_URL + "&t=" + Date.now(), {
             download: true, header: true, skipEmptyLines: 'greedy',
             transformHeader: h => h.replace(/^\uFEFF/, '').trim().toUpperCase(),
@@ -424,7 +450,8 @@
             if (earnedCoins > 0) {
                 let vault = parseInt(localStorage.getItem('gold_coins_vault') || "0");
                 localStorage.setItem('gold_coins_vault', vault + earnedCoins);
-                syncToCloud({ type: 'coin_update', user: currentPlayer, total: vault + earnedCoins });
+                // 🌟 核心修改：只发送增量 earned
+                syncToCloud({ type: 'coin_update', user: currentPlayer, earned: earnedCoins });
             }
         }
 
@@ -456,9 +483,11 @@
                 crystalEarned = true;
             }
             
+            // 🌟 核心修改：附带最新的 checkinDate 给云端
             syncToCloud({ 
                 type: 'crystal_update', user: currentPlayer, 
-                crystalsTotal: crys, totalDays: totalDays, streak: currentStreak 
+                crystalsTotal: crys, totalDays: totalDays, streak: currentStreak,
+                checkinDate: today 
             });
         }
         
