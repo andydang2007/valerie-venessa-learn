@@ -200,6 +200,29 @@
         let activeIcon = curSub === '华文' ? '🐼' : (curSub === 'Science' ? '🌱' : (curSub === 'Math' ? '🔢' : '🚀'));
         document.getElementById('header-info').innerHTML = `${activeIcon} ${curUser} - ${curSub}`;
 
+        // 🌟🌟 核心补丁：开局从云端同步真实数据，不被手机缓存欺骗 🌟🌟
+        try {
+            const statsResp = await fetch(`${SYNC_API_URL}?type=fetch_user_data&user=${curUser}`);
+            const cloudStats = await statsResp.json();
+            if (cloudStats && Object.keys(cloudStats).length > 0) {
+                // 用云端的“真理”覆盖本地的缓存
+                localStorage.setItem(`total_days_${curUser}`, cloudStats.userTotalDays);
+                localStorage.setItem(`current_streak_${curUser}`, cloudStats.userStreak);
+                localStorage.setItem(`crystals_${curUser}`, cloudStats.userCrystals);
+                localStorage.setItem(`gold_coins_vault`, cloudStats.vaultCoins); // 同步最新金币
+                
+                // 格式化云端的日期，防止时区错乱
+                if (cloudStats.lastCheckinDate) {
+                    let d = new Date(cloudStats.lastCheckinDate);
+                    let sgtStr = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+                    localStorage.setItem(`last_date_${curUser}`, sgtStr);
+                }
+                console.log("✅ 成功从云端同步玩家数据！云端连击数：", cloudStats.userStreak);
+            }
+        } catch (e) {
+            console.log("❌ 云端数据同步失败，将使用本地缓存:", e);
+        }
+
         const today = getSGTDateString();
         const limitKey = `limit_${today}_${curUser}_${curSub}`;
         if (parseInt(localStorage.getItem(limitKey) || "0") >= 1) {
@@ -474,7 +497,8 @@
             let coinGain = earnedBadgesForCoin;
             let vaultCoins = parseInt(localStorage.getItem('gold_coins_vault') || "0");
             localStorage.setItem('gold_coins_vault', vaultCoins + coinGain);
-            syncToCloud({ type: 'coin_update', user: curUser, total: vaultCoins + coinGain });
+            // 🌟 核心修改：发送增量 earned，不再让前端越权发送总金币
+            syncToCloud({ type: 'coin_update', user: curUser, earned: coinGain });
         }
 
         let lastDate = localStorage.getItem(`last_date_${curUser}`);
@@ -502,9 +526,11 @@
                 badgeQueue.push({ icon: '💎', title: isCN ? '毅力水晶' : 'Crystal', desc: isCN ? `连续打卡 ${currentStreak} 天，水晶 +1！` : `Streak ${currentStreak} days! Crystal +1!` });
             }
             
+            // 🌟 核心修改：携带 checkinDate 告诉云端确切的新加坡打卡日期
             syncToCloud({ 
                 type: 'crystal_update', user: curUser, 
-                crystalsTotal: crys, totalDays: totalDays, streak: currentStreak 
+                crystalsTotal: crys, totalDays: totalDays, streak: currentStreak,
+                checkinDate: today 
             });
         }
 
