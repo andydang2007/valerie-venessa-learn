@@ -157,26 +157,35 @@
 
     <div id="admin-screen" class="screen">
         <h2 style="color: #3b82f6; font-size: 28px; font-weight: 900; margin-bottom: 20px;">⚙️ 系统控制台</h2>
-        <div id="admin-loading" style="font-weight:900; color:#94a3b8; padding: 30px;">📡 连接云端引擎中...</div>
-        <div id="admin-config-container" style="display:none; width: 100%; flex-direction: column; gap: 12px; margin-bottom: 25px;">
-            <div class="config-row"><label>P1 拼音要求</label><input type="number" id="cfg-pinyin_threshold_p1"></div>
-            <div class="config-row"><label>P3 拼音要求</label><input type="number" id="cfg-pinyin_threshold_p3"></div>
-            <div class="config-row"><label>P1 极速时间(秒)</label><input type="number" id="cfg-speed_limit_p1"></div>
-            <div class="config-row"><label>P3 极速时间(秒)</label><input type="number" id="cfg-speed_limit_p3"></div>
-            <div class="config-row"><label>听写全对奖励</label><input type="number" id="cfg-tingxie_reward_coin"></div>
-            <div class="config-row"><label>汉堡价格 (金币)</label><input type="number" id="cfg-shop_hb_price"></div>
-            <div class="config-row"><label>套餐价格 (金币)</label><input type="number" id="cfg-shop_tc_price"></div>
-            <div class="config-row"><label>披萨价格 (金币)</label><input type="number" id="cfg-shop_pz_price"></div>
-            <div class="config-row"><label>甜筒价格 (水晶)</label><input type="number" id="cfg-shop_tt_price"></div>
-            <div class="config-row"><label>麦旋风价格 (水晶)</label><input type="number" id="cfg-shop_xf_price"></div>
-        </div>
-        <button id="admin-save-btn" class="btn-action" style="background:#10b981; color:white; box-shadow:0 6px 0 #059669; margin-bottom: 15px; display:none;" onclick="saveAdminConfig()">💾 保存并推送云端</button>
-        <div style="font-size:14px; color:#64748b; font-weight:800; margin-bottom:15px; line-height:1.5;">
-            💡 提示：如需修改徽章数量或打卡天数，请直接在 Google Sheets 表格的 Dashboard 中修改，App 下次刷新会自动同步。
-        </div>
+        
+        <!-- 🌟 老爸要求的固定按钮区 (在最上面) -->
         <button class="btn-action" style="background:#8b5cf6; color:white; border-color:#7e22ce; box-shadow:0 6px 0 #6b21a8; margin-bottom: 15px;" onclick="window.location.href='mistakescanner.html'">📸 智能错题扫描台 (老爸专属)</button>
         <button class="btn-action" style="background:#ef4444; color:white; border-color:#dc2626; box-shadow:0 6px 0 #b91c1c; margin-bottom: 15px;" onclick="executeNuclearReset()">☢️ 清空所有本地数据</button>
-        <button class="btn-action" onclick="showScreen('dashboard-screen')">← 返回主页</button>
+        <button class="btn-action" onclick="showScreen('dashboard-screen')" style="margin-bottom: 25px;">← 返回主页</button>
+        
+        <!-- 🌟 需要转圈加载和同步的数据区 (放在底部) -->
+        <div style="width: 100%; border-top: 2px dashed #cbd5e1; padding-top: 20px;">
+            <div id="admin-loading" style="font-weight:900; color:#94a3b8; padding: 10px;">📡 连接云端引擎中...</div>
+            
+            <div id="admin-config-container" style="display:none; width: 100%; flex-direction: column; gap: 12px; margin-bottom: 15px;">
+                <div class="config-row"><label>P1 拼音要求</label><input type="number" id="cfg-pinyin_threshold_p1"></div>
+                <div class="config-row"><label>P3 拼音要求</label><input type="number" id="cfg-pinyin_threshold_p3"></div>
+                <div class="config-row"><label>P1 极速时间(秒)</label><input type="number" id="cfg-speed_limit_p1"></div>
+                <div class="config-row"><label>P3 极速时间(秒)</label><input type="number" id="cfg-speed_limit_p3"></div>
+                <div class="config-row"><label>听写全对奖励</label><input type="number" id="cfg-tingxie_reward_coin"></div>
+                <div class="config-row"><label>汉堡价格 (金币)</label><input type="number" id="cfg-shop_hb_price"></div>
+                <div class="config-row"><label>套餐价格 (金币)</label><input type="number" id="cfg-shop_tc_price"></div>
+                <div class="config-row"><label>披萨价格 (金币)</label><input type="number" id="cfg-shop_pz_price"></div>
+                <div class="config-row"><label>甜筒价格 (水晶)</label><input type="number" id="cfg-shop_tt_price"></div>
+                <div class="config-row"><label>麦旋风价格 (水晶)</label><input type="number" id="cfg-shop_xf_price"></div>
+            </div>
+            
+            <button id="admin-save-btn" class="btn-action" style="background:#10b981; color:white; box-shadow:0 6px 0 #059669; margin-bottom: 15px; display:none;" onclick="saveAdminConfig()">💾 保存并推送云端</button>
+            
+            <div style="font-size:14px; color:#64748b; font-weight:800; line-height:1.5;">
+                💡 提示：如需修改徽章数量或打卡天数，请直接在 Google Sheets 表格的 Dashboard 中修改，App 下次刷新会自动同步。
+            </div>
+        </div>
     </div>
 
     <div id="user-screen" class="screen">
@@ -412,6 +421,7 @@
         `;
     }
 
+    // 🌟 保留你要求的长按输入密码进入后台逻辑
     let pressTimer = null;
     let isLongPress = false;
     let startY = 0;
@@ -634,9 +644,9 @@
     }
     function closePinModal() { document.getElementById('pin-modal').style.display = 'none'; document.getElementById('hub-pin-input').value = ''; }
 
+    // 🌟 核心文案修改：变色判定逻辑 (把连击改成累计)
     function updateEconomyUI() {
         let totalDays = parseInt(localStorage.getItem(`total_days_${currentUser}`) || "0");
-        let currentStreak = parseInt(localStorage.getItem(`current_streak_${currentUser}`) || "0");
         
         let lastCheckin = localStorage.getItem(`last_checkin_date_${currentUser}`);
         let todayStr = getSGTDateString();
@@ -648,11 +658,13 @@
             streakEl.innerHTML = `⚪ 开启你的第 1 天打卡吧！`; 
         } else { 
             if (lastCheckin === todayStr) {
+                // ✅ 今日印章对得上号 -> 变彩色火焰，文案显示累计天数
                 streakEl.className = 'streak-badge completed';
-                streakEl.innerHTML = `🔥 今日已打卡 (连击 ${currentStreak} 天)`; 
+                streakEl.innerHTML = `🔥 今日已打卡 (累计 ${totalDays} 天)`; 
             } else {
+                // ❌ 还没印章 -> 变灰色待打卡，文案显示累计天数
                 streakEl.className = 'streak-badge pending';
-                streakEl.innerHTML = `⚪ 今日待打卡 (连击 ${currentStreak} 天)`; 
+                streakEl.innerHTML = `⚪ 今日待打卡 (累计 ${totalDays} 天)`; 
             }
         }
         
@@ -748,7 +760,6 @@
             
             let countHtml = (b.count > 1) ? `<div class="badge-count">x${b.count}</div>` : '';
             
-            // 🌟 滑动窗口特殊展示：如果是王冠显示天数，普通的显示 进度/目标
             let progressHtml = '';
             if (b.isCrown) {
                 progressHtml = `<div class="badge-progress" style="color:#d97706;">${b.currentStreak} 天</div>`;
@@ -776,21 +787,18 @@
         ];
         container.innerHTML += `<div class="badge-category"><div class="badge-category-title">🎓 科目大师</div><div class="badge-grid">${subBadges.map(renderItemHTML).join('')}</div></div>`;
 
-        // 🌟 核心升级：毅力连击的 滑动窗口算法
         const currentStreak = parseInt(localStorage.getItem(`current_streak_${currentUser}`) || '0');
         const maxStreak = Math.max(parseInt(localStorage.getItem(`max_streak_${currentUser}`) || '0'), currentStreak);
         
         let streakMilestones = [3, 5, 10, 15, 30];
         
-        // 当连击超过 30 天后，窗口开始滑动
         if (currentStreak >= 30) {
-            let nextTarget = (Math.floor(currentStreak / 5) + 1) * 5; // 如果是32，下一个就是35
+            let nextTarget = (Math.floor(currentStreak / 5) + 1) * 5;
             streakMilestones = [nextTarget - 20, nextTarget - 15, nextTarget - 10, nextTarget - 5, nextTarget];
         }
         
         let streakBadges = [];
         
-        // 1. 最左侧永远放一个最高纪录的王冠
         streakBadges.push({ 
             icon: '👑', 
             name: `最高记录`, 
@@ -801,7 +809,6 @@
             isCrown: true 
         });
 
-        // 2. 依次排开 5 个滑动坑位
         streakMilestones.forEach(day => {
             let isAchieved = (currentStreak >= day);
             let count = isAchieved ? 1 : 0;
