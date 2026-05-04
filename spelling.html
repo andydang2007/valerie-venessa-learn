@@ -206,13 +206,36 @@
         let activeIcon = '✍️';
         document.getElementById('header-info').innerHTML = `${activeIcon} ${curUser} - Spelling`;
 
+        // 🌟🌟 核心补丁：开局从云端同步真实数据，不被手机缓存欺骗 🌟🌟
+        try {
+            const statsResp = await fetch(`${SYNC_API_URL}?type=fetch_user_data&user=${curUser}`);
+            const cloudStats = await statsResp.json();
+            if (cloudStats && Object.keys(cloudStats).length > 0) {
+                // 用云端的“真理”覆盖本地的缓存
+                localStorage.setItem(`total_days_${curUser}`, cloudStats.userTotalDays);
+                localStorage.setItem(`current_streak_${curUser}`, cloudStats.userStreak);
+                localStorage.setItem(`crystals_${curUser}`, cloudStats.userCrystals);
+                localStorage.setItem(`gold_coins_vault`, cloudStats.vaultCoins); // 同步最新金币
+                
+                // 格式化云端的日期，防止时区错乱
+                if (cloudStats.lastCheckinDate) {
+                    let d = new Date(cloudStats.lastCheckinDate);
+                    let sgtStr = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+                    localStorage.setItem(`last_date_${curUser}`, sgtStr);
+                }
+                console.log("✅ 成功从云端同步玩家数据！云端连击数：", cloudStats.userStreak);
+            }
+        } catch (e) {
+            console.log("❌ 云端数据同步失败，将使用本地缓存:", e);
+        }
+
         const today = getSGTDateString();
         const limitKey = `limit_${today}_${curUser}_Spelling`;
         if (parseInt(localStorage.getItem(limitKey) || "0") >= 1) {
             document.getElementById('loading').innerHTML = `
                 <div style="padding:20px; text-align:center;">
                     <div style="font-size:60px; margin-bottom:15px;">🏆</div>
-                    <h2 style="color:#1e293b; margin-bottom:10px; font-size:24px;">今日【听写】已达标！</h2>
+                    <h2 style="color:#1e293b; margin-bottom:10px; font-size:24px;">今日【Spelling】已达标！</h2>
                     <p style="color:#64748b; font-weight:800; font-size:14px; margin-bottom:25px;">每天只做一次，保证最高质量。<br>明天再来挑战吧！</p>
                     <button class="btn-action" style="background:#3b82f6; color:white; max-width:200px; margin: 0 auto;" onclick="window.location.href='index.html'">返回主页</button>
                 </div>`;
@@ -261,7 +284,7 @@
             return isNaN(tNum) || tNum <= currentTermNum;
         });
         if (mainPool.length === 0) { 
-            document.getElementById('loading').innerHTML = "⚠️ 没有找到今日的听写词汇。"; 
+            document.getElementById('loading').innerHTML = "⚠️ 没有找到今日的Spelling词汇。"; 
             setTimeout(() => window.location.href='index.html', 2000); return; 
         }
 
@@ -424,8 +447,8 @@
         if (sessionErrors <= 3) {
             earnedBadgesForCoin++;
             let subIcon = '👑';
-            let subName = '听写大王';
-            badgeQueue.push({ icon: subIcon, title: subName, desc: `完成高质量听写，专属徽章 +1！` });
+            let subName = 'Spelling Master';
+            badgeQueue.push({ icon: subIcon, title: subName, desc: `Great spelling practice, Badge +1!` });
             syncToCloud({ type: 'badge', user: curUser, grade: curGrade, subject: curSub, icon: subIcon, title: subName, desc: '高质量听写' });
         }
 
@@ -460,7 +483,8 @@
             let coinGain = earnedBadgesForCoin;
             let vaultCoins = parseInt(localStorage.getItem('gold_coins_vault') || "0");
             localStorage.setItem('gold_coins_vault', vaultCoins + coinGain);
-            syncToCloud({ type: 'coin_update', user: curUser, total: vaultCoins + coinGain });
+            // 🌟 核心修改：发送增量 earned 给云端
+            syncToCloud({ type: 'coin_update', user: curUser, earned: coinGain });
         }
 
         let lastDate = localStorage.getItem(`last_date_${curUser}`);
@@ -488,9 +512,11 @@
                 badgeQueue.push({ icon: '💎', title: 'Crystal', desc: `Streak ${currentStreak} days! Crystal +1!` });
             }
             
+            // 🌟 核心修改：附带最新的 checkinDate 给云端
             syncToCloud({ 
                 type: 'crystal_update', user: curUser, 
-                crystalsTotal: crys, totalDays: totalDays, streak: currentStreak 
+                crystalsTotal: crys, totalDays: totalDays, streak: currentStreak,
+                checkinDate: today
             });
         }
 
