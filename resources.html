@@ -1,1 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>学习百宝箱 - My Resources</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; font-family: 'Nunito', 'Microsoft YaHei', sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            margin: 0; padding: 20px; 
+            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%); 
+            min-height: 100vh; color: #1e293b;
+            padding-bottom: 80px;
+        }
 
+        .header {
+            text-align: center; margin-bottom: 30px; margin-top: 10px;
+        }
+        .header h1 {
+            font-size: 36px; font-weight: 900; color: white; margin: 0;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.1); letter-spacing: 1px;
+        }
+        .header p {
+            font-size: 18px; color: rgba(255,255,255,0.9); font-weight: 800; margin-top: 5px;
+        }
+
+        .category-title {
+            font-size: 22px; font-weight: 900; color: white; 
+            margin: 30px 0 15px 10px; text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex; align-items: center; gap: 10px;
+        }
+        .category-title::after {
+            content: ''; flex: 1; height: 3px; background: rgba(255,255,255,0.3); border-radius: 5px;
+        }
+
+        .grid-container {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px;
+            max-width: 900px; margin: 0 auto;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95); border-radius: 25px; padding: 20px 15px;
+            text-align: center; text-decoration: none; color: #334155;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05), inset 0 -4px 0 rgba(0,0,0,0.05);
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .card:active { transform: translateY(5px); box-shadow: 0 2px 5px rgba(0,0,0,0.05), inset 0 0 0 transparent; }
+        
+        .card-icon { font-size: 45px; margin-bottom: 10px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
+        .card-title { font-size: 18px; font-weight: 900; margin: 0 0 5px 0; color: #1e293b; }
+        .card-desc { font-size: 12px; font-weight: 700; color: #94a3b8; margin: 0; line-height: 1.3; }
+
+        /* 卡片专属颜色 */
+        .card.sls { border: 3px solid #60a5fa; } .card.sls .card-title { color: #2563eb; }
+        .card.ezhishi { border: 3px solid #f472b6; } .card.ezhishi .card-title { color: #db2777; }
+        .card.libby { border: 3px solid #a78bfa; } .card.libby .card-title { color: #7c3aed; }
+        .card.baidu { border: 3px solid #34d399; } .card.baidu .card-title { color: #059669; }
+        .card.code { border: 3px solid #fbbf24; } .card.code .card-title { color: #d97706; }
+        .card.math { border: 3px solid #fb923c; } .card.math .card-title { color: #ea580c; }
+        .card.timer { border: 3px solid #f87171; } .card.timer .card-title { color: #dc2626; }
+
+        .btn-home {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: white; padding: 15px 40px; border-radius: 30px;
+            font-size: 20px; font-weight: 900; color: #6366f1; border: none;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15), inset 0 -4px 0 #e0e7ff;
+            cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 10px; z-index: 100;
+        }
+        .btn-home:active { transform: translate(-50%, 5px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+
+        @media (min-width: 768px) {
+            .grid-container { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+            .card-icon { font-size: 55px; }
+            .card-title { font-size: 20px; }
+            .card-desc { font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>🧰 学习百宝箱</h1>
+        <p>My Smart Learning Hub</p>
+    </div>
+
+    <!-- 类别 1: 学校必备 -->
+    <div style="max-width: 900px; margin: 0 auto;">
+        <div class="category-title">🏫 学校必备</div>
+        <div class="grid-container">
+            <a href="https://vle.learning.moe.edu.sg/" target="_blank" class="card sls">
+                <div class="card-icon">🇸🇬</div>
+                <h3 class="card-title">SLS</h3>
+                <p class="card-desc">学生学习空间<br>MOE Student Portal</p>
+            </a>
+            <a href="https://www.ezhishi.net/" target="_blank" class="card ezhishi">
+                <div class="card-icon">🐼</div>
+                <h3 class="card-title">e知识</h3>
+                <p class="card-desc">华文线上作业<br>eZhiShi Portal</p>
+            </a>
+        </div>
+
+        <!-- 类别 2: 查阅天地 -->
+        <div class="category-title">📚 查阅天地</div>
+        <div class="grid-container">
+            <a href="https://libbyapp.com/" target="_blank" class="card libby">
+                <div class="card-icon">📖</div>
+                <h3 class="card-title">Libby (NLB)</h3>
+                <p class="card-desc">国家图书馆绘本<br>Read anywhere</p>
+            </a>
+            <a href="https://hanyu.baidu.com/" target="_blank" class="card baidu">
+                <div class="card-icon">🔍</div>
+                <h3 class="card-title">汉语词典</h3>
+                <p class="card-desc">查意思 / 查拼音<br>Baidu Hanyu</p>
+            </a>
+        </div>
+
+        <!-- 类别 3: 脑力拓展 -->
+        <div class="category-title">🧠 脑力健身房</div>
+        <div class="grid-container">
+            <a href="https://code.org/" target="_blank" class="card code">
+                <div class="card-icon">👾</div>
+                <h3 class="card-title">Code.org</h3>
+                <p class="card-desc">通关学编程<br>Play with Code</p>
+            </a>
+            <!-- 乘法表先用弹窗占位，以后咱们单独写这个页面 -->
+            <a href="#" onclick="alert('🔧 正在让爸爸加班开发中！马上就来！')" class="card math">
+                <div class="card-icon">✖️</div>
+                <h3 class="card-title">乘法大作战</h3>
+                <p class="card-desc">九九乘法表<br>Coming Soon!</p>
+            </a>
+        </div>
+
+        <!-- 类别 4: 效率工具 -->
+        <div class="category-title">⏱️ 效率工具</div>
+        <div class="grid-container">
+            <!-- 番茄钟同样先用弹窗占位 -->
+            <a href="#" onclick="alert('🍅 番茄时钟正在打造中，即将上线！')" class="card timer">
+                <div class="card-icon">🍅</div>
+                <h3 class="card-title">番茄时钟</h3>
+                <p class="card-desc">25分钟专注挑战<br>Focus Timer</p>
+            </a>
+        </div>
+    </div>
+
+    <!-- 返回主页按钮 -->
+    <button class="btn-home" onclick="window.location.href='index.html'">
+        <span>🏠</span> 返回主页
+    </button>
+
+</body>
+</html>
