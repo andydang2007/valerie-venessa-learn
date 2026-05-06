@@ -530,7 +530,7 @@
                 let currentCount = parseInt(localStorage.getItem(badgeCountKey) || "0");
                 localStorage.setItem(badgeCountKey, currentCount + 1);
 
-                let coinGain = isSister ? 2 : 1;
+                let coinGain = 1;
                 let vaultCoins = parseInt(localStorage.getItem('gold_coins_vault') || "0");
                 localStorage.setItem('gold_coins_vault', vaultCoins + coinGain);
 
