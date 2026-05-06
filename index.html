@@ -81,6 +81,17 @@
         .card-btn.cn { border-color: #e9d5ff; }
         .card-btn.sci { border-color: #a7f3d0; }
 
+        .btn-resources {
+            width: 100%; padding: 18px; border-radius: 25px; 
+            background: linear-gradient(135deg, #a855f7 0%, #c084fc 100%); 
+            color: white; font-size: 22px; font-weight: 900; border: none; 
+            box-shadow: 0 8px 15px rgba(168, 85, 247, 0.3), inset 0 -4px 0 rgba(0,0,0,0.1); 
+            cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 12px;
+            margin-bottom: 30px; 
+        }
+        .btn-resources:active { transform: translateY(6px); box-shadow: 0 0 0 transparent; }
+        .btn-resources .emoji { font-size: 30px; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2)); }
+
         .menu-row { display: flex; gap: 15px; width: 100%; margin-bottom: 15px; }
         .menu-btn { flex: 1; background: white; border: 4px solid #e2e8f0; border-radius: 20px; padding: 20px 10px; font-size: 18px; font-weight: 900; color: #475569; cursor: pointer; box-shadow: 0 6px 0 #cbd5e1; display: flex; flex-direction: column; align-items: center; gap: 8px; transition: 0.1s; }
         .menu-btn:active { transform: translateY(6px); box-shadow: 0 0 0 transparent; }
@@ -242,7 +253,6 @@
         </div>
 
         <div class="shop-item-grid">
-            <!-- 注意：这里只留下了纯粹的 onclick 事件，删掉了所有打架的触摸事件 -->
             <div class="shop-item coin-item" id="shop-item-HB" onclick="selectPrize(this, '团队金币', 67, '汉堡', 'HB')">
                 <div class="shop-badge" id="badge-HB"></div>
                 <img src="hb.png" class="shop-icon" alt="汉堡"><div class="name">汉堡</div><div class="price">💰 67</div>
@@ -265,7 +275,6 @@
             </div>
         </div>
         
-        <!-- 🌟 新增：我的背包按钮 (完全替代长按) -->
         <div style="display:flex; gap:10px; width: 100%; margin-bottom: 15px;">
             <button class="btn-action" style="flex:1; background:#6366f1; color:white; border-color:#4f46e5; box-shadow:0 6px 0 #4338ca;" onclick="openMyItemsPanel()">📦 我的背包</button>
             <button id="do-redeem-btn" class="btn-action" style="flex:1; background:#cbd5e1; color:white; border-color:#94a3b8; box-shadow:0 6px 0 #94a3b8;" disabled onclick="executeRedeem()">✅ 确认兑换</button>
@@ -333,7 +342,7 @@
     </div>
 </div>
 
-<!-- 🌟 新增：我的背包面板 (包含退款) -->
+<!-- 🌟 我的背包面板 -->
 <div id="my-items-modal" class="modal-overlay">
     <div class="modal-content" style="border-color: #6366f1; padding: 25px 20px;">
         <div style="font-size: 40px; margin-bottom:10px;">📦</div>
@@ -491,7 +500,7 @@
         const validPrefixes = ['HB', 'TC', 'PZ', 'TT', 'XF'];
         if (!validPrefixes.includes(prefix)) { alert("❌ 代码无效！请输入 HB, TC, PZ, TT 或 XF"); return; }
         let count = parseInt(localStorage.getItem(`redeemed_${prefix}`) || "0");
-        if (count <= 0) { alert(`⚠️ 没有找到【${prefix}】的兑换记录，无法退款。`); return; }
+        if (count <= 0) { alert(`⚠️ 没有找到【${prefix}】的待领取记录，无法退款。`); return; }
 
         let type = (prefix === 'TT' || prefix === 'XF') ? '个人水晶' : '团队金币';
         let balanceKey = type === '团队金币' ? 'gold_coins_vault' : `crystals_${currentUser}`;
@@ -522,7 +531,7 @@
                     })
                 });
             } catch(e) {}
-            alert("✅ 强制退款成功！"); updateEconomyUI(); updateShopBadges();
+            alert("✅ 强制退款指令已发送！"); updateEconomyUI(); updateShopBadges();
         }
     }
 
@@ -550,6 +559,7 @@
         updateItem('HB', 'shop_hb_price'); updateItem('TC', 'shop_tc_price'); updateItem('PZ', 'shop_pz_price'); updateItem('TT', 'shop_tt_price'); updateItem('XF', 'shop_xf_price');
     }
     
+    // 🌟 核心同步更新：根据云端传回的 activeItems，重新配置本地背包！
     async function syncFromCloud() {
         if (!currentUser) return;
         const indicator = document.getElementById('cloud-sync-indicator');
@@ -560,12 +570,14 @@
             const cloudData = await resp.json();
             
             if (cloudData && Object.keys(cloudData).length > 0) {
+                // 更新货币与打卡
                 if (cloudData.vaultCoins !== undefined) localStorage.setItem('gold_coins_vault', cloudData.vaultCoins);
                 if (cloudData.userCrystals !== undefined) localStorage.setItem(`crystals_${currentUser}`, cloudData.userCrystals);
                 if (cloudData.userTotalDays !== undefined) localStorage.setItem(`total_days_${currentUser}`, cloudData.userTotalDays);
                 if (cloudData.userStreak !== undefined) localStorage.setItem(`current_streak_${currentUser}`, cloudData.userStreak);
                 if (cloudData.maxStreak !== undefined) localStorage.setItem(`max_streak_${currentUser}`, cloudData.maxStreak);
                 
+                // 更新各科数据
                 if (cloudData.pinyin !== undefined) localStorage.setItem(`pinyin_badge_count_${currentUser}`, cloudData.pinyin);
                 if (cloudData.speed !== undefined) localStorage.setItem(`speed_breaks_${currentUser}`, cloudData.speed);
                 if (cloudData.tingxie !== undefined) localStorage.setItem(`tingxie_badge_count_${currentUser}`, cloudData.tingxie);
@@ -589,7 +601,30 @@
                     localStorage.setItem(`last_checkin_date_${currentUser}`, sgtStr);
                     localStorage.setItem(`last_date_${currentUser}`, sgtStr); 
                 }
-                updateEconomyUI(); renderBadges();
+
+                // 🌟 核心同步：用云端的背包清单强制覆盖本地！如果云端没有，本地直接清零！
+                if (cloudData.activeItems !== undefined) {
+                    const validItems = ['HB', 'TC', 'PZ', 'TT', 'XF'];
+                    // 1. 先把本地这个人的记录全部清零
+                    validItems.forEach(p => {
+                        localStorage.setItem(`redeemed_${p}`, 0);
+                        localStorage.removeItem(`last_code_${p}`);
+                    });
+                    
+                    // 2. 根据云端发来的待领取名单，重新写入本地
+                    cloudData.activeItems.forEach(item => {
+                        if (item.code) {
+                            let prefix = item.code.split('-')[0];
+                            if (validItems.includes(prefix)) {
+                                let c = parseInt(localStorage.getItem(`redeemed_${prefix}`)||0);
+                                localStorage.setItem(`redeemed_${prefix}`, c + 1);
+                                localStorage.setItem(`last_code_${prefix}`, item.code); // 记录最新的那张兑换券
+                            }
+                        }
+                    });
+                }
+
+                updateEconomyUI(); renderBadges(); updateShopBadges();
             }
         } catch (e) {}
         setTimeout(() => { indicator.style.display = 'none'; }, 800);
@@ -650,12 +685,12 @@
             let count = parseInt(localStorage.getItem(`redeemed_${prefix}`) || "0");
             let badge = document.getElementById(`badge-${prefix}`);
             if (badge) {
-                if (count > 0) { badge.innerText = `已兑 ${count}`; badge.style.display = 'block'; } else { badge.style.display = 'none'; }
+                if (count > 0) { badge.innerText = `已存 ${count}`; badge.style.display = 'block'; } else { badge.style.display = 'none'; }
             }
         });
     }
 
-    // 🌟 我的背包与退货逻辑 (彻底替换了长按逻辑)
+    // 🌟 我的背包与退货逻辑 
     function openMyItemsPanel() {
         let html = '';
         const allItems = [
@@ -670,8 +705,6 @@
             let count = parseInt(localStorage.getItem(`redeemed_${i.prefix}`) || "0");
             if (count > 0) {
                 let code = localStorage.getItem('last_code_' + i.prefix) || "无记录";
-                
-                // 从当前页面抓取最新价格
                 let el = document.getElementById(`shop-item-${i.prefix}`);
                 let price = el ? parseInt(el.querySelector('.price').innerText.replace(/[^0-9]/g, '')) : 0;
 
