@@ -81,6 +81,17 @@
         .card-btn.cn { border-color: #e9d5ff; }
         .card-btn.sci { border-color: #a7f3d0; }
 
+        .btn-resources {
+            width: 100%; padding: 18px; border-radius: 25px; 
+            background: linear-gradient(135deg, #a855f7 0%, #c084fc 100%); 
+            color: white; font-size: 22px; font-weight: 900; border: none; 
+            box-shadow: 0 8px 15px rgba(168, 85, 247, 0.3), inset 0 -4px 0 rgba(0,0,0,0.1); 
+            cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 12px;
+            margin-bottom: 30px; 
+        }
+        .btn-resources:active { transform: translateY(6px); box-shadow: 0 0 0 transparent; }
+        .btn-resources .emoji { font-size: 30px; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2)); }
+
         .menu-row { display: flex; gap: 15px; width: 100%; margin-bottom: 15px; }
         .menu-btn { flex: 1; background: white; border: 4px solid #e2e8f0; border-radius: 20px; padding: 20px 10px; font-size: 18px; font-weight: 900; color: #475569; cursor: pointer; box-shadow: 0 6px 0 #cbd5e1; display: flex; flex-direction: column; align-items: center; gap: 8px; transition: 0.1s; }
         .menu-btn:active { transform: translateY(6px); box-shadow: 0 0 0 transparent; }
@@ -102,7 +113,7 @@
         
         .shop-item-grid { display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 12px; width: 100%; margin-bottom: 10px; padding: 15px 5px 25px 5px; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
         .shop-item-grid::-webkit-scrollbar { display: none; }
-        .shop-item { flex: 0 0 95px; background: white; border: 3px solid #e2e8f0; border-radius: 15px; padding: 10px 5px; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 0 #cbd5e1; position: relative; }
+        .shop-item { flex: 0 0 95px; background: white; border: 3px solid #e2e8f0; border-radius: 15px; padding: 10px 5px; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 0 #cbd5e1; position: relative; user-select: none; -webkit-user-select: none;}
         .shop-item:active { transform: translateY(4px); box-shadow: 0 0 0 transparent; }
         .shop-item.active { border-color: #f59e0b; background: #fffbeb; transform: scale(1.05); box-shadow: 0 6px 15px rgba(245,158,11,0.2); z-index: 10; }
         
@@ -158,12 +169,21 @@
     <div id="admin-screen" class="screen">
         <h2 style="color: #3b82f6; font-size: 28px; font-weight: 900; margin-bottom: 20px;">⚙️ 系统控制台</h2>
         
-        <!-- 🌟 老爸要求的固定按钮区 (在最上面) -->
         <button class="btn-action" style="background:#8b5cf6; color:white; border-color:#7e22ce; box-shadow:0 6px 0 #6b21a8; margin-bottom: 15px;" onclick="window.location.href='mistakescanner.html'">📸 智能错题扫描台 (老爸专属)</button>
         <button class="btn-action" style="background:#ef4444; color:white; border-color:#dc2626; box-shadow:0 6px 0 #b91c1c; margin-bottom: 15px;" onclick="executeNuclearReset()">☢️ 清空所有本地数据</button>
+        
+        <!-- 🌟 老爸要求的退款管理区 -->
+        <div style="width: 100%; border-top: 2px dashed #cbd5e1; padding-top: 20px; margin-bottom: 20px; text-align: left;">
+            <h3 style="color: #475569; font-size: 18px; margin-top:0; margin-bottom:8px;">💳 后台订单撤销 (退款)</h3>
+            <p style="font-size:13px; color:#94a3b8; margin:0 0 10px 0; font-weight:800;">输入兑换缩写 (HB/TC/PZ/TT/XF) 强制退款</p>
+            <div style="display:flex; gap:10px;">
+                <input type="text" id="admin-refund-code" placeholder="如 HB" class="pin-input-hub" style="margin:0; width:120px; font-size:20px; letter-spacing:2px; padding:10px; text-transform:uppercase;">
+                <button class="btn-action" style="flex:1; background:#f59e0b; color:white; border-color:#d97706; box-shadow:0 6px 0 #b45309; margin:0; padding:10px;" onclick="adminForceRefund()">强制退款</button>
+            </div>
+        </div>
+
         <button class="btn-action" onclick="showScreen('dashboard-screen')" style="margin-bottom: 25px;">← 返回主页</button>
         
-        <!-- 🌟 需要转圈加载和同步的数据区 (放在底部) -->
         <div style="width: 100%; border-top: 2px dashed #cbd5e1; padding-top: 20px;">
             <div id="admin-loading" style="font-weight:900; color:#94a3b8; padding: 10px;">📡 连接云端引擎中...</div>
             
@@ -181,10 +201,6 @@
             </div>
             
             <button id="admin-save-btn" class="btn-action" style="background:#10b981; color:white; box-shadow:0 6px 0 #059669; margin-bottom: 15px; display:none;" onclick="saveAdminConfig()">💾 保存并推送云端</button>
-            
-            <div style="font-size:14px; color:#64748b; font-weight:800; line-height:1.5;">
-                💡 提示：如需修改徽章数量或打卡天数，请直接在 Google Sheets 表格的 Dashboard 中修改，App 下次刷新会自动同步。
-            </div>
         </div>
     </div>
 
@@ -226,6 +242,14 @@
             </div>
         </div>
 
+        <!-- 🌟 探索与工具专区 (先隐藏不上线) -->
+        <div style="width: 100%; text-align: left; margin-bottom: 10px; margin-left: 5px; display: none;">
+            <span style="color: #64748b; font-size: 16px; font-weight: 800;">🚀 探索与工具</span>
+        </div>
+        <button class="btn-resources" onclick="window.location.href='resources.html'" style="display: none;">
+            <span class="emoji">🧰</span> 学习百宝箱
+        </button>
+
         <div class="honor-wall">
             <h3>
                 <div style="display:flex; align-items:center; gap:10px;">
@@ -241,8 +265,10 @@
         <button class="btn-action" onclick="showScreen('user-screen')">👤 Switch User</button>
     </div>
 
+    <!-- 🌟 商店界面：添加了长按识别代码 (ontouchstart等) -->
     <div id="shop-screen" class="screen">
-        <h2 style="margin:0 0 20px 0; font-size: 28px; font-weight: 900; color: #b45309; text-shadow: 0 2px 4px rgba(245,158,11,0.2);">🎁 神秘兑换中心</h2>
+        <h2 style="margin:0 0 5px 0; font-size: 28px; font-weight: 900; color: #b45309; text-shadow: 0 2px 4px rgba(245,158,11,0.2);">🎁 神秘兑换中心</h2>
+        <p style="color:#64748b; font-size:13px; font-weight:800; margin:0 0 20px 0;">💡 兑换后<strong style="color:#ef4444;">长按物品</strong>可以查看提货码或退款</p>
         <div class="shop-header">
             <div class="shop-bal-card shop-bal-vault">
                 <div style="font-size:14px; color:#d97706; font-weight:900; margin-bottom:4px;">团队金币</div>
@@ -255,31 +281,46 @@
         </div>
 
         <div class="shop-item-grid">
-            <div class="shop-item coin-item" id="shop-item-HB" onclick="selectPrize(this, '团队金币', 67, '汉堡', 'HB')">
+            <div class="shop-item coin-item" id="shop-item-HB" 
+                 ontouchstart="startShopPress('HB')" ontouchend="cancelShopPress()" ontouchmove="cancelShopPress()" 
+                 onmousedown="startShopPress('HB')" onmouseup="cancelShopPress()" onmouseleave="cancelShopPress()" 
+                 onclick="if(!isShopLongPress) selectPrize(this, '团队金币', 67, '汉堡', 'HB')" oncontextmenu="return false;">
                 <div class="shop-badge" id="badge-HB"></div>
                 <img src="hb.png" class="shop-icon" alt="汉堡">
                 <div class="name">汉堡</div>
                 <div class="price">💰 67</div>
             </div>
-            <div class="shop-item coin-item" id="shop-item-TC" onclick="selectPrize(this, '团队金币', 134, '套餐', 'TC')">
+            <div class="shop-item coin-item" id="shop-item-TC" 
+                 ontouchstart="startShopPress('TC')" ontouchend="cancelShopPress()" ontouchmove="cancelShopPress()" 
+                 onmousedown="startShopPress('TC')" onmouseup="cancelShopPress()" onmouseleave="cancelShopPress()" 
+                 onclick="if(!isShopLongPress) selectPrize(this, '团队金币', 134, '套餐', 'TC')" oncontextmenu="return false;">
                 <div class="shop-badge" id="badge-TC"></div>
                 <img src="tc.png" class="shop-icon" alt="套餐">
                 <div class="name">套餐</div>
                 <div class="price">💰 134</div>
             </div>
-            <div class="shop-item coin-item" id="shop-item-PZ" onclick="selectPrize(this, '团队金币', 268, '披萨大餐', 'PZ')">
+            <div class="shop-item coin-item" id="shop-item-PZ" 
+                 ontouchstart="startShopPress('PZ')" ontouchend="cancelShopPress()" ontouchmove="cancelShopPress()" 
+                 onmousedown="startShopPress('PZ')" onmouseup="cancelShopPress()" onmouseleave="cancelShopPress()" 
+                 onclick="if(!isShopLongPress) selectPrize(this, '团队金币', 268, '披萨大餐', 'PZ')" oncontextmenu="return false;">
                 <div class="shop-badge" id="badge-PZ"></div>
                 <img src="pz.png" class="shop-icon" alt="披萨大餐">
                 <div class="name">披萨大餐</div>
                 <div class="price">💰 268</div>
             </div>
-            <div class="shop-item crys-item" id="shop-item-TT" onclick="selectPrize(this, '个人水晶', 7, '甜筒', 'TT')">
+            <div class="shop-item crys-item" id="shop-item-TT" 
+                 ontouchstart="startShopPress('TT')" ontouchend="cancelShopPress()" ontouchmove="cancelShopPress()" 
+                 onmousedown="startShopPress('TT')" onmouseup="cancelShopPress()" onmouseleave="cancelShopPress()" 
+                 onclick="if(!isShopLongPress) selectPrize(this, '个人水晶', 7, '甜筒', 'TT')" oncontextmenu="return false;">
                 <div class="shop-badge" id="badge-TT"></div>
                 <img src="tt.png" class="shop-icon" alt="甜筒">
                 <div class="name">甜筒</div>
                 <div class="price">💎 7</div>
             </div>
-            <div class="shop-item crys-item" id="shop-item-XF" onclick="selectPrize(this, '个人水晶', 14, '麦旋风', 'XF')">
+            <div class="shop-item crys-item" id="shop-item-XF" 
+                 ontouchstart="startShopPress('XF')" ontouchend="cancelShopPress()" ontouchmove="cancelShopPress()" 
+                 onmousedown="startShopPress('XF')" onmouseup="cancelShopPress()" onmouseleave="cancelShopPress()" 
+                 onclick="if(!isShopLongPress) selectPrize(this, '个人水晶', 14, '麦旋风', 'XF')" oncontextmenu="return false;">
                 <div class="shop-badge" id="badge-XF"></div>
                 <img src="xf.png" class="shop-icon" alt="麦旋风">
                 <div class="name">麦旋风</div>
@@ -324,6 +365,7 @@
 
 </div>
 
+<!-- 弹窗合集 -->
 <div id="pin-modal" class="modal-overlay">
     <div class="modal-content">
         <div style="font-size: 40px; margin-bottom: 5px;">🛡️</div>
@@ -360,6 +402,20 @@
     </div>
 </div>
 
+<!-- 🌟 新增：长按查看/退货详情弹窗 -->
+<div id="item-detail-modal" class="modal-overlay">
+    <div class="modal-content" style="border-color: #3b82f6;">
+        <div style="font-size: 50px; margin-bottom:10px;">📦</div>
+        <h2 style="margin:0; color:#0f172a; font-size:24px;" id="detail-name">物品名称</h2>
+        <p style="color:#64748b; font-weight:800; margin-top:10px;">最新兑换码 (请出示给老爸)：</p>
+        <div id="detail-code" style="font-family: monospace; font-size: 24px; background: #f8fafc; padding: 10px; border: 2px dashed #3b82f6; margin: 10px 0; color: #2563eb; font-weight: 900;">CODE-XXXX</div>
+        <div style="display:flex; gap:10px; width: 100%; margin-top: 20px;">
+            <button class="btn-action" style="flex:1; padding:15px; font-size:16px;" onclick="closeItemDetail()">关闭</button>
+            <button class="btn-action" style="flex:1; padding:15px; font-size:16px; background:#ef4444; color:white; border-color:#dc2626; box-shadow:0 6px 0 #b91c1c;" onclick="processRefund()">撤销退款</button>
+        </div>
+    </div>
+</div>
+
 <script>
     let pendingUser = { name: null, grade: null };
     let currentUser = '';
@@ -368,7 +424,6 @@
     
     const SYNC_API_URL = "https://script.google.com/macros/s/AKfycbzbNOgg7deW9uVVyfYGTfKGOtVgNs_9ZfUQ9J_9cYpG2Ufow9KLDICHgsinBXrPJlmz/exec";
 
-    // 🌟 核心升级：锁定新加坡时间 (UTC+8)
     function getSGTDate() {
         const d = new Date();
         const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
@@ -421,7 +476,7 @@
         `;
     }
 
-    // 🌟 保留你要求的长按输入密码进入后台逻辑
+    // 长按密码进入后台
     let pressTimer = null;
     let isLongPress = false;
     let startY = 0;
@@ -527,6 +582,58 @@
         }, 2000);
     }
     
+    // 🌟 1. 后台专用：强制退款按钮逻辑
+    function adminForceRefund() {
+        let prefix = document.getElementById('admin-refund-code').value.trim().toUpperCase();
+        const validPrefixes = ['HB', 'TC', 'PZ', 'TT', 'XF'];
+        if (!validPrefixes.includes(prefix)) {
+            alert("❌ 代码无效！请输入 HB, TC, PZ, TT 或 XF");
+            return;
+        }
+        let count = parseInt(localStorage.getItem(`redeemed_${prefix}`) || "0");
+        if (count <= 0) {
+            alert(`⚠️ 没有找到【${prefix}】的兑换记录，无法退款。`);
+            return;
+        }
+
+        let type = (prefix === 'TT' || prefix === 'XF') ? '个人水晶' : '团队金币';
+        let balanceKey = type === '团队金币' ? 'gold_coins_vault' : `crystals_${currentUser}`;
+        let currentBalance = parseInt(localStorage.getItem(balanceKey) || "0");
+
+        // 尝试获取价格，如果当前界面未渲染该元素则用预设配置
+        let el = document.getElementById(`shop-item-${prefix}`);
+        let price = el ? parseInt(el.querySelector('.price').innerText.replace(/[^0-9]/g, '')) : 0;
+        let name = el ? el.querySelector('.name').innerText : prefix;
+        
+        if (price === 0) {
+            let cfg = JSON.parse(localStorage.getItem('hub_config') || "{}");
+            let priceKey = `shop_${prefix.toLowerCase()}_price`;
+            let defaultPrices = {HB:67, TC:134, PZ:268, TT:7, XF:14};
+            price = cfg[priceKey] || defaultPrices[prefix];
+        }
+
+        if (confirm(`【后台强制退款】\n即将撤销 1 份 ${name}，并退回 ${price} ${type}。\n确定吗？`)) {
+            localStorage.setItem(`redeemed_${prefix}`, count - 1);
+            localStorage.setItem(balanceKey, currentBalance + price);
+            localStorage.removeItem('last_code_' + prefix);
+            document.getElementById('admin-refund-code').value = '';
+
+            try {
+                fetch(SYNC_API_URL, {
+                    method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({
+                        type: 'refund', user: currentUser || 'Admin', rewardName: name, price: price, prefix: prefix,
+                        balanceType: type === '团队金币' ? 'coin' : 'crystal', newBalance: currentBalance + price
+                    })
+                });
+            } catch(e) {}
+
+            alert("✅ 强制退款成功！");
+            updateEconomyUI();
+            updateShopBadges();
+        }
+    }
+
     async function fetchGlobalConfig() {
         try {
             let res = await fetch(`${SYNC_API_URL}?type=fetch_config`);
@@ -544,7 +651,7 @@
                     el.querySelector('.price').innerText = (prefix==='TT'||prefix==='XF'?'💎 ':'💰 ') + cfg[priceKey];
                     let name = el.querySelector('.name').innerText;
                     let type = (prefix==='TT'||prefix==='XF') ? '个人水晶' : '团队金币';
-                    el.setAttribute('onclick', `selectPrize(this, '${type}', ${cfg[priceKey]}, '${name}', '${prefix}')`);
+                    el.setAttribute('onclick', `if(!isShopLongPress) selectPrize(this, '${type}', ${cfg[priceKey]}, '${name}', '${prefix}')`);
                 }
             }
         };
@@ -572,7 +679,6 @@
                 if (cloudData.userTotalDays !== undefined) localStorage.setItem(`total_days_${currentUser}`, cloudData.userTotalDays);
                 if (cloudData.userStreak !== undefined) localStorage.setItem(`current_streak_${currentUser}`, cloudData.userStreak);
                 
-                // 🌟 把云端最高记录拿回来
                 if (cloudData.maxStreak !== undefined) {
                     localStorage.setItem(`max_streak_${currentUser}`, cloudData.maxStreak);
                 }
@@ -644,13 +750,10 @@
     }
     function closePinModal() { document.getElementById('pin-modal').style.display = 'none'; document.getElementById('hub-pin-input').value = ''; }
 
-    // 🌟 核心文案修改：变色判定逻辑 (把连击改成累计)
     function updateEconomyUI() {
         let totalDays = parseInt(localStorage.getItem(`total_days_${currentUser}`) || "0");
-        
         let lastCheckin = localStorage.getItem(`last_checkin_date_${currentUser}`);
         let todayStr = getSGTDateString();
-        
         let streakEl = document.getElementById('dash-streak');
         
         if (totalDays === 0) { 
@@ -658,16 +761,13 @@
             streakEl.innerHTML = `⚪ 开启你的第 1 天打卡吧！`; 
         } else { 
             if (lastCheckin === todayStr) {
-                // ✅ 今日印章对得上号 -> 变彩色火焰，文案显示累计天数
                 streakEl.className = 'streak-badge completed';
                 streakEl.innerHTML = `🔥 今日已打卡 (累计 ${totalDays} 天)`; 
             } else {
-                // ❌ 还没印章 -> 变灰色待打卡，文案显示累计天数
                 streakEl.className = 'streak-badge pending';
                 streakEl.innerHTML = `⚪ 今日待打卡 (累计 ${totalDays} 天)`; 
             }
         }
-        
         document.getElementById('shop-vault-total').innerText = localStorage.getItem('gold_coins_vault') || "0";
         document.getElementById('shop-user-crys').innerText = localStorage.getItem(`crystals_${currentUser}`) || "0";
     }
@@ -684,6 +784,88 @@
         });
     }
 
+    // 🌟 2. 前端商店长按：显示兑换码与退款功能
+    let isShopLongPress = false;
+    let shopItemTimer = null;
+    
+    function startShopPress(prefix) {
+        isShopLongPress = false;
+        shopItemTimer = setTimeout(() => {
+            isShopLongPress = true;
+            openItemDetail(prefix);
+        }, 800); // 长按 0.8 秒触发
+    }
+    
+    function cancelShopPress() {
+        clearTimeout(shopItemTimer);
+    }
+
+    function openItemDetail(prefix) {
+        let count = parseInt(localStorage.getItem(`redeemed_${prefix}`) || "0");
+        if (count <= 0) return; // 如果没有兑换记录，不弹出任何窗口
+        
+        let el = document.getElementById(`shop-item-${prefix}`);
+        let name = el.querySelector('.name').innerText;
+        let price = parseInt(el.querySelector('.price').innerText.replace(/[^0-9]/g, ''));
+        let type = (prefix === 'TT' || prefix === 'XF') ? '个人水晶' : '团队金币';
+
+        document.getElementById('detail-name').innerText = name;
+        let lastCode = localStorage.getItem('last_code_' + prefix) || "暂无记录";
+        document.getElementById('detail-code').innerText = lastCode;
+
+        // 把数据绑在弹窗的 Dataset 上，供退款时使用
+        let modal = document.getElementById('item-detail-modal');
+        modal.dataset.prefix = prefix;
+        modal.dataset.type = type;
+        modal.dataset.price = price;
+        modal.dataset.name = name;
+
+        modal.style.display = 'flex';
+    }
+
+    function closeItemDetail() {
+        document.getElementById('item-detail-modal').style.display = 'none';
+    }
+
+    function processRefund() {
+        let modal = document.getElementById('item-detail-modal');
+        let prefix = modal.dataset.prefix;
+        let type = modal.dataset.type;
+        let price = parseInt(modal.dataset.price);
+        let name = modal.dataset.name;
+
+        if(!confirm(`⚠️ 确定要撤销【${name}】的兑换记录吗？\n将自动退回 ${price} ${type}。`)) return;
+
+        // 1. 本地记录 -1
+        let count = parseInt(localStorage.getItem(`redeemed_${prefix}`) || "0");
+        if(count > 0) localStorage.setItem(`redeemed_${prefix}`, count - 1);
+
+        // 2. 本地资产退回
+        let balanceKey = type === '团队金币' ? 'gold_coins_vault' : `crystals_${currentUser}`;
+        let currentBalance = parseInt(localStorage.getItem(balanceKey) || "0");
+        localStorage.setItem(balanceKey, currentBalance + price);
+        
+        // 3. 删除验证码
+        localStorage.removeItem('last_code_' + prefix);
+
+        // 4. 通知云端退款
+        try {
+            fetch(SYNC_API_URL, {
+                method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify({
+                    type: 'refund', user: currentUser, rewardName: name, price: price, prefix: prefix,
+                    balanceType: type === '团队金币' ? 'coin' : 'crystal', newBalance: currentBalance + price
+                })
+            });
+        } catch(e) {}
+
+        closeItemDetail();
+        updateEconomyUI();
+        updateShopBadges();
+        alert(`✅ 撤销成功！${price} ${type} 已退回。`);
+    }
+
+    // 🌟 3. 正常购买兑换逻辑
     function openShop() {
         updateEconomyUI(); updateShopBadges();
         selectedPrize = null; document.querySelectorAll('.shop-item').forEach(i => i.classList.remove('active'));
@@ -718,9 +900,12 @@
             const checkSum = (now.getDate() + price).toString().padStart(3, '0'); 
             const code = `${prefix}-${datePart}-${checkSum}`;
 
+            // 🌟 核心：将兑换码存入本地，供长按时显示
+            localStorage.setItem('last_code_' + prefix, code);
+
             try {
                 fetch(SYNC_API_URL, {
-                    method: 'POST', headers: { 'Content-Type': 'text/plain' }, 
+                    method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, 
                     body: JSON.stringify({ 
                         type: 'redemption', user: currentUser, rewardName: name, price: price, code: code,
                         balanceType: type === '团队金币' ? 'coin' : 'crystal', newBalance: currentBalance - price 
