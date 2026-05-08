@@ -158,7 +158,6 @@
     function saveMistakes(m) { localStorage.setItem('hub_mistakes', JSON.stringify(m)); }
     function getQuestionKey(sub, user, qText) { return `${user}_${sub}_${qText.trim()}`; }
 
-    // 🌟 辅助功能：获取新加坡标准时间的 YYYY-MM-DD
     function getSGTDateString() {
         const d = new Date();
         const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
@@ -200,28 +199,22 @@
         let activeIcon = curSub === '华文' ? '🐼' : (curSub === 'Science' ? '🌱' : (curSub === 'Math' ? '🔢' : '🚀'));
         document.getElementById('header-info').innerHTML = `${activeIcon} ${curUser} - ${curSub}`;
 
-        // 🌟🌟 核心补丁：开局从云端同步真实数据，不被手机缓存欺骗 🌟🌟
         try {
             const statsResp = await fetch(`${SYNC_API_URL}?type=fetch_user_data&user=${curUser}`);
             const cloudStats = await statsResp.json();
             if (cloudStats && Object.keys(cloudStats).length > 0) {
-                // 用云端的“真理”覆盖本地的缓存
                 localStorage.setItem(`total_days_${curUser}`, cloudStats.userTotalDays);
                 localStorage.setItem(`current_streak_${curUser}`, cloudStats.userStreak);
                 localStorage.setItem(`crystals_${curUser}`, cloudStats.userCrystals);
-                localStorage.setItem(`gold_coins_vault`, cloudStats.vaultCoins); // 同步最新金币
+                localStorage.setItem(`gold_coins_vault`, cloudStats.vaultCoins);
                 
-                // 格式化云端的日期，防止时区错乱
                 if (cloudStats.lastCheckinDate) {
                     let d = new Date(cloudStats.lastCheckinDate);
                     let sgtStr = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
                     localStorage.setItem(`last_date_${curUser}`, sgtStr);
                 }
-                console.log("✅ 成功从云端同步玩家数据！云端连击数：", cloudStats.userStreak);
             }
-        } catch (e) {
-            console.log("❌ 云端数据同步失败，将使用本地缓存:", e);
-        }
+        } catch (e) { console.log("云端同步失败:", e); }
 
         const today = getSGTDateString();
         const limitKey = `limit_${today}_${curUser}_${curSub}`;
@@ -241,11 +234,8 @@
             const cloudMistakes = await resp.json();
             if (cloudMistakes && Object.keys(cloudMistakes).length > 0) {
                 localStorage.setItem('hub_mistakes', JSON.stringify(cloudMistakes));
-                console.log("✅ 已从云端找回错题记忆");
             }
-        } catch (e) {
-            console.log("❌ 云端记忆检索失败:", e);
-        }
+        } catch (e) {}
 
         const now = new Date();
         const t2 = new Date(2026, 2, 23), t3 = new Date(2026, 5, 29), t4 = new Date(2026, 8, 14);
@@ -443,7 +433,7 @@
 
     function finishQuiz() {
         const timeTakenSec = Math.floor((Date.now() - startTime) / 1000);
-        const isPerfect = sessionErrors <= 1;
+        const isPerfect = sessionErrors <= 1; // 错题1道以内判定为完美
         const isCN = (curSub === '华文');
         
         let config = JSON.parse(localStorage.getItem('hub_config') || "{}");
@@ -458,6 +448,7 @@
         if (isPerfect) localStats.perfects += 1;
         localStorage.setItem(statsKey, JSON.stringify(localStats));
 
+        // 1. 基础科目徽章奖励 (错题 <= 3)
         if (sessionErrors <= 3) {
             earnedBadgesForCoin++;
             let subIcon = curSub === '华文' ? '🐼' : (curSub === 'Science' ? '🌱' : (curSub === 'Math' ? '🔢' : '🔤'));
@@ -466,100 +457,127 @@
             syncToCloud({ type: 'badge', user: curUser, grade: curGrade, subject: curSub, icon: subIcon, title: subName, desc: '高质量练习' });
         }
 
+        // 2. 核心战绩徽章 (完美/极速/气球)
         if (isPerfect) {
             earnedBadgesForCoin++;
             badgeQueue.push({ icon: '🎯', title: isCN ? '神奇射手！' : 'Sharpshooter!', desc: isCN ? '错题在1道以内，神奇射手徽章 +1！' : 'Great accuracy! Sharpshooter badge +1!' });
             syncToCloud({ type: 'badge', user: curUser, grade: curGrade, subject: curSub, icon: '🎯', title: '神奇射手', desc: '错题<=1' });
 
+            // ⚡️ 极速突破
             if (timeTakenSec <= speedLimit) {
                 earnedBadgesForCoin++;
                 let currentBreaks = parseInt(localStorage.getItem(`speed_breaks_${curUser}`) || '0');
                 localStorage.setItem(`speed_breaks_${curUser}`, currentBreaks + 1);
-
                 badgeQueue.push({ icon: '⚡️', title: isCN ? '极速突破！' : 'Speed Record!', desc: isCN ? `仅用 <span class="epic-highlight">${timeTakenSec}秒</span>！闪电般的速度！` : `Finished in <span class="epic-highlight">${timeTakenSec}s</span>! Lightning fast!` });
                 syncToCloud({ type: 'badge', user: curUser, grade: curGrade, subject: curSub, icon: '⚡️', title: '极速突破', desc: `耗时: ${timeTakenSec}秒` });
             }
 
+            // 🎈 气球猎人
             pendingGameResult = applyBalloonLogic(sessionErrors);
             if (pendingGameResult && pendingGameResult.trigger) {
                 badgeQueue.push({ icon: '🎈', title: isCN ? '气球猎人！' : 'Balloon Hunter!', desc: pendingGameResult.msg });
-                
                 localStats.gamesPlayed += 1;
                 localStorage.setItem(statsKey, JSON.stringify(localStats));
-
                 syncToCloud({ type: 'badge', user: curUser, grade: curGrade, subject: curSub, icon: '🎈', title: '气球猎人', desc: '解锁气球游戏' });
+            }
+
+            // 🔥 核心逻辑：全对三连 (Hat-trick)
+            let pStreak = parseInt(localStorage.getItem(`perfect_streak_${curUser}`) || "0") + 1;
+            localStorage.setItem(`perfect_streak_${curUser}`, pStreak);
+            if (pStreak === 3) {
+                let htCount = parseInt(localStorage.getItem(`easter_hattrick_${curUser}`) || "0");
+                localStorage.setItem(`easter_hattrick_${curUser}`, htCount + 1);
+                badgeQueue.push({ icon: '🔥', title: isCN ? '全对三连！' : 'Hat-trick!', desc: isCN ? `连续 3 次完美通关！手感火热！` : `3 perfect scores in a row! On fire!` });
+                syncToCloud({ type: 'badge', user: curUser, grade: curGrade, subject: curSub, icon: '🔥', title: '全对三连', desc: '连续3次完美' });
+                localStorage.setItem(`perfect_streak_${curUser}`, 0); // 发放后重置
             }
         } else {
             pendingGameResult = null; 
+            localStorage.setItem(`perfect_streak_${curUser}`, 0); // 只要有一次不完美，连击直接归零
         }
 
+        // 3. 资产结算：发放金币
         if (earnedBadgesForCoin > 0) {
-            let coinGain = earnedBadgesForCoin;
             let vaultCoins = parseInt(localStorage.getItem('gold_coins_vault') || "0");
-            localStorage.setItem('gold_coins_vault', vaultCoins + coinGain);
-            // 🌟 核心修改：发送增量 earned，不再让前端越权发送总金币
-            syncToCloud({ type: 'coin_update', user: curUser, earned: coinGain });
+            localStorage.setItem('gold_coins_vault', vaultCoins + earnedBadgesForCoin);
+            syncToCloud({ type: 'coin_update', user: curUser, earned: earnedBadgesForCoin });
         }
 
+        // 4. 打卡连击与水晶奖励 (每日一次)
         let lastDate = localStorage.getItem(`last_date_${curUser}`);
         let currentStreak = parseInt(localStorage.getItem(`current_streak_${curUser}`) || "0");
         let totalDays = parseInt(localStorage.getItem(`total_days_${curUser}`) || "0");
-
         if (lastDate) {
             let diff = Math.floor((new Date(today) - new Date(lastDate)) / 864e5);
             if (diff === 1) currentStreak++; else if (diff > 1) currentStreak = 1; 
-        } else {
-            currentStreak = 1;
-        }
+        } else { currentStreak = 1; }
 
         if (lastDate !== today) {
             totalDays++; 
             localStorage.setItem(`last_date_${curUser}`, today);
             localStorage.setItem(`current_streak_${curUser}`, currentStreak);
             localStorage.setItem(`total_days_${curUser}`, totalDays);
-
             let crys = parseInt(localStorage.getItem(`crystals_${curUser}`) || "0");
-
             if (currentStreak >= 3) {
                 crys += 1;
                 localStorage.setItem(`crystals_${curUser}`, crys);
                 badgeQueue.push({ icon: '💎', title: isCN ? '毅力水晶' : 'Crystal', desc: isCN ? `连续打卡 ${currentStreak} 天，水晶 +1！` : `Streak ${currentStreak} days! Crystal +1!` });
             }
-            
-            // 🌟 核心修改：携带 checkinDate 告诉云端确切的新加坡打卡日期
-            syncToCloud({ 
-                type: 'crystal_update', user: curUser, 
-                crystalsTotal: crys, totalDays: totalDays, streak: currentStreak,
-                checkinDate: today 
-            });
+            syncToCloud({ type: 'crystal_update', user: curUser, crystalsTotal: crys, totalDays: totalDays, streak: currentStreak, checkinDate: today });
         }
 
+        // 🌟🌟 5. 新增：隐藏彩蛋 (早起 / 熬夜 / 假期) 🌟🌟
+        let currentHour = new Date().getHours();
+        
+        // 🌅 5.1 早起鸟儿 (< 7点)
+        if (currentHour < 7) {
+            let ebCount = parseInt(localStorage.getItem(`easter_earlybird_${curUser}`) || '0');
+            localStorage.setItem(`easter_earlybird_${curUser}`, ebCount + 1);
+            badgeQueue.push({ icon: '🌅', title: isCN ? '早起鸟儿！' : 'Early Bird!', desc: isCN ? `一日之计在于晨！真棒！` : `The early bird catches the worm!` });
+            syncToCloud({ type: 'badge', user: curUser, grade: curGrade, subject: curSub, icon: '🌅', title: '早起鸟儿', desc: `时间: ${currentHour}点` });
+        } 
+        // 🦉 5.2 小猫头鹰 (>= 22点)
+        else if (currentHour >= 22) {
+            let noCount = parseInt(localStorage.getItem(`easter_nightowl_${curUser}`) || '0');
+            localStorage.setItem(`easter_nightowl_${curUser}`, noCount + 1);
+            badgeQueue.push({ icon: '🦉', title: isCN ? '小猫头鹰！' : 'Night Owl!', desc: isCN ? `夜深了，做完赶紧休息哦！` : `Studying late! Time to rest soon!` });
+            syncToCloud({ type: 'badge', user: curUser, grade: curGrade, subject: curSub, icon: '🦉', title: '小猫头鹰', desc: `时间: ${currentHour}点` });
+        }
+
+        // 🔋 5.3 假期充电 (根据 2026 MOE 校历)
+        const d = new Date();
+        const y = d.getFullYear(), m = d.getMonth() + 1, day = d.getDate();
+        const isHoliday = (y === 2026 && (
+            (m === 3 && day >= 14 && day <= 22) ||   // Term 1 Break
+            (m === 5 && day >= 30) || (m === 6 && day <= 28) || // Term 2 Break
+            (m === 9 && day >= 5 && day <= 13) ||    // Term 3 Break
+            (m === 11 && day >= 21) || m === 12      // Term 4 Break
+        ));
+        if (isHoliday && lastDate !== today) {
+            let holCount = parseInt(localStorage.getItem(`easter_holiday_${curUser}`) || '0');
+            localStorage.setItem(`easter_holiday_${curUser}`, holCount + 1);
+            badgeQueue.push({ icon: '🔋', title: isCN ? '假期充电！' : 'Holiday Charge!', desc: isCN ? `假期也不忘学习，给你点赞！` : `Learning during holidays! Awesome!` });
+            syncToCloud({ type: 'badge', user: curUser, grade: curGrade, subject: curSub, icon: '🔋', title: '假期充电', desc: `假期首次打卡` });
+        }
+
+        // 🎉 6. 周末狂人
         const dayOfWeek = new Date().getDay();
         if (dayOfWeek === 0 || dayOfWeek === 6) { 
             if (earnedBadgesForCoin > 0) {
-                let d = new Date();
-                d.setDate(d.getDate() - (d.getDay() === 0 ? 7 : d.getDay()) + 6); 
-                let weekendId = d.toISOString().split('T')[0];
-                
-                let wkKey = `wk_count_${curUser}_${weekendId}`;
-                let wkAwardedKey = `wk_awarded_${curUser}_${weekendId}`;
-                
-                let currentWkCount = parseInt(localStorage.getItem(wkKey) || "0");
-                currentWkCount += earnedBadgesForCoin;
+                let wd = new Date();
+                wd.setDate(wd.getDate() - (wd.getDay() === 0 ? 7 : wd.getDay()) + 6); 
+                let weekendId = wd.toISOString().split('T')[0];
+                let wkKey = `wk_count_${curUser}_${weekendId}`, wkAwardedKey = `wk_awarded_${curUser}_${weekendId}`;
+                let currentWkCount = (parseInt(localStorage.getItem(wkKey) || "0")) + earnedBadgesForCoin;
                 localStorage.setItem(wkKey, currentWkCount);
-
                 if (currentWkCount >= 10 && !localStorage.getItem(wkAwardedKey)) {
                     localStorage.setItem(wkAwardedKey, "1"); 
-                    badgeQueue.push({ 
-                        icon: '🎉', title: isCN ? '周末狂人！' : 'Weekend Maniac!', 
-                        desc: isCN ? `本周末狂揽 10 个徽章！太肝了！` : `10 badges this weekend! Amazing!` 
-                    });
-                    syncToCloud({ type: 'badge', user: curUser, grade: curGrade, subject: curSub, title: '周末狂人' });
+                    badgeQueue.push({ icon: '🎉', title: isCN ? '周末狂人！' : 'Weekend Maniac!', desc: isCN ? `本周末狂揽 10 个徽章！太肝了！` : `10 badges this weekend! Amazing!` });
+                    syncToCloud({ type: 'badge', user: curUser, grade: curGrade, subject: curSub, icon: '🎉', title: '周末狂人', desc: '周末满10个徽章' });
                 }
             }
         }
 
-        // 🌟🌟 核心：盖上今日打卡印章 🌟🌟
         localStorage.setItem(`last_checkin_date_${curUser}`, today);
 
         if (badgeQueue.length > 0) {
