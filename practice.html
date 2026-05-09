@@ -610,8 +610,8 @@
         if (sessionErrors > 0) html += `<p style="color:#ef4444; font-weight:800; margin-top:20px; font-size: 14px;">🐞 已将 ${sessionErrors} 道错题关进捉虫日记。</p>`;
         html += `<button class="btn-action" style="background:#f1f5f9; color:#64748b; width:100%; max-width: 250px; margin: 30px auto 0 auto; border: 3px solid #e2e8f0;" onclick="window.location.href='index.html'">🏠 返回主页</button></div>`;
         document.getElementById('finish-screen').innerHTML = html; showScreen('finish-screen');
-        
-        if (isPerfect && pendingGameResult && pendingGameResult.trigger) setTimeout(() => { window.location.href = "https://andydang2007.github.io/game/popballoons.html?ticket=" + Date.now() + "&returnUrl=index.html"; }, 2500);
+
+        if (isPerfect && pendingGameResult && pendingGameResult.trigger) setTimeout(() => { window.location.href = "https://andydang2007.github.io/game/index.html?ticket=" + Date.now() + "&returnUrl=../index.html"; }, 2500);
     }
 
     function initDrawPad() {
