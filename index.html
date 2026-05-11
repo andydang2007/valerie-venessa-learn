@@ -172,7 +172,6 @@
         <button class="btn-action" style="background:#8b5cf6; color:white; border-color:#7e22ce; box-shadow:0 6px 0 #6b21a8; margin-bottom: 15px;" onclick="window.location.href='mistakescanner.html'">📸 智能错题扫描台</button>
         <button class="btn-action" style="background:#ef4444; color:white; border-color:#dc2626; box-shadow:0 6px 0 #b91c1c; margin-bottom: 15px;" onclick="executeNuclearReset()">☢️ 清空所有本地数据</button>
         
-        <!-- 后台退货退款区 -->
         <div style="width: 100%; border-top: 2px dashed #cbd5e1; padding-top: 20px; margin-bottom: 20px; text-align: left;">
             <h3 style="color: #475569; font-size: 18px; margin-top:0; margin-bottom:8px;">💳 后台订单撤销 (退款)</h3>
             <p style="font-size:13px; color:#94a3b8; margin:0 0 10px 0; font-weight:800;">输入兑换缩写 (HB/TC/PZ/TT/XF) 强制退款</p>
@@ -297,7 +296,7 @@
         <div class="menu-row" style="flex-wrap: wrap;">
             <div class="menu-btn" style="border-color:#bae6fd; color:#0284c7; flex: 1 1 40%;" onclick="launchPractice('华文')"><div class="emoji">📝</div> 复习</div>
             <div class="menu-btn" style="border-color:#fde68a; color:#b45309; flex: 1 1 40%;" onclick="window.location.href='tingxie.html'"><div class="emoji">✍️</div> 听写</div>
-            <div class="menu-btn" style="border-color:#fbcfe8; color:#be185d; flex: 1 1 40%;" onclick="window.location.href='pinyin.html'"><div class="emoji">🎮</div> 拼音游戏</div>
+            <div class="menu-btn" style="border-color:#fbcfe8; color:#be185d; flex: 1 1 40%;" onclick="window.location.href='game/pinyin.html'"><div class="emoji">🎮</div> 拼音游戏</div>
             <div class="menu-btn" style="border-color:#a7f3d0; color:#047857; flex: 1 1 40%;" onclick="window.location.href='https://andydang2007.github.io/reading/'"><div class="emoji">📚</div> 图书馆</div>
         </div>
         <button class="btn-action" onclick="showScreen('dashboard-screen')">← 返回主页</button>
@@ -305,7 +304,6 @@
 
 </div>
 
-<!-- 弹窗合集 -->
 <div id="pin-modal" class="modal-overlay">
     <div class="modal-content">
         <div style="font-size: 40px; margin-bottom: 5px;">🛡️</div>
@@ -342,14 +340,12 @@
     </div>
 </div>
 
-<!-- 🌟 我的背包面板 -->
 <div id="my-items-modal" class="modal-overlay">
     <div class="modal-content" style="border-color: #6366f1; padding: 25px 20px;">
         <div style="font-size: 40px; margin-bottom:10px;">📦</div>
         <h2 style="margin:0 0 15px 0; color:#0f172a; font-size:24px;">我的背包</h2>
         <div id="my-items-list" style="max-height: 40vh; overflow-y: auto; text-align: left; padding: 5px;">
-            <!-- 背包物品会动态生成在这里 -->
-        </div>
+            </div>
         <button class="btn-action" style="margin-top: 20px;" onclick="closeMyItemsPanel()">关闭</button>
     </div>
 </div>
