@@ -450,11 +450,17 @@
 
         // 1. 基础科目徽章奖励 (错题 <= 3)
         if (sessionErrors <= 3) {
-            earnedBadgesForCoin++;
-            let subIcon = curSub === '华文' ? '🐼' : (curSub === 'Science' ? '🌱' : (curSub === 'Math' ? '🔢' : '🔤'));
-            let subName = curSub === '华文' ? '华文小将' : (curSub === 'Science' ? '科学博士' : (curSub === 'Math' ? '数学天才' : '英语达人'));
-            badgeQueue.push({ icon: subIcon, title: subName, desc: isCN ? `完成高质量练习，专属徽章 +1！` : `Good job! Badge +1!` });
-            syncToCloud({ type: 'badge', user: curUser, grade: curGrade, subject: curSub, icon: subIcon, title: subName, desc: '高质量练习' });
+            if (curSub === '华文') {
+                earnedBadgesForCoin += 2;
+                badgeQueue.push({ icon: '🐼', title: '华文小将', desc: '完成高质量练习，金币 +2！' });
+                syncToCloud({ type: 'badge', user: curUser, grade: curGrade, subject: curSub, icon: '🐼', title: '华文小将', desc: '高质量练习(金币+2)' });
+            } else {
+                earnedBadgesForCoin++;
+                let subIcon = curSub === 'Science' ? '🌱' : (curSub === 'Math' ? '🔢' : '🔤');
+                let subName = curSub === 'Science' ? '科学博士' : (curSub === 'Math' ? '数学天才' : '英语达人');
+                badgeQueue.push({ icon: subIcon, title: subName, desc: `Good job! Badge +1!` });
+                syncToCloud({ type: 'badge', user: curUser, grade: curGrade, subject: curSub, icon: subIcon, title: subName, desc: '高质量练习' });
+            }
         }
 
         // 2. 核心战绩徽章 (完美/极速/气球)
