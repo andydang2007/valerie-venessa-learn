@@ -578,6 +578,9 @@
                 if (cloudData.speed !== undefined) localStorage.setItem(`speed_breaks_${currentUser}`, cloudData.speed);
                 if (cloudData.tingxie !== undefined) localStorage.setItem(`tingxie_badge_count_${currentUser}`, cloudData.tingxie);
                 
+                // 🌟 添加汉字精灵本地存入逻辑 🌟
+                if (cloudData.hanzi !== undefined) localStorage.setItem(`hanzi_badge_count_${currentUser}`, cloudData.hanzi);
+                
                 if (cloudData.perfects !== undefined) localStorage.setItem(`perfects_count_${currentUser}`, cloudData.perfects);
                 if (cloudData.games !== undefined) localStorage.setItem(`games_count_${currentUser}`, cloudData.games);
                 if (cloudData.eng !== undefined) localStorage.setItem(`eng_badge_count_${currentUser}`, cloudData.eng);
@@ -857,7 +860,9 @@
             { icon: '🐼', name: '华文小将', count: Math.max(subPerfects['华文'], parseInt(localStorage.getItem(`cn_badge_count_${currentUser}`)||'0')) },
             { icon: '🌱', name: '科学博士', count: Math.max(subPerfects['Science'], parseInt(localStorage.getItem(`sci_badge_count_${currentUser}`)||'0')) },
             { icon: '🎮', name: '拼音高手', count: parseInt(localStorage.getItem(`pinyin_badge_count_${currentUser}`)||'0') },
-            { icon: '👑', name: '听写大王', count: parseInt(localStorage.getItem(`tingxie_badge_count_${currentUser}`)||'0') } 
+            { icon: '👑', name: '听写大王', count: parseInt(localStorage.getItem(`tingxie_badge_count_${currentUser}`)||'0') },
+            // 🌟 在这里加入汉字精灵的图标 🌟
+            { icon: '🧚', name: '汉字精灵', count: parseInt(localStorage.getItem(`hanzi_badge_count_${currentUser}`)||'0') } 
         ];
         container.innerHTML += `<div class="badge-category"><div class="badge-category-title">🎓 科目大师</div><div class="badge-grid">${subBadges.map(renderItemHTML).join('')}</div></div>`;
 
