@@ -26,7 +26,6 @@
         
         .header-tag { background: #f8fafc; color: #3b82f6; padding: 10px 25px; border-radius: 30px; font-weight: 900; font-size: 18px; border: 3px solid #e2e8f0; box-shadow: 0 4px 0 #cbd5e1; margin-bottom: 20px; display: inline-flex; align-items: center; gap: 8px; }
 
-        /* 💡 进度条折行适配 */
         .milestone-track { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; width: 100%; margin-bottom: 10px; }
         .milestone { width: 28px; height: 28px; background: #f8fafc; border: 3px solid #cbd5e1; border-radius: 50%; z-index: 2; display: flex; align-items: center; justify-content: center; font-size: 12px; transition: 0.4s; box-sizing: border-box; flex-shrink: 0; }
         .milestone.done { border-color: #10b981; background: #d1fae5; }
@@ -125,7 +124,6 @@
 </div>
 
 <script>
-    // 🌟 已更新为最新的 API
     const SYNC_API_URL = "https://script.google.com/macros/s/AKfycbzbNOgg7deW9uVVyfYGTfKGOtVgNs_9ZfUQ9J_9cYpG2Ufow9KLDICHgsinBXrPJlmz/exec";
     const SHEET_ID = "1vQlpdRHnR9ybEHHgX6fouRI-vXOh8KQNLSjsbt0TYh9R3No_9i7QNv_4ELwJZJGQpTe3oZVXaZijaW4";
     const GIDS = { "English": "1893311738", "Math": "59294467", "Science": "1581471994", "华文": "2020673087" };
@@ -134,10 +132,8 @@
     let canvas, ctx, drawing = false;
     let currentTermNum = 1, startTime = 0; 
     
-    // 🌟 修复：正确读取当前用户和年级
     let curUser = localStorage.getItem('currentPlayer') || 'Valerie';
     let curGrade = localStorage.getItem('currentGrade') || 'P3';
-    // 💡 Spelling 页面强制锁定为 English
     let curSub = 'English';
 
     let badgeQueue = [], pendingGameResult = null;
@@ -152,7 +148,6 @@
     function saveMistakes(m) { localStorage.setItem('hub_mistakes', JSON.stringify(m)); }
     function getQuestionKey(sub, user, qText) { return `${user}_${sub}_${qText.trim()}`; }
 
-    // 🌟 核心升级：强行锁定新加坡时间的 YYYY-MM-DD
     function getSGTDateString() {
         const d = new Date();
         const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
@@ -160,41 +155,41 @@
         return sgt.getFullYear() + '-' + String(sgt.getMonth() + 1).padStart(2, '0') + '-' + String(sgt.getDate()).padStart(2, '0');
     }
 
-    function getDailyStats() {
+    // 新的气球逻辑：Valerie > 80% 直接触发，Venessa 需要错题<=1并累计次数
+    function applyBalloonLogic(isPerfect, errors) {
         const today = getSGTDateString();
-        const key = `practice_stats_${today}_${curUser}_${curSub}`;
-        let stats = JSON.parse(localStorage.getItem(key) || '{"perfects":0, "gamesPlayed":0, "date":""}');
-        if(stats.date !== today) stats = { perfects: 0, gamesPlayed: 0, date: today }; 
-        return { key, stats };
-    }
-    
-    function applyPerfectSession() {
-        let { key, stats } = getDailyStats();
-        stats.perfects += 1;
-        let triggerGame = false, bonusMsg = "";
-        if (stats.perfects % 2 === 0 && stats.gamesPlayed < 3) {
-            triggerGame = true; stats.gamesPlayed += 1;
-            bonusMsg = "🎉 完美达标！即将进入气球大作战！🎈";
-        } else if (stats.gamesPlayed >= 3) {
-            bonusMsg = "🌟 你今天已获得最高次数奖励！";
-        } else {
-            bonusMsg = "🔥 再获得一次 6~7 就能玩气球啦！";
-        }
-        localStorage.setItem(key, JSON.stringify(stats));
-        return { trigger: triggerGame, msg: bonusMsg };
-    }
+        const key = `balloon_stats_${today}_${curUser}`;
+        let stats = JSON.parse(localStorage.getItem(key) || '{"goodCount":0, "date":""}');
+        if (stats.date !== today) stats = { goodCount: 0, date: today }; 
 
-    function checkAndRecordSpeed(timeTakenSec) {
-        const key = `pb_speed_${curUser}_${curSub}`;
-        const breaksKey = `speed_breaks_${curUser}`;
-        let pb = localStorage.getItem(key);
-        if (!pb || timeTakenSec < parseInt(pb)) {
-            localStorage.setItem(key, timeTakenSec);
-            let breaks = parseInt(localStorage.getItem(breaksKey) || '0') + 1;
-            localStorage.setItem(breaksKey, breaks);
-            return { isNewRecord: true, oldRecord: pb ? parseInt(pb) : null };
+        let trigger = false;
+        let msg = "";
+
+        if (curUser === 'Valerie' || curUser === 'Velarie') {
+            if (isPerfect) {
+                trigger = true;
+                msg = "🎉 准确率达到80%！直接奖励气球大作战！🎈";
+            } else {
+                msg = "🔥 准确率达到80%就能玩气球啦！";
+            }
+        } else { // Venessa
+            if (isPerfect) {
+                stats.goodCount += 1; 
+                if (errors === 0) {
+                    trigger = true;
+                    msg = "🎉 满分达成！直接奖励气球大作战！🎈";
+                } else if (stats.goodCount % 2 === 0) {
+                    trigger = true;
+                    msg = "🎉 累计两次高质量完成！解锁气球大作战！🎈";
+                } else {
+                    msg = "🔥 表现不错！再获得一次 6~7 就能玩气球啦！";
+                }
+            } else {
+                msg = "🔥 再获得一次 6~7 就能玩气球啦！";
+            }
+            localStorage.setItem(key, JSON.stringify(stats));
         }
-        return { isNewRecord: false, oldRecord: parseInt(pb) };
+        return { trigger, msg };
     }
 
     function showScreen(id) {
@@ -206,24 +201,20 @@
         let activeIcon = '✍️';
         document.getElementById('header-info').innerHTML = `${activeIcon} ${curUser} - Spelling`;
 
-        // 🌟🌟 核心补丁：开局从云端同步真实数据，不被手机缓存欺骗 🌟🌟
         try {
             const statsResp = await fetch(`${SYNC_API_URL}?type=fetch_user_data&user=${curUser}`);
             const cloudStats = await statsResp.json();
             if (cloudStats && Object.keys(cloudStats).length > 0) {
-                // 用云端的“真理”覆盖本地的缓存
                 localStorage.setItem(`total_days_${curUser}`, cloudStats.userTotalDays);
                 localStorage.setItem(`current_streak_${curUser}`, cloudStats.userStreak);
                 localStorage.setItem(`crystals_${curUser}`, cloudStats.userCrystals);
-                localStorage.setItem(`gold_coins_vault`, cloudStats.vaultCoins); // 同步最新金币
+                localStorage.setItem(`gold_coins_vault`, cloudStats.vaultCoins); 
                 
-                // 格式化云端的日期，防止时区错乱
                 if (cloudStats.lastCheckinDate) {
                     let d = new Date(cloudStats.lastCheckinDate);
                     let sgtStr = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
                     localStorage.setItem(`last_date_${curUser}`, sgtStr);
                 }
-                console.log("✅ 成功从云端同步玩家数据！云端连击数：", cloudStats.userStreak);
             }
         } catch (e) {
             console.log("❌ 云端数据同步失败，将使用本地缓存:", e);
@@ -276,7 +267,6 @@
     }
     
     function startQuiz() {
-        // 💡 提取 Spelling 题库
         let mainPool = (db[curGrade][curSub] || []).filter(q => (q.Type || "").toString().trim().toUpperCase() === 'SPELLING');
         mainPool = mainPool.filter(q => {
             let t = q.Term || q.TERM; if (!t) return true; 
@@ -335,12 +325,11 @@
         document.getElementById('progress-text').innerText = `${curIdx + 1} / ${sessionQs.length}`;
     }
 
-    // 💡 发音功能
     function playAudio(text) {
         if ('speechSynthesis' in window) {
             let msg = new SpeechSynthesisUtterance();
             msg.text = text;
-            msg.lang = 'en-SG'; // 新加坡英语口音
+            msg.lang = 'en-SG';
             window.speechSynthesis.speak(msg);
         } else {
             alert("Sorry, your browser doesn't support text to speech!");
@@ -352,7 +341,6 @@
         const q = sessionQs[curIdx];
         q.isEvaluated = false; 
 
-        // 💡 针对听写页面的渲染逻辑：点击发音图标
         const targetWord = (q['Correct Answer'] || q['ANSWER'] || "").toString().trim();
         document.getElementById('q-text').innerHTML = `
             <div style="display:flex; align-items:center; gap: 15px;">
@@ -430,10 +418,20 @@
 
     function finishQuiz() {
         const timeTakenSec = Math.floor((Date.now() - startTime) / 1000);
-        const isPerfect = sessionErrors <= 1;
+        const totalQs = sessionQs.length;
+        const correctRatio = totalQs > 0 ? (totalQs - sessionErrors) / totalQs : 0;
         
-        let config = JSON.parse(localStorage.getItem('hub_config') || "{}");
-        const speedLimit = (curGrade === 'P1' || curUser === 'Venessa') ? (config.speed_limit_p1 || 360) : (config.speed_limit_p3 || 180);
+        let isBaseLevel = false;
+        let isPerfect = false;
+
+        // 🌟 新的分别判定逻辑
+        if (curUser === 'Venessa') {
+            isBaseLevel = (sessionErrors <= 3);
+            isPerfect = (sessionErrors <= 1);
+        } else {
+            isBaseLevel = (correctRatio >= 0.5);
+            isPerfect = (correctRatio >= 0.8);
+        }
 
         badgeQueue = [];
         let earnedBadgesForCoin = 0;
@@ -444,7 +442,8 @@
         if (isPerfect) localStats.perfects += 1;
         localStorage.setItem(statsKey, JSON.stringify(localStats));
 
-        if (sessionErrors <= 3) {
+        // 1. 基础达标奖励
+        if (isBaseLevel) {
             earnedBadgesForCoin++;
             let subIcon = '👑';
             let subName = 'Spelling Master';
@@ -452,21 +451,13 @@
             syncToCloud({ type: 'badge', user: curUser, grade: curGrade, subject: curSub, icon: subIcon, title: subName, desc: '高质量听写' });
         }
 
+        // 2. 完美通关奖励 & 气球彩蛋
         if (isPerfect) {
             earnedBadgesForCoin++;
             badgeQueue.push({ icon: '🎯', title: 'Sharpshooter!', desc: 'Great spelling accuracy! Sharpshooter badge +1!' });
-            syncToCloud({ type: 'badge', user: curUser, grade: curGrade, subject: curSub, icon: '🎯', title: '神奇射手', desc: '错题<=1' });
+            syncToCloud({ type: 'badge', user: curUser, grade: curGrade, subject: curSub, icon: '🎯', title: '神奇射手', desc: curUser === 'Venessa' ? '错题<=1' : '准确率>=80%' });
 
-            if (timeTakenSec <= speedLimit) {
-                earnedBadgesForCoin++;
-                let currentBreaks = parseInt(localStorage.getItem(`speed_breaks_${curUser}`) || '0');
-                localStorage.setItem(`speed_breaks_${curUser}`, currentBreaks + 1);
-
-                badgeQueue.push({ icon: '⚡️', title: 'Speed Record!', desc: `Finished in <span class="epic-highlight">${timeTakenSec}s</span>! Lightning fast!` });
-                syncToCloud({ type: 'badge', user: curUser, grade: curGrade, subject: curSub, icon: '⚡️', title: '极速突破', desc: `耗时: ${timeTakenSec}秒` });
-            }
-
-            pendingGameResult = applyBalloonLogic(sessionErrors);
+            pendingGameResult = applyBalloonLogic(true, sessionErrors);
             if (pendingGameResult && pendingGameResult.trigger) {
                 badgeQueue.push({ icon: '🎈', title: 'Balloon Hunter!', desc: pendingGameResult.msg });
                 
@@ -476,14 +467,13 @@
                 syncToCloud({ type: 'badge', user: curUser, grade: curGrade, subject: curSub, icon: '🎈', title: '气球猎人', desc: '解锁气球游戏' });
             }
         } else {
-            pendingGameResult = null; 
+            pendingGameResult = applyBalloonLogic(false, sessionErrors); 
         }
 
         if (earnedBadgesForCoin > 0) {
             let coinGain = earnedBadgesForCoin;
             let vaultCoins = parseInt(localStorage.getItem('gold_coins_vault') || "0");
             localStorage.setItem('gold_coins_vault', vaultCoins + coinGain);
-            // 🌟 核心修改：发送增量 earned 给云端
             syncToCloud({ type: 'coin_update', user: curUser, earned: coinGain });
         }
 
@@ -512,7 +502,6 @@
                 badgeQueue.push({ icon: '💎', title: 'Crystal', desc: `Streak ${currentStreak} days! Crystal +1!` });
             }
             
-            // 🌟 核心修改：附带最新的 checkinDate 给云端
             syncToCloud({ 
                 type: 'crystal_update', user: curUser, 
                 crystalsTotal: crys, totalDays: totalDays, streak: currentStreak,
@@ -545,7 +534,6 @@
             }
         }
 
-        // 🌟🌟 核心：在此处印下今日打卡印章 🌟🌟
         localStorage.setItem(`last_checkin_date_${curUser}`, today);
 
         if (badgeQueue.length > 0) {
@@ -571,15 +559,20 @@
     }
 
     function renderFinalScreen() {
-        const isPerfect = sessionErrors <= 1;
-        let title = isPerfect ? '🎉 You got 6~7!' : '💪 Keep trying!';
+        const totalQs = sessionQs.length;
+        const correctRatio = totalQs > 0 ? (totalQs - sessionErrors) / totalQs : 0;
+        
+        let isPerfect = false;
+        if (curUser === 'Venessa') isPerfect = (sessionErrors <= 1);
+        else isPerfect = (correctRatio >= 0.8);
+
+        let title = isPerfect ? '🎉 Great Job!' : '💪 Keep trying!';
         let html = `<div style="text-align:center; padding: 40px 0;"><h1 style="font-size:32px; color:#0f172a; font-weight:900;">${title}</h1>`;
         if (pendingGameResult && pendingGameResult.msg) html += `<div class="stat-badge">${pendingGameResult.msg}</div>`;
         if (sessionErrors > 0) html += `<p style="color:#ef4444; font-weight:800; margin-top:25px;">🐞 已将 ${sessionErrors} 道错词关进捉虫日记。</p>`;
         html += `<button class="btn-action" style="background:#f1f5f9; color:#64748b; width:100%; max-width: 300px; margin: 40px auto 0 auto; border: 4px solid #e2e8f0;" onclick="window.location.href='index.html'">🏠 Back to Hub</button></div>`;
         document.getElementById('finish-screen').innerHTML = html; showScreen('finish-screen');
         
-        // 🌟 已加上带回家地址的回城车票！
         if (isPerfect && pendingGameResult && pendingGameResult.trigger) setTimeout(() => { window.location.href = "https://andydang2007.github.io/game/popballoons.html?ticket=" + Date.now() + "&returnUrl=index.html"; }, 2500);
     }
 
