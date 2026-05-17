@@ -81,17 +81,6 @@
         .card-btn.cn { border-color: #e9d5ff; }
         .card-btn.sci { border-color: #a7f3d0; }
 
-        .btn-resources {
-            width: 100%; padding: 18px; border-radius: 25px; 
-            background: linear-gradient(135deg, #a855f7 0%, #c084fc 100%); 
-            color: white; font-size: 22px; font-weight: 900; border: none; 
-            box-shadow: 0 8px 15px rgba(168, 85, 247, 0.3), inset 0 -4px 0 rgba(0,0,0,0.1); 
-            cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 12px;
-            margin-bottom: 30px; 
-        }
-        .btn-resources:active { transform: translateY(6px); box-shadow: 0 0 0 transparent; }
-        .btn-resources .emoji { font-size: 30px; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2)); }
-
         .menu-row { display: flex; gap: 15px; width: 100%; margin-bottom: 15px; }
         .menu-btn { flex: 1; background: white; border: 4px solid #e2e8f0; border-radius: 20px; padding: 20px 10px; font-size: 18px; font-weight: 900; color: #475569; cursor: pointer; box-shadow: 0 6px 0 #cbd5e1; display: flex; flex-direction: column; align-items: center; gap: 8px; transition: 0.1s; }
         .menu-btn:active { transform: translateY(6px); box-shadow: 0 0 0 transparent; }
@@ -107,30 +96,10 @@
         .pin-input-hub:focus { border-color: #f59e0b; background: #fffbeb; }
         .error-shake { border-color: #ef4444 !important; animation: shake 0.3s; background-color: #fef2f2 !important; }
 
-        .shop-header { display: flex; gap: 15px; width: 100%; margin-bottom: 25px; }
-        .shop-bal-card { flex: 1; border-radius: 20px; padding: 15px; text-align: center; display: flex; flex-direction: column; justify-content: center; }
-        .shop-bal-vault { background: #fffbeb; border: 3px solid #fde68a; }
-        .shop-bal-crys { background: #f0f9ff; border: 3px solid #bae6fd; }
-        
-        .shop-item-grid { display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 12px; width: 100%; margin-bottom: 10px; padding: 15px 5px 25px 5px; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
-        .shop-item-grid::-webkit-scrollbar { display: none; }
-        .shop-item { flex: 0 0 95px; background: white; border: 3px solid #e2e8f0; border-radius: 15px; padding: 10px 5px; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 0 #cbd5e1; position: relative; user-select: none; -webkit-user-select: none;}
-        .shop-item:active { transform: translateY(4px); box-shadow: 0 0 0 transparent; }
-        .shop-item.active { border-color: #f59e0b; background: #fffbeb; transform: scale(1.05); box-shadow: 0 6px 15px rgba(245,158,11,0.2); z-index: 10; }
-        
-        .shop-badge { position: absolute; top: -10px; right: -8px; background: #ef4444; color: white; font-size: 11px; font-weight: 900; padding: 3px 6px; border-radius: 10px; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3); z-index: 20; display: none; white-space: nowrap;}
-        .shop-icon { width: 100%; max-width: 90px; aspect-ratio: 1/1; object-fit: contain; margin-bottom: 8px; mix-blend-mode: multiply; pointer-events: none; }
-        .shop-item .name { font-weight: 900; font-size: 11px; color: #475569; margin-bottom: 6px; text-align: center; line-height: 1.1; width: 100%; }
-        .shop-item .price { font-size: 12px; font-weight: 900; border-radius: 10px; padding: 3px 6px; display: inline-flex; align-items: center; justify-content: center; gap: 2px; width: 100%; }
-        .shop-item.coin-item .price { background: #fef3c7; color: #d97706; border: 1.5px solid #fde68a; }
-        .shop-item.crys-item .price { background: #e0f2fe; color: #0284c7; border: 1.5px solid #bae6fd; }
-
         .config-row { display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px 20px; border-radius: 15px; border: 2px solid #e2e8f0; width: 100%; box-shadow: 0 2px 0 #cbd5e1;}
         .config-row label { font-weight: 900; color: #475569; font-size: 16px; }
         .config-row input { width: 90px; font-weight: 900; font-size: 18px; padding: 6px; text-align: center; border: 2px solid #cbd5e1; border-radius: 10px; color: #1e293b; outline: none; transition: 0.2s; }
         .config-row input:focus { border-color: #3b82f6; background: #eff6ff; }
-
-        #secret-code { font-family: monospace; font-size: 28px; background: #fffbeb; padding: 15px; border: 3px dashed #f59e0b; margin: 20px 0; color: #b45309; font-weight: 900; letter-spacing: 2px; }
 
         @media (min-width: 768px) { 
             .container { padding: 40px 50px; max-width: 750px; } 
@@ -139,9 +108,6 @@
             .badge-icon { width: 56px; height: 56px; font-size: 30px; border-radius: 18px; }
             .badge-name { font-size: 13px; }
             .badge-count { font-size: 12px; padding: 2px 8px; top: -8px; right: -8px; }
-            .shop-item { flex: 0 0 110px; }
-            .shop-item .name { font-size: 14px; }
-            .shop-item .price { font-size: 14px; }
         }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
 
@@ -228,7 +194,7 @@
                     🏆 My Badges 
                     <div class="total-trophies">Total: <span class="total-number" id="total-badge-count">0</span></div>
                 </div>
-                <button onclick="openShop()" style="background:#f59e0b; color:white; border:none; padding:10px 18px; border-radius:20px; font-weight:900; font-size:16px; cursor:pointer; box-shadow:0 6px 0 #d97706; display:flex; align-items:center; gap:6px; transition:0.15s;">
+                <button onclick="window.location.href='shop.html'" style="background:#f59e0b; color:white; border:none; padding:10px 18px; border-radius:20px; font-weight:900; font-size:16px; cursor:pointer; box-shadow:0 6px 0 #d97706; display:flex; align-items:center; gap:6px; transition:0.15s;">
                     🎁 神秘商店
                 </button>
             </h3>
@@ -237,50 +203,6 @@
         <button class="btn-action" onclick="showScreen('user-screen')">👤 Switch User</button>
     </div>
 
-    <div id="shop-screen" class="screen">
-        <h2 style="margin:0 0 15px 0; font-size: 28px; font-weight: 900; color: #b45309; text-shadow: 0 2px 4px rgba(245,158,11,0.2);">🎁 神秘兑换中心</h2>
-        
-        <div class="shop-header">
-            <div class="shop-bal-card shop-bal-vault">
-                <div style="font-size:14px; color:#d97706; font-weight:900; margin-bottom:4px;">团队金币</div>
-                <div style="font-size:32px; font-weight:900; color:#b45309;">💰 <span id="shop-vault-total">0</span></div>
-            </div>
-            <div class="shop-bal-card shop-bal-crys">
-                <div style="font-size:14px; color:#0369a1; font-weight:900; margin-bottom:4px;">个人水晶</div>
-                <div style="font-size:32px; font-weight:900; color:#0ea5e9;">💎 <span id="shop-user-crys">0</span></div>
-            </div>
-        </div>
-
-        <div class="shop-item-grid">
-            <div class="shop-item coin-item" id="shop-item-HB" onclick="selectPrize(this, '团队金币', 67, '汉堡', 'HB')">
-                <div class="shop-badge" id="badge-HB"></div>
-                <img src="hb.png" class="shop-icon" alt="汉堡"><div class="name">汉堡</div><div class="price">💰 67</div>
-            </div>
-            <div class="shop-item coin-item" id="shop-item-TC" onclick="selectPrize(this, '团队金币', 134, '套餐', 'TC')">
-                <div class="shop-badge" id="badge-TC"></div>
-                <img src="tc.png" class="shop-icon" alt="套餐"><div class="name">套餐</div><div class="price">💰 134</div>
-            </div>
-            <div class="shop-item coin-item" id="shop-item-PZ" onclick="selectPrize(this, '团队金币', 268, '披萨大餐', 'PZ')">
-                <div class="shop-badge" id="badge-PZ"></div>
-                <img src="pz.png" class="shop-icon" alt="披萨大餐"><div class="name">披萨大餐</div><div class="price">💰 268</div>
-            </div>
-            <div class="shop-item crys-item" id="shop-item-TT" onclick="selectPrize(this, '个人水晶', 7, '甜筒', 'TT')">
-                <div class="shop-badge" id="badge-TT"></div>
-                <img src="tt.png" class="shop-icon" alt="甜筒"><div class="name">甜筒</div><div class="price">💎 7</div>
-            </div>
-            <div class="shop-item crys-item" id="shop-item-XF" onclick="selectPrize(this, '个人水晶', 14, '麦旋风', 'XF')">
-                <div class="shop-badge" id="badge-XF"></div>
-                <img src="xf.png" class="shop-icon" alt="麦旋风"><div class="name">麦旋风</div><div class="price">💎 14</div>
-            </div>
-        </div>
-        
-        <div style="display:flex; gap:10px; width: 100%; margin-bottom: 15px;">
-            <button class="btn-action" style="flex:1; background:#6366f1; color:white; border-color:#4f46e5; box-shadow:0 6px 0 #4338ca;" onclick="openMyItemsPanel()">📦 我的背包</button>
-            <button id="do-redeem-btn" class="btn-action" style="flex:1; background:#cbd5e1; color:white; border-color:#94a3b8; box-shadow:0 6px 0 #94a3b8;" disabled onclick="executeRedeem()">✅ 确认兑换</button>
-        </div>
-        
-        <button class="btn-action" onclick="showScreen('dashboard-screen')">← 返回荣誉墙</button>
-    </div>
     <div id="english-menu" class="screen">
         <h2 style="margin:0 0 20px 0; font-size: 26px; font-weight: 900; color: #0f172a;">🔤 English Modes</h2>
         <div class="menu-row" style="flex-wrap: wrap;">
@@ -330,31 +252,10 @@
     </div>
 </div>
 
-<div id="redeem-modal" class="modal-overlay">
-    <div class="modal-content" style="border-color: #f59e0b;">
-        <div style="font-size: 60px; margin-bottom:10px;">🎉</div>
-        <h2 style="margin:0; color:#0f172a; font-size:28px;">兑换成功！</h2>
-        <p style="color:#64748b; font-weight:800; margin-top:10px;">兑换码已存入你的【背包】</p>
-        <div id="secret-code">CODE-XXXX</div>
-        <button class="btn-action" style="background:#f59e0b; color:white; border-color:#d97706; box-shadow:0 6px 0 #b45309;" onclick="closeRedeemModal()">我知道了！</button>
-    </div>
-</div>
-
-<div id="my-items-modal" class="modal-overlay">
-    <div class="modal-content" style="border-color: #6366f1; padding: 25px 20px;">
-        <div style="font-size: 40px; margin-bottom:10px;">📦</div>
-        <h2 style="margin:0 0 15px 0; color:#0f172a; font-size:24px;">我的背包</h2>
-        <div id="my-items-list" style="max-height: 40vh; overflow-y: auto; text-align: left; padding: 5px;">
-            </div>
-        <button class="btn-action" style="margin-top: 20px;" onclick="closeMyItemsPanel()">关闭</button>
-    </div>
-</div>
-
 <script>
     let pendingUser = { name: null, grade: null };
     let currentUser = '';
     let currentGrade = '';
-    let selectedPrize = null;
     
     const SYNC_API_URL = "https://script.google.com/macros/s/AKfycbzbNOgg7deW9uVVyfYGTfKGOtVgNs_9ZfUQ9J_9cYpG2Ufow9KLDICHgsinBXrPJlmz/exec";
 
@@ -502,15 +403,11 @@
         let balanceKey = type === '团队金币' ? 'gold_coins_vault' : `crystals_${currentUser}`;
         let currentBalance = parseInt(localStorage.getItem(balanceKey) || "0");
 
-        let el = document.getElementById(`shop-item-${prefix}`);
-        let price = el ? parseInt(el.querySelector('.price').innerText.replace(/[^0-9]/g, '')) : 0;
-        let name = el ? el.querySelector('.name').innerText : prefix;
-        
-        if (price === 0) {
-            let cfg = JSON.parse(localStorage.getItem('hub_config') || "{}");
-            let defaultPrices = {HB:67, TC:134, PZ:268, TT:7, XF:14};
-            price = cfg[`shop_${prefix.toLowerCase()}_price`] || defaultPrices[prefix];
-        }
+        let cfg = JSON.parse(localStorage.getItem('hub_config') || "{}");
+        let defaultPrices = {HB:67, TC:134, PZ:268, TT:7, XF:14};
+        let itemNames = {HB:'汉堡', TC:'套餐', PZ:'披萨大餐', TT:'甜筒', XF:'麦旋风'};
+        let price = cfg[`shop_${prefix.toLowerCase()}_price`] || defaultPrices[prefix];
+        let name = itemNames[prefix];
 
         if (confirm(`【后台强制退款】\n即将撤销 1 份 ${name}，并退回 ${price} ${type}。\n确定吗？`)) {
             localStorage.setItem(`redeemed_${prefix}`, count - 1);
@@ -522,12 +419,13 @@
                 fetch(SYNC_API_URL, {
                     method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' },
                     body: JSON.stringify({
-                        type: 'refund', user: currentUser || 'Admin', rewardName: name, price: price, prefix: prefix,
+                        type: 'refund', user: currentUser || 'Admin', rewardName: name, refundAmount: price, prefix: prefix,
                         balanceType: type === '团队金币' ? 'coin' : 'crystal', newBalance: currentBalance + price
                     })
                 });
             } catch(e) {}
-            alert("✅ 强制退款指令已发送！"); updateEconomyUI(); updateShopBadges();
+            alert("✅ 强制退款指令已发送！"); 
+            updateEconomyUI();
         }
     }
 
@@ -536,26 +434,9 @@
             let res = await fetch(`${SYNC_API_URL}?type=fetch_config`);
             let cfg = await res.json();
             localStorage.setItem('hub_config', JSON.stringify(cfg));
-            applyConfigToShop(cfg);
         } catch(e){}
     }
 
-    function applyConfigToShop(cfg) {
-        const updateItem = (prefix, priceKey) => {
-            if(cfg[priceKey]) {
-                let el = document.getElementById(`shop-item-${prefix}`);
-                if(el) {
-                    el.querySelector('.price').innerText = (prefix==='TT'||prefix==='XF'?'💎 ':'💰 ') + cfg[priceKey];
-                    let name = el.querySelector('.name').innerText;
-                    let type = (prefix==='TT'||prefix==='XF') ? '个人水晶' : '团队金币';
-                    el.setAttribute('onclick', `selectPrize(this, '${type}', ${cfg[priceKey]}, '${name}', '${prefix}')`);
-                }
-            }
-        };
-        updateItem('HB', 'shop_hb_price'); updateItem('TC', 'shop_tc_price'); updateItem('PZ', 'shop_pz_price'); updateItem('TT', 'shop_tt_price'); updateItem('XF', 'shop_xf_price');
-    }
-    
-    // 🌟 核心同步更新：根据云端传回的 activeItems，重新配置本地背包！
     async function syncFromCloud() {
         if (!currentUser) return;
         const indicator = document.getElementById('cloud-sync-indicator');
@@ -577,10 +458,7 @@
                 if (cloudData.pinyin !== undefined) localStorage.setItem(`pinyin_badge_count_${currentUser}`, cloudData.pinyin);
                 if (cloudData.speed !== undefined) localStorage.setItem(`speed_breaks_${currentUser}`, cloudData.speed);
                 if (cloudData.tingxie !== undefined) localStorage.setItem(`tingxie_badge_count_${currentUser}`, cloudData.tingxie);
-                
-                // 🌟 添加汉字精灵本地存入逻辑 🌟
                 if (cloudData.hanzi !== undefined) localStorage.setItem(`hanzi_badge_count_${currentUser}`, cloudData.hanzi);
-                
                 if (cloudData.perfects !== undefined) localStorage.setItem(`perfects_count_${currentUser}`, cloudData.perfects);
                 if (cloudData.games !== undefined) localStorage.setItem(`games_count_${currentUser}`, cloudData.games);
                 if (cloudData.eng !== undefined) localStorage.setItem(`eng_badge_count_${currentUser}`, cloudData.eng);
@@ -601,29 +479,27 @@
                     localStorage.setItem(`last_date_${currentUser}`, sgtStr); 
                 }
 
-                // 🌟 核心同步：用云端的背包清单强制覆盖本地！如果云端没有，本地直接清零！
+                // 核心同步：用云端的背包清单强制覆盖本地！
                 if (cloudData.activeItems !== undefined) {
                     const validItems = ['HB', 'TC', 'PZ', 'TT', 'XF'];
-                    // 1. 先把本地这个人的记录全部清零
                     validItems.forEach(p => {
                         localStorage.setItem(`redeemed_${p}`, 0);
                         localStorage.removeItem(`last_code_${p}`);
                     });
                     
-                    // 2. 根据云端发来的待领取名单，重新写入本地
                     cloudData.activeItems.forEach(item => {
                         if (item.code) {
                             let prefix = item.code.split('-')[0];
                             if (validItems.includes(prefix)) {
                                 let c = parseInt(localStorage.getItem(`redeemed_${prefix}`)||0);
                                 localStorage.setItem(`redeemed_${prefix}`, c + 1);
-                                localStorage.setItem(`last_code_${prefix}`, item.code); // 记录最新的那张兑换券
+                                localStorage.setItem(`last_code_${prefix}`, item.code); 
                             }
                         }
                     });
                 }
 
-                updateEconomyUI(); renderBadges(); updateShopBadges();
+                updateEconomyUI(); renderBadges();
             }
         } catch (e) {}
         setTimeout(() => { indicator.style.display = 'none'; }, 800);
@@ -674,145 +550,7 @@
             if (lastCheckin === todayStr) { streakEl.className = 'streak-badge completed'; streakEl.innerHTML = `🔥 今日已打卡 (累计 ${totalDays} 天)`; } 
             else { streakEl.className = 'streak-badge pending'; streakEl.innerHTML = `⚪ 今日待打卡 (累计 ${totalDays} 天)`; }
         }
-        document.getElementById('shop-vault-total').innerText = localStorage.getItem('gold_coins_vault') || "0";
-        document.getElementById('shop-user-crys').innerText = localStorage.getItem(`crystals_${currentUser}`) || "0";
     }
-
-    function updateShopBadges() {
-        const items = ['HB', 'TC', 'PZ', 'TT', 'XF'];
-        items.forEach(prefix => {
-            let count = parseInt(localStorage.getItem(`redeemed_${prefix}`) || "0");
-            let badge = document.getElementById(`badge-${prefix}`);
-            if (badge) {
-                if (count > 0) { badge.innerText = `已存 ${count}`; badge.style.display = 'block'; } else { badge.style.display = 'none'; }
-            }
-        });
-    }
-
-    // 🌟 我的背包与退货逻辑 
-    function openMyItemsPanel() {
-        let html = '';
-        const allItems = [
-            {prefix: 'HB', name: '汉堡', type: '团队金币'},
-            {prefix: 'TC', name: '套餐', type: '团队金币'},
-            {prefix: 'PZ', name: '披萨大餐', type: '团队金币'},
-            {prefix: 'TT', name: '甜筒', type: '个人水晶'},
-            {prefix: 'XF', name: '麦旋风', type: '个人水晶'}
-        ];
-
-        allItems.forEach(i => {
-            let count = parseInt(localStorage.getItem(`redeemed_${i.prefix}`) || "0");
-            if (count > 0) {
-                let code = localStorage.getItem('last_code_' + i.prefix) || "无记录";
-                let el = document.getElementById(`shop-item-${i.prefix}`);
-                let price = el ? parseInt(el.querySelector('.price').innerText.replace(/[^0-9]/g, '')) : 0;
-
-                html += `
-                <div style="background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 15px; padding: 15px; margin-bottom: 12px; display:flex; flex-direction:column; gap:8px; box-shadow: 0 4px 0 #cbd5e1;">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-weight:900; font-size:18px; color:#334155;">${i.name} <span style="color:#ef4444; font-size:14px;">(拥有 ${count} 份)</span></span>
-                        <span style="font-weight:800; font-size:14px; color:#64748b;">价值 ${price} ${i.type}</span>
-                    </div>
-                    <div style="background: white; border: 2px dashed #3b82f6; color: #2563eb; font-family: monospace; font-size: 20px; font-weight: 900; text-align: center; padding: 10px; border-radius: 10px;">
-                        ${code}
-                    </div>
-                    <button onclick="processMyItemRefund('${i.prefix}', '${i.type}', ${price}, '${i.name}')" style="background:#ef4444; color:white; border:none; padding:12px; border-radius:10px; font-weight:900; font-size:16px; margin-top:5px; box-shadow:0 4px 0 #b91c1c;">
-                        ❌ 撤销并退回 ${i.type}
-                    </button>
-                </div>`;
-            }
-        });
-
-        if (html === '') {
-            html = `<div style="text-align:center; padding: 30px 0; color:#94a3b8; font-weight:800; font-size:16px;">哎呀，背包空空如也！<br>快去赚金币兑换奖励吧~</div>`;
-        }
-        
-        document.getElementById('my-items-list').innerHTML = html;
-        document.getElementById('my-items-modal').style.display = 'flex';
-    }
-
-    function closeMyItemsPanel() {
-        document.getElementById('my-items-modal').style.display = 'none';
-    }
-
-    function processMyItemRefund(prefix, type, price, name) {
-        if(!confirm(`⚠️ 确定要撤销【${name}】吗？\n你的 ${price} 个 ${type} 将立即退回到账户中。`)) return;
-
-        let count = parseInt(localStorage.getItem(`redeemed_${prefix}`) || "0");
-        if(count > 0) localStorage.setItem(`redeemed_${prefix}`, count - 1);
-
-        let balanceKey = type === '团队金币' ? 'gold_coins_vault' : `crystals_${currentUser}`;
-        let currentBalance = parseInt(localStorage.getItem(balanceKey) || "0");
-        localStorage.setItem(balanceKey, currentBalance + price);
-        
-        localStorage.removeItem('last_code_' + prefix);
-
-        try {
-            fetch(SYNC_API_URL, {
-                method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' },
-                body: JSON.stringify({
-                    type: 'refund', user: currentUser, rewardName: name, price: price, prefix: prefix,
-                    balanceType: type === '团队金币' ? 'coin' : 'crystal', newBalance: currentBalance + price
-                })
-            });
-        } catch(e) {}
-
-        alert(`✅ 退货成功！${price} ${type} 已退回。`);
-        closeMyItemsPanel();
-        updateEconomyUI();
-        updateShopBadges();
-    }
-
-    function openShop() {
-        updateEconomyUI(); updateShopBadges();
-        selectedPrize = null; document.querySelectorAll('.shop-item').forEach(i => i.classList.remove('active'));
-        const btn = document.getElementById('do-redeem-btn'); btn.style.background = '#cbd5e1'; btn.style.borderColor = '#94a3b8'; btn.style.boxShadow = '0 6px 0 #94a3b8'; btn.disabled = true;
-        showScreen('shop-screen');
-    }
-
-    function selectPrize(el, type, price, name, prefix) {
-        document.querySelectorAll('.shop-item').forEach(i => i.classList.remove('active'));
-        el.classList.add('active');
-        selectedPrize = { type, price, name, prefix: prefix.toUpperCase() };
-        const btn = document.getElementById('do-redeem-btn'); btn.style.background = '#10b981'; btn.style.borderColor = '#059669'; btn.style.boxShadow = '0 6px 0 #059669'; btn.disabled = false;
-    }
-
-    function executeRedeem() {
-        if (!selectedPrize) return;
-        confirmRedeem(selectedPrize.type, selectedPrize.price, selectedPrize.name, selectedPrize.prefix);
-    }
-
-    function confirmRedeem(type, price, name, prefix) {
-        let balanceKey = type === '团队金币' ? 'gold_coins_vault' : `crystals_${currentUser}`;
-        let currentBalance = parseInt(localStorage.getItem(balanceKey) || "0");
-        if (currentBalance < price) { alert(`🚫 余额不足！你的${type}还差 ${price - currentBalance} 个，继续努力哦！`); return; }
-
-        if (confirm(`确定要消耗 ${price} ${type} 兑换【${name}】吗？`)) {
-            localStorage.setItem(balanceKey, currentBalance - price);
-            let currentRedeemed = parseInt(localStorage.getItem(`redeemed_${prefix}`) || "0");
-            localStorage.setItem(`redeemed_${prefix}`, currentRedeemed + 1);
-
-            const now = getSGTDate();
-            const datePart = (now.getMonth() + 1).toString().padStart(2, '0') + now.getDate().toString().padStart(2, '0');
-            const checkSum = (now.getDate() + price).toString().padStart(3, '0'); 
-            const code = `${prefix}-${datePart}-${checkSum}`;
-
-            localStorage.setItem('last_code_' + prefix, code);
-
-            try {
-                fetch(SYNC_API_URL, {
-                    method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, 
-                    body: JSON.stringify({ 
-                        type: 'redemption', user: currentUser, rewardName: name, price: price, code: code,
-                        balanceType: type === '团队金币' ? 'coin' : 'crystal', newBalance: currentBalance - price 
-                    })
-                });
-            } catch(e) {}
-            document.getElementById('secret-code').innerText = code; document.getElementById('redeem-modal').style.display = 'flex';
-            updateEconomyUI(); updateShopBadges(); 
-        }
-    }
-    function closeRedeemModal() { document.getElementById('redeem-modal').style.display = 'none'; openShop(); }
 
     function renderBadges() {
         const container = document.getElementById('badges-container');
@@ -861,7 +599,6 @@
             { icon: '🌱', name: '科学博士', count: Math.max(subPerfects['Science'], parseInt(localStorage.getItem(`sci_badge_count_${currentUser}`)||'0')) },
             { icon: '🎮', name: '拼音高手', count: parseInt(localStorage.getItem(`pinyin_badge_count_${currentUser}`)||'0') },
             { icon: '👑', name: '听写大王', count: parseInt(localStorage.getItem(`tingxie_badge_count_${currentUser}`)||'0') },
-            // 🌟 在这里加入汉字精灵的图标 🌟
             { icon: '🧚', name: '汉字精灵', count: parseInt(localStorage.getItem(`hanzi_badge_count_${currentUser}`)||'0') } 
         ];
         container.innerHTML += `<div class="badge-category"><div class="badge-category-title">🎓 科目大师</div><div class="badge-grid">${subBadges.map(renderItemHTML).join('')}</div></div>`;
