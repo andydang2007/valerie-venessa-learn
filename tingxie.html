@@ -150,7 +150,6 @@
     let sessionErrors = 0;
     let currentMode = 'practice';
 
-    // 🌟 辅助功能：获取新加坡标准时间的 YYYY-MM-DD
     function getSGTDateString() {
         const d = new Date();
         const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
@@ -200,7 +199,6 @@
         }
     }
 
-    // 🌟🌟 核心：开局从云端同步连击数据
     async function syncUserDataFromCloud() {
         try {
             const statsResp = await fetch(`${SYNC_API_URL}?type=fetch_user_data&user=${currentPlayer}`);
@@ -209,7 +207,7 @@
                 localStorage.setItem(`total_days_${currentPlayer}`, cloudStats.userTotalDays);
                 localStorage.setItem(`current_streak_${currentPlayer}`, cloudStats.userStreak);
                 localStorage.setItem(`crystals_${currentPlayer}`, cloudStats.userCrystals);
-                localStorage.setItem(`gold_coins_vault`, cloudStats.vaultCoins); // 同步最新金币
+                localStorage.setItem(`gold_coins_vault`, cloudStats.vaultCoins); 
                 
                 if (cloudStats.lastCheckinDate) {
                     let d = new Date(cloudStats.lastCheckinDate);
@@ -224,7 +222,6 @@
     }
 
     function init() {
-        // 先偷偷启动云端同步
         syncUserDataFromCloud();
 
         Papa.parse(SHEET_URL + "&t=" + Date.now(), {
@@ -424,16 +421,21 @@
             sessionErrors += uncompleted; 
         }
 
+        // 🌟🌟 核心修改：区分姐姐和妹妹的奖励条件
+        const isValerie = (currentPlayer === 'Valerie' || currentPlayer === 'Velarie');
         const isPerfect = (sessionErrors === 0 && uncompleted === 0);
+        // 姐姐只要写完（uncompleted === 0）就算成功；妹妹要求全对（isPerfect）
+        const isSuccess = isValerie ? (uncompleted === 0) : isPerfect;
+
         let earnedCoins = 0;
         let badgeEarned = false;
         let newBadgedTopics = [];
 
-        // 🌟 读取 God Mode 配置
         let config = JSON.parse(localStorage.getItem('hub_config') || "{}");
         let rewardCoinAmount = config.tingxie_reward_coin || 1;
 
-        if (currentMode === 'challenge' && isPerfect) {
+        // 判断是否给予奖励
+        if (currentMode === 'challenge' && isSuccess) {
             let involvedTopics = [...new Set(practiceList.map(q => q.Topic))];
             
             involvedTopics.forEach(topic => {
@@ -450,12 +452,10 @@
             if (earnedCoins > 0) {
                 let vault = parseInt(localStorage.getItem('gold_coins_vault') || "0");
                 localStorage.setItem('gold_coins_vault', vault + earnedCoins);
-                // 🌟 核心修改：只发送增量 earned
                 syncToCloud({ type: 'coin_update', user: currentPlayer, earned: earnedCoins });
             }
         }
 
-        // 🌟 双轨打卡逻辑
         const today = getSGTDateString();
         let lastDate = localStorage.getItem(`last_date_${currentPlayer}`);
         let currentStreak = parseInt(localStorage.getItem(`current_streak_${currentPlayer}`) || "0");
@@ -483,7 +483,6 @@
                 crystalEarned = true;
             }
             
-            // 🌟 核心修改：附带最新的 checkinDate 给云端
             syncToCloud({ 
                 type: 'crystal_update', user: currentPlayer, 
                 crystalsTotal: crys, totalDays: totalDays, streak: currentStreak,
@@ -491,16 +490,20 @@
             });
         }
         
-        // 🌟🌟 核心：在此处印下今日打卡印章 🌟🌟
         localStorage.setItem(`last_checkin_date_${currentPlayer}`, today);
 
-        if (isPerfect) {
+        if (isSuccess) {
             confetti({ particleCount: 250, spread: 100 });
             new Audio("https://actions.google.com/sounds/v1/foley/cheer_short.ogg").play().catch(()=>{});
         }
 
-        let html = `<div style="padding:40px 0;"><h1>${isPerfect?'🏆':'💪'}</h1><h2 style="font-size:36px;">${isPerfect?'太厉害了！':'继续加油！'}</h2>`;
+        let html = `<div style="padding:40px 0;"><h1>${isSuccess?'🏆':'💪'}</h1><h2 style="font-size:36px;">${isSuccess?'太厉害了！':'继续加油！'}</h2>`;
         
+        // 🌟 针对姐姐的额外鼓励提示
+        if (isValerie && isSuccess && !isPerfect) {
+            html += `<div style="color:#d97706; font-weight:800; margin-bottom:10px;">(坚持写完了所有字，非常棒！破例给你发奖励啦！🎉)</div>`;
+        }
+
         if (badgeEarned) {
             html += `<div style="background:#fffbeb; padding:15px; border-radius:20px; border:3px solid #fde68a; margin:20px 0;">
                         <div style="font-size:40px;">👑</div>
@@ -508,7 +511,7 @@
                         <div style="font-size:16px; color:#92400e; margin: 5px 0;">(${newBadgedTopics.join(', ')})</div>
                         <div style="font-size:20px; color:#b45309; margin-top:10px;">💰 +${earnedCoins} 金币已存入金库</div>
                      </div>`;
-        } else if (currentMode === 'challenge' && isPerfect) {
+        } else if (currentMode === 'challenge' && isSuccess) {
             html += `<div style="color:#94a3b8; margin:20px 0; font-weight:800;">(这几课的【听写大王】你已经拿过啦，去挑战新课文吧！)</div>`;
         }
 
@@ -519,8 +522,7 @@
         html += `<button class="btn-action btn-quit" style="width:200px; margin:30px auto;" onclick="window.location.href='index.html'">返回主页 🏠</button></div>`;
         document.getElementById('finish-screen').innerHTML = html; showScreen('finish-screen');
         
-        // 🌟 已加上带回家地址的回城车票！
-        if (isPerfect) setTimeout(() => { window.location.href = "https://andydang2007.github.io/game/popballoons.html?ticket=" + Date.now() + "&returnUrl=index.html"; }, 3000);
+        if (isSuccess) setTimeout(() => { window.location.href = "https://andydang2007.github.io/game/popballoons.html?ticket=" + Date.now() + "&returnUrl=index.html"; }, 3000);
     }
     
     function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.style.display='none'); document.getElementById(id).style.display='flex'; }
