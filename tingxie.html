@@ -421,7 +421,7 @@
             sessionErrors += uncompleted; 
         }
 
-        // 🌟🌟 核心修改：区分姐姐和妹妹的奖励条件
+        // 🌟 区分姐姐和妹妹的奖励条件
         const isValerie = (currentPlayer === 'Valerie' || currentPlayer === 'Velarie');
         const isPerfect = (sessionErrors === 0 && uncompleted === 0);
         // 姐姐只要写完（uncompleted === 0）就算成功；妹妹要求全对（isPerfect）
@@ -434,21 +434,31 @@
         let config = JSON.parse(localStorage.getItem('hub_config') || "{}");
         let rewardCoinAmount = config.tingxie_reward_coin || 1;
 
-        // 判断是否给予奖励
+        // 🌟 判断是否给予奖励 (全新每日首胜任务逻辑：不限课文限制，每天可拿一次，必须是挑战模式)
         if (currentMode === 'challenge' && isSuccess) {
             let involvedTopics = [...new Set(practiceList.map(q => q.Topic))];
+            let currentDate = getSGTDateString(); 
+            let dailyBadgeKey = `tingxie_daily_challenge_${currentPlayer}_${currentDate}`;
             
-            involvedTopics.forEach(topic => {
-                let badgeKey = `tingxie_badge_${currentPlayer}_${topic}`;
-                if (!localStorage.getItem(badgeKey)) {
-                    localStorage.setItem(badgeKey, "true");
-                    badgeEarned = true;
-                    earnedCoins += rewardCoinAmount; 
-                    newBadgedTopics.push(topic);
-                    syncToCloud({ type: 'badge', user: currentPlayer, subject: '听写', icon: '👑', title: '听写大王', desc: `完美攻克《${topic}》` });
-                }
-            });
+            // 检查今天是否拿过“每日挑战者”徽章
+            if (!localStorage.getItem(dailyBadgeKey)) {
+                localStorage.setItem(dailyBadgeKey, "true");
+                badgeEarned = true;
+                earnedCoins = rewardCoinAmount; // 每日挑战通关只发一次规定数量的金币
+                newBadgedTopics = involvedTopics; 
+                
+                // 统一合并发送一个全新的每日大徽章
+                syncToCloud({ 
+                    type: 'badge', 
+                    user: currentPlayer, 
+                    subject: '听写', 
+                    icon: '🔥', 
+                    title: '每日挑战者', 
+                    desc: `完成今日挑战《${involvedTopics.join('、')}》` 
+                });
+            }
 
+            // 统一结算更新金币入库
             if (earnedCoins > 0) {
                 let vault = parseInt(localStorage.getItem('gold_coins_vault') || "0");
                 localStorage.setItem('gold_coins_vault', vault + earnedCoins);
@@ -506,13 +516,13 @@
 
         if (badgeEarned) {
             html += `<div style="background:#fffbeb; padding:15px; border-radius:20px; border:3px solid #fde68a; margin:20px 0;">
-                        <div style="font-size:40px;">👑</div>
-                        <div style="font-weight:900; color:#d97706;">获得【听写大王】徽章</div>
-                        <div style="font-size:16px; color:#92400e; margin: 5px 0;">(${newBadgedTopics.join(', ')})</div>
+                        <div style="font-size:40px;">🔥</div>
+                        <div style="font-weight:900; color:#d97706;">获得【每日挑战者】徽章</div>
+                        <div style="font-size:16px; color:#92400e; margin: 5px 0;">(${newBadgedTopics.join('、')})</div>
                         <div style="font-size:20px; color:#b45309; margin-top:10px;">💰 +${earnedCoins} 金币已存入金库</div>
                      </div>`;
         } else if (currentMode === 'challenge' && isSuccess) {
-            html += `<div style="color:#94a3b8; margin:20px 0; font-weight:800;">(这几课的【听写大王】你已经拿过啦，去挑战新课文吧！)</div>`;
+            html += `<div style="color:#94a3b8; margin:20px 0; font-weight:800;">(今天的【每日挑战者】徽章已经拿过啦，明天再来挑战拿奖励吧！)</div>`;
         }
 
         if (crystalEarned) {
